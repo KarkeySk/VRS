@@ -10,6 +10,7 @@ export const vehicles = [
     capacity: "7 Seats",
     price: 120,
     rating: 4.5,
+    category: "All Terrain",
     capabilities: [
       {
         title: "High Ground Clearance",
@@ -48,6 +49,7 @@ export const vehicles = [
     capacity: "7 Seats",
     price: 250,
     rating: 5.0,
+    category: "Ice Peaks",
     capabilities: [
       {
         title: "Multi-Terrain Select",
@@ -86,6 +88,7 @@ export const vehicles = [
     capacity: "5 Seats",
     price: 190,
     rating: 4.8,
+    category: "All Terrain",
     capabilities: [
       {
         title: "xDrive AWD",
@@ -124,6 +127,7 @@ export const vehicles = [
     capacity: "7 Seats",
     price: 140,
     rating: 4.6,
+    category: "Ice Peaks",
     capabilities: [
       {
         title: "Super Select 4WD",
@@ -162,6 +166,7 @@ export const vehicles = [
     capacity: "5 Seats",
     price: 65,
     rating: 4.3,
+    category: "Valley Passes",
     capabilities: [
       {
         title: "Agile Dimensions",
@@ -200,6 +205,7 @@ export const vehicles = [
     capacity: "4 Seats",
     price: 70,
     rating: 4.7,
+    category: "Valley Passes",
     capabilities: [
       {
         title: "Rigid Ladder Frame",
@@ -238,6 +244,7 @@ export const vehicles = [
     capacity: "5 Seats",
     price: 180,
     rating: 4.8,
+    category: "All Terrain",
     capabilities: [
       {
         title: "Sway Bar Disconnect",
@@ -276,6 +283,7 @@ export const vehicles = [
     capacity: "5 Seats",
     price: 55,
     rating: 4.2,
+    category: "Valley Passes",
     capabilities: [
       {
         title: "5-Star Safety",
@@ -315,6 +323,7 @@ export const vehicles = [
     price: 85,
     rating: 4.8,
     type: "bike",
+    category: "Ice Peaks",
     capabilities: [
       {
         title: "Heated Grips",

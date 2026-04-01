@@ -7,6 +7,13 @@ import Navbar from '../../components/layout/Navbar';
 export default function VehiclesPage() {
     const navigate = useNavigate();
     const [filter, setFilter] = useState('All Terrain');
+    const [sortHighToLow, setSortHighToLow] = useState(false);
+    const [showFilters, setShowFilters] = useState(true);
+
+    const filteredVehicles = vehicles
+        .filter(v => filter === 'All Terrain' ? true : v.category === filter)
+        .sort((a, b) => sortHighToLow ? b.price - a.price : a.price - b.price);
+
 
     return (
         <div style={{ paddingTop: '100px', minHeight: '100vh', paddingBottom: '80px', background: 'var(--bg-primary)' }}>
@@ -30,11 +37,14 @@ export default function VehiclesPage() {
 
                 {/* Filters */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
-                    <button style={{ background: 'linear-gradient(to right, #fcab73, #e8732a)', border: 'none', color: '#000', padding: '10px 24px', borderRadius: '30px', fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button 
+                        onClick={() => setShowFilters(!showFilters)}
+                        style={{ background: showFilters ? 'linear-gradient(to right, #fcab73, #e8732a)' : 'rgba(255,255,255,0.05)', border: showFilters ? 'none' : '1px solid rgba(255,255,255,0.1)', color: showFilters ? '#000' : '#fff', padding: '10px 24px', borderRadius: '30px', fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.3s' }}
+                    >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-                        Filter Fleet
+                        Filter Fleet {showFilters ? '✕' : ''}
                     </button>
-                    {['All Terrain', 'Ice Peaks', 'Valley Passes'].map((f) => (
+                    {showFilters && ['All Terrain', 'Ice Peaks', 'Valley Passes'].map((f) => (
                         <button 
                             key={f}
                             onClick={() => setFilter(f)}
@@ -55,14 +65,17 @@ export default function VehiclesPage() {
                     ))}
                     
                     <div style={{ flex: 1 }}></div>
-                    <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px 24px', borderRadius: '30px', fontWeight: '500', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        Price High-Low
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    <button 
+                        onClick={() => setSortHighToLow(!sortHighToLow)}
+                        style={{ background: sortHighToLow ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px 24px', borderRadius: '30px', fontWeight: '500', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', transition: 'all 0.2s' }}
+                    >
+                        Price: {sortHighToLow ? 'High-Low' : 'Low-High'}
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: sortHighToLow ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                 </div>
                 
                 <div className="fleet-grid">
-                    {vehicles.map(vehicle => (
+                    {filteredVehicles.map(vehicle => (
                         <div key={vehicle.id} style={{ background: '#111', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => navigate(`/vehicles/${vehicle.id}`)} onMouseOver={(e) => e.currentTarget.style.background = '#1a1a1a'} onMouseOut={(e) => e.currentTarget.style.background = '#111'}>
                             <div style={{ overflow: 'hidden', height: '240px', borderRadius: '16px', position: 'relative', marginBottom: '20px' }}>
                                 <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2, display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -86,7 +99,7 @@ export default function VehiclesPage() {
                                     <span style={{ background: 'rgba(255,255,255,0.05)', color: '#a0a0a0', fontSize: '0.625rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '6px 12px', borderRadius: '20px' }}>WINCH READY</span>
                                 </div>
 
-                                <button style={{ width: '100%', padding: '14px', background: 'linear-gradient(to right, #fcab73, #e8732a)', border: 'none', borderRadius: '12px', color: '#000', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.875rem' }}>
+                                <button onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/9779800000000?text=I'm interested in the ${vehicle.name}`, '_blank'); }} style={{ width: '100%', padding: '14px', background: 'linear-gradient(to right, #fcab73, #e8732a)', border: 'none', borderRadius: '12px', color: '#000', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.875rem' }}>
                                     Verify via WhatsApp <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                                 </button>
                             </div>
