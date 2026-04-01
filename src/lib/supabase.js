@@ -6,5 +6,14 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'missing-anon-
 // if (!supabaseUrl || !supabaseAnonKey) {
 //     throw new Error('Missing Supabase environment variables. Check your .env file.')
 // }
+if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn(
+        'Missing Supabase environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY).',
+        'Create a .env file in the project root. Auth features will be disabled.'
+    )
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null
+

@@ -9,20 +9,37 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        let listener = null
+
         // Grab initial session
-        authService.getSession().then((s) => {
-            setSession(s)
-            setUser(s?.user ?? null)
-            setLoading(false)
-        })
+        authService.getSession()
+            .then((s) => {
+                setSession(s)
+                setUser(s?.user ?? null)
+            })
+            .catch((err) => {
+                console.warn('Auth session check failed (Supabase may not be configured):', err.message)
+            })
+            .finally(() => {
+                setLoading(false)
+            })
 
         // Listen for auth changes
-        const { data: listener } = authService.onAuthStateChange((_event, s) => {
-            setSession(s)
-            setUser(s?.user ?? null)
-        })
+        try {
+            const result = authService.onAuthStateChange((_event, s) => {
+                setSession(s)
+                setUser(s?.user ?? null)
+            })
+            listener = result?.data?.listener
+        } catch (err) {
+            console.warn('Auth listener setup failed:', err.message)
+        }
 
-        return () => listener.subscription.unsubscribe()
+        return () => {
+            if (listener?.subscription) {
+                listener.subscription.unsubscribe()
+            }
+        }
     }, [])
 
     const value = {
