@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 export const authService = {
     /** Sign up a new user */
     signUp: async (email, password, metadata = {}) => {
+        if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -14,6 +15,7 @@ export const authService = {
 
     /** Sign in existing user */
     signIn: async (email, password) => {
+        if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
         return data
@@ -21,12 +23,14 @@ export const authService = {
 
     /** Sign out current user */
     signOut: async () => {
+        if (!supabase) return
         const { error } = await supabase.auth.signOut()
         if (error) throw error
     },
 
     /** Get current session */
     getSession: async () => {
+        if (!supabase) return null
         const { data, error } = await supabase.auth.getSession()
         if (error) throw error
         return data.session
@@ -34,6 +38,7 @@ export const authService = {
 
     /** Get current user */
     getUser: async () => {
+        if (!supabase) return null
         const { data, error } = await supabase.auth.getUser()
         if (error) throw error
         return data.user
@@ -41,6 +46,8 @@ export const authService = {
 
     /** Listen to auth state changes */
     onAuthStateChange: (callback) => {
+        if (!supabase) return { data: { listener: { subscription: { unsubscribe: () => {} } } } }
         return supabase.auth.onAuthStateChange(callback)
     },
 }
+
