@@ -1,0 +1,39 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from '../context/AuthContext'
+import { ProtectedRoute } from './ProtectedRoute'
+
+// Pages — fill these in as you build them
+import HomePage from '../pages/HomePage'
+import LoginPage from '../pages/auth/LoginPage'
+import RegisterPage from '../pages/auth/RegisterPage'
+import VehiclesPage from '../pages/vehicles/VehiclesPage'
+import VehicleDetail from '../pages/vehicles/VehicleDetail'
+import BookingsPage from '../pages/bookings/BookingsPage'
+import ProfilePage from '../pages/user/ProfilePage'
+import NotFoundPage from '../pages/NotFoundPage'
+
+export function AppRouter() {
+    return (
+        <BrowserRouter>
+            <AuthProvider>
+                <Routes>
+                    {/* Public routes */}
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/auth/login" element={<LoginPage />} />
+                    <Route path="/auth/register" element={<RegisterPage />} />
+                    <Route path="/vehicles" element={<VehiclesPage />} />
+                    <Route path="/vehicles/:id" element={<VehicleDetail />} />
+
+                    {/* Protected routes */}
+                    <Route element={<ProtectedRoute />}>
+                        <Route path="/bookings" element={<BookingsPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                    </Route>
+
+                    {/* Fallback */}
+                    <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+            </AuthProvider>
+        </BrowserRouter>
+    )
+}
