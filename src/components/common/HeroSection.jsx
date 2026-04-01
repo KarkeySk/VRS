@@ -1,12 +1,53 @@
+import { useRef } from 'react'
+
 export default function HeroSection() {
+  const bgRef = useRef(null)
+
+  const handleMouseMove = (e) => {
+    if (!bgRef.current) return
+    const { clientX, clientY } = e
+    const { innerWidth, innerHeight } = window
+
+    // Calculate mouse position as -1 to 1 range
+    const xPercent = (clientX / innerWidth - 0.5) * 2
+    const yPercent = (clientY / innerHeight - 0.5) * 2
+
+    // Apply 3D transform — tilt + translate for parallax depth
+    const rotateY = xPercent * 5     // max 5deg tilt X
+    const rotateX = -yPercent * 3    // max 3deg tilt Y
+    const translateX = xPercent * -20 // subtle shift
+    const translateY = yPercent * -15
+
+    bgRef.current.style.transform =
+      `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateX(${translateX}px) translateY(${translateY}px) scale(1.1)`
+  }
+
+  const handleMouseLeave = () => {
+    if (!bgRef.current) return
+    // Smoothly reset back to center
+    bgRef.current.style.transform =
+      'perspective(1000px) rotateX(0deg) rotateY(0deg) translateX(0px) translateY(0px) scale(1.1)'
+  }
+
   return (
-    <section className="hero" id="hero">
-      {/* Background Image */}
+    <section
+      className="hero"
+      id="hero"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* 3D Background Image */}
       <div className="hero-bg">
         <img
+          ref={bgRef}
           src="/images/hero-mountain.png"
           alt="Dramatic Himalayan mountain peaks"
           loading="eager"
+          style={{
+            transition: 'transform 0.15s ease-out',
+            transformOrigin: 'center center',
+            willChange: 'transform',
+          }}
         />
         <div className="hero-overlay"></div>
       </div>
