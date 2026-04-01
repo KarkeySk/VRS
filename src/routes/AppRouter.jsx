@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '../context/AuthContext'
 import { ProtectedRoute } from './ProtectedRoute'
+import Navbar from '../components/layout/Navbar'
 
 // Pages — fill these in as you build them
 import HomePage from '../pages/HomePage'
@@ -16,16 +17,16 @@ export function AppRouter() {
     return (
         <BrowserRouter>
             <AuthProvider>
+                <Navbar />
                 <Routes>
                     {/* Public routes */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/auth/login" element={<LoginPage />} />
                     <Route path="/auth/register" element={<RegisterPage />} />
-                    <Route path="/vehicles" element={<VehiclesPage />} />
-                    <Route path="/vehicles/:id" element={<VehicleDetail />} />
-
                     {/* Protected routes */}
                     <Route element={<ProtectedRoute />}>
+                        <Route path="/vehicles" element={<VehiclesPage />} />
+                        <Route path="/vehicles/:id" element={<VehicleDetail />} />
                         <Route path="/bookings" element={<BookingsPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
                     </Route>
