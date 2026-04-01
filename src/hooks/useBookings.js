@@ -11,11 +11,20 @@ export function useMyBookings() {
 
     useEffect(() => {
         if (!user) return
-        setLoading(true)
-        bookingService.getMyBookings(user.id)
-            .then(setBookings)
-            .catch(setError)
-            .finally(() => setLoading(false))
+        let mounted = true;
+        const load = async () => {
+            setLoading(true)
+            try {
+                const data = await bookingService.getMyBookings(user.id);
+                if (mounted) setBookings(data);
+            } catch (err) {
+                if (mounted) setError(err);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+        load();
+        return () => { mounted = false; };
     }, [user])
 
     return { bookings, loading, error }

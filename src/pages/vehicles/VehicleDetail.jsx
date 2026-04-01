@@ -224,6 +224,40 @@ export default function VehicleDetail() {
                     </div>
                 </div>
             </div>
+            
+            <div className="container">
+                {/* EXPLORE MORE */}
+                <div style={{ marginTop: '80px', paddingTop: '60px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
+                        <div>
+                            <div style={{ color: 'var(--accent)', letterSpacing: '2px', fontWeight: '600', fontSize: '0.75rem', marginBottom: '8px' }}>EXPLORE MORE</div>
+                            <h2 style={{ fontSize: '2.5rem', fontWeight: '800', margin: 0 }}>Similar Expeditions</h2>
+                        </div>
+                        <button onClick={() => navigate('/vehicles')} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px 24px', borderRadius: '30px', fontWeight: '500', fontSize: '0.875rem', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background='rgba(255,255,255,0.1)'} onMouseOut={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'}>View Full Fleet</button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
+                        {vehicles.filter(v => v.id !== vehicle.id).map(v => (
+                            <div key={v.id} style={{ background: '#161616', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => { window.scrollTo(0,0); navigate(`/vehicles/${v.id}`); }} onMouseOver={(e) => e.currentTarget.style.background = '#1a1a1a'} onMouseOut={(e) => e.currentTarget.style.background = '#161616'}>
+                                <div style={{ overflow: 'hidden', height: '200px', borderRadius: '16px', position: 'relative', marginBottom: '16px' }}>
+                                    <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2 }}>
+                                        {v.altitude?.target} RATED
+                                    </div>
+                                    <img src={v.image} alt={v.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #161616 0%, transparent 50%)' }} />
+                                </div>
+                                <div style={{ padding: '0 8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                                        <h3 style={{ fontSize: '1.125rem', fontWeight: 700, margin: 0 }}>{v.name}</h3>
+                                        <div style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--accent)' }}>${v.price}</div>
+                                    </div>
+                                    <p style={{ color: '#888', fontSize: '0.8125rem', marginBottom: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.subtitle}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

@@ -11,15 +11,20 @@ export function useVehicles(type = null) {
     const [error, setError] = useState(null)
 
     useEffect(() => {
-        setLoading(true)
-        const fetch = type
-            ? vehicleService.getByType(type)
-            : vehicleService.getAll()
-
-        fetch
-            .then(setVehicles)
-            .catch(setError)
-            .finally(() => setLoading(false))
+        let mounted = true;
+        const load = async () => {
+            setLoading(true);
+            try {
+                const data = await (type ? vehicleService.getByType(type) : vehicleService.getAll());
+                if (mounted) setVehicles(data);
+            } catch (err) {
+                if (mounted) setError(err);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+        load();
+        return () => { mounted = false; };
     }, [type])
 
     return { vehicles, loading, error }

@@ -18,7 +18,7 @@ export default function Navbar() {
                 {/* NAV LINKS */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '32px', fontSize: '0.875rem', fontWeight: '500' }}>
                     <Link to="/vehicles" style={{ textDecoration: 'none', color: location.pathname === '/vehicles' ? 'var(--accent)' : '#a0a0a0', transition: 'color 0.2s' }}>Explore</Link>
-                    <Link to="#" style={{ textDecoration: 'none', color: '#a0a0a0', transition: 'color 0.2s' }}>Tours</Link>
+                    <Link to="/vehicles/scorpio-s11" style={{ textDecoration: 'none', color: location.pathname.startsWith('/vehicles/') ? 'var(--accent)' : '#a0a0a0', transition: 'color 0.2s' }}>Tours</Link>
                     <Link to="#" style={{ textDecoration: 'none', color: '#a0a0a0', transition: 'color 0.2s' }}>Weather</Link>
                     <Link to="/profile" style={{ textDecoration: 'none', color: location.pathname === '/profile' ? 'var(--accent)' : '#a0a0a0', transition: 'color 0.2s' }}>Profile</Link>
                 </div>
