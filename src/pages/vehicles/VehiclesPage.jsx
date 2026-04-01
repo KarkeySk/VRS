@@ -1,23 +1,26 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { vehicles } from '../../data/vehicles';
 import { Users, Shield, CloudRain } from 'lucide-react';
-import Navbar from '../../components/layout/Navbar';
-
 export default function VehiclesPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const searchQuery = searchParams.get('search') || '';
     const [filter, setFilter] = useState('All Terrain');
     const [sortHighToLow, setSortHighToLow] = useState(false);
     const [showFilters, setShowFilters] = useState(true);
 
     const filteredVehicles = vehicles
-        .filter(v => filter === 'All Terrain' ? true : v.category === filter)
+        .filter(v => {
+            const matchesSearch = !searchQuery || v.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesFilter = filter === 'All Terrain' || v.category === filter;
+            return matchesSearch && matchesFilter;
+        })
         .sort((a, b) => sortHighToLow ? b.price - a.price : a.price - b.price);
 
 
     return (
         <div style={{ paddingTop: '100px', minHeight: '100vh', paddingBottom: '80px', background: 'var(--bg-primary)' }}>
-            <Navbar />
             <div className="container" style={{ position: 'relative' }}>
                 <div style={{ position: 'absolute', top: '20px', right: '0', display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.03)', padding: '8px 16px', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }}>
