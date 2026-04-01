@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { vehicles } from '../../data/vehicles';
-import Navbar from '../../components/layout/Navbar';
-import { 
+import {
     CloudRain, Settings, Unlock, Lock, Navigation, Droplet, 
     RefreshCw, Briefcase, Star, Wind, Snowflake, Map as MapIcon, Shield, Activity
 } from 'lucide-react';
@@ -45,8 +44,6 @@ export default function VehicleDetail() {
 
     return (
         <div style={{ background: '#111', color: '#ffffff', minHeight: '100vh', paddingBottom: '100px' }}>
-            <Navbar />
-            
             {/* HERO SECTION */}
             <div style={{ position: 'relative', height: '65vh', minHeight: '500px', display: 'flex', alignItems: 'flex-end', paddingBottom: '60px' }}>
                 <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
