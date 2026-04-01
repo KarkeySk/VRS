@@ -22,7 +22,7 @@ export default function Navbar() {
         <div className="container">
           <Link to="/" className="navbar-logo" id="navbar-logo">
             <span className="logo-dot"></span>
-            TrailGuard
+            Bhatbhatify
           </Link>
 
           <div className="navbar-links" id="navbar-links">

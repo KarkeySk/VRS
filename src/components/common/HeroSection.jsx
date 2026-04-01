@@ -20,12 +20,12 @@ export default function HeroSection() {
 
           <h1 className="hero-title" id="hero-title">
             ASCEND THE<br />
-            <span className="highlight">UNKNOWN</span>.
+            <span className="highlight">UNKNOWN</span>
           </h1>
 
           <p className="hero-description" id="hero-description">
-            Conquer the most unforgiving terrain in Nepal with our 
-            expedition-hardened fleet. Built to endure what the 
+            Conquer the most unforgiving terrain in Nepal with our
+            expedition-hardened fleet. Built to endure what the
             Himalayas throw at you.
           </p>
 
@@ -33,7 +33,7 @@ export default function HeroSection() {
             <a href="#fleet" className="btn btn-primary" id="hero-explore-btn">
               Explore Fleet
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
+                <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </a>
             <a href="#routes" className="btn btn-ghost" id="hero-routes-btn">
