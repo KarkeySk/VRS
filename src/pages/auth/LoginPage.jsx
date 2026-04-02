@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import logo from '../../assets/logo.png';
+import landing from '../../assets/landing.png';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -14,15 +16,13 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    
     try {
       await signIn(email, password);
-      navigate('/profile');
+      navigate('/vehicles');
     } catch (err) {
       setError(err.message || 'Failed to login');
-      // If Supabase is not configured, it will throw an error, so we can mock navigation for now
       if (err.message === 'Supabase is not configured') {
-        navigate('/profile');
+        navigate('/vehicles');
       }
     } finally {
       setIsLoading(false);
@@ -30,145 +30,201 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black font-sans">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="/landing.png" 
-          alt="Background" 
-          className="w-full h-full object-cover opacity-60"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-[#0a0a0a]"></div>
+    <div style={{
+      height: '100vh', width: '100vw', background: '#080c12',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif",
+    }}>
+      {/* Background */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        <img src={landing} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.15 }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center top, rgba(232,115,42,0.06) 0%, transparent 60%)' }} />
       </div>
 
-      {/* Main Container */}
-      <div className="relative z-10 w-full max-w-md p-8 sm:p-10 bg-[#161616]/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl mx-4">
-        
-        {/* Logo Section */}
-        <div className="flex flex-col items-center mb-8">
-          <img src="/logo.png" alt="Bhatbhati Logo" className="h-20 w-auto object-contain mb-2 drop-shadow-md filter sepia-[0.3] hue-rotate-[340deg] saturate-[3] hover:scale-105 transition-transform" />
-          {/* Logo usually has text in the image, so we don't necessarily need text here, but fallbacks are nice */}
+      {/* Card */}
+      <div style={{
+        position: 'relative', zIndex: 10, width: '420px', maxWidth: '90vw', height:"80vh",
+        padding: '48px 40px',
+        background: 'rgba(18,18,22,0.92)', backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
+        border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px',
+        boxShadow: '0 32px 80px rgba(0,0,0,0.5)',
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <img src={logo} alt="Bhatbhati" style={{
+            width: '52px', height: '52px', margin: '0 auto 14px', objectFit: 'contain',
+            filter: 'drop-shadow(0 0 12px rgba(232,115,42,0.35))',
+          }} />
+          <h2 style={{
+            fontSize: '1.25rem', fontWeight: '700', marginBottom: '4px',
+            background: 'linear-gradient(135deg, #fcc89b, #e8732a)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>Bhatbhati</h2>
+          <p style={{ color: '#555', fontSize: '0.6rem', letterSpacing: '2.5px', textTransform: 'uppercase' }}>
+            The Ethereal Expedition
+          </p>
         </div>
 
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-sm text-gray-400">Your next Himalayan ascent begins here.</p>
+        {/* Heading */}
+        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: '800', color: '#fff', marginBottom: '6px' }}>Welcome Back</h1>
+          <p style={{ color: '#777', fontSize: '0.8rem' }}>Your next Himalayan ascent begins here.</p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded-xl text-red-500 text-sm text-center">
-            {error}
-          </div>
+          <div style={{
+            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
+            borderRadius: '12px', padding: '10px 14px', marginBottom: '20px',
+            color: '#ef4444', fontSize: '0.8rem', textAlign: 'center',
+          }}>{error}</div>
         )}
 
-        <form className="space-y-5" onSubmit={handleLogin}>
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-400 tracking-wider uppercase">Email Address</label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
-              </span>
-              <input 
-                type="email" 
-                placeholder="explorer@summit.com" 
-                className="w-full bg-[#111111] border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-[#fcab74] focus:ring-1 focus:ring-[#fcab74] transition-all placeholder-gray-600 shadow-inner"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+        <form onSubmit={handleLogin}>
+          {/* Email */}
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: '700', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>
+              Email Address
+            </label>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '14px', padding: '12px 14px',
+            }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94"/>
+              </svg>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                placeholder="explorer@summit.com" required
+                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontSize: '0.85rem', fontFamily: 'inherit' }} />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-gray-400 tracking-wider uppercase">Secret Key</label>
-              <Link to="#" className="text-xs font-semibold text-[#fcab74] hover:text-[#ffdacc] transition-colors tracking-wider uppercase">Forgot?</Link>
+          {/* Password */}
+          <div style={{ marginBottom: '28px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label style={{ fontSize: '0.65rem', fontWeight: '700', color: '#777', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+                Secret Key
+              </label>
+              <Link to="#" style={{ fontSize: '0.65rem', fontWeight: '700', color: '#e8732a', textTransform: 'uppercase', letterSpacing: '0.5px', textDecoration: 'none' }}>
+                Forgot?
+              </Link>
             </div>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              </span>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                className="w-full bg-[#111111] border border-white/5 rounded-2xl py-3.5 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-[#fcab74] focus:ring-1 focus:ring-[#fcab74] transition-all placeholder-gray-600 tracking-widest shadow-inner"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '14px', padding: '12px 14px',
+            }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+              </svg>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••" required
+                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#fff', fontSize: '0.85rem', fontFamily: 'inherit', letterSpacing: '3px' }} />
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-[#ffad76] hover:bg-[#ffc299] text-[#5c2a11] font-bold py-3.5 rounded-2xl transition-all shadow-[0_4px_15px_rgba(255,173,118,0.3)] hover:shadow-[0_4px_25px_rgba(255,173,118,0.5)] flex items-center justify-center gap-2 mt-6 disabled:opacity-70"
-          >
+          {/* Submit */}
+          <button type="submit" disabled={isLoading} style={{
+            width: '100%', padding: '14px', border: 'none', borderRadius: '14px',
+            background: 'linear-gradient(135deg, #fcab73, #e8732a)', color: '#000',
+            fontSize: '0.875rem', fontWeight: '700', fontFamily: 'inherit',
+            cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.7 : 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            boxShadow: '0 4px 20px rgba(232,115,42,0.3)', transition: 'all 0.25s',
+          }}>
             {isLoading ? 'Authenticating...' : 'Enter the Expedition'}
-            {!isLoading && <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>}
+            {!isLoading && (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            )}
           </button>
         </form>
 
-        <div className="mt-8 mb-6 relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/10"></div>
-          </div>
-          <div className="relative flex justify-center text-[10px]">
-            <span className="bg-[#161616] px-4 text-gray-500 tracking-widest uppercase">Social Verification</span>
-          </div>
+        {/* Divider */}
+        <div style={{ position: 'relative', margin: '28px 0 20px', textAlign: 'center' }}>
+          <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+          <span style={{ position: 'relative', background: 'rgba(18,18,22,0.92)', padding: '0 14px', fontSize: '0.6rem', color: '#555', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '600' }}>
+            Social Verification
+          </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <button type="button" className="flex items-center justify-center gap-2 py-3 bg-[#111111] border border-white/5 rounded-2xl hover:bg-white/5 transition-all text-sm text-gray-300 font-medium group">
-            <svg className="w-4 h-4 text-[#7b81ff] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" /></svg>
+        {/* Social */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <button style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            padding: '11px', background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: '12px', color: '#bbb', fontSize: '0.8rem', fontWeight: '600',
+            fontFamily: 'inherit', cursor: 'pointer',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7b81ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"/>
+            </svg>
             Biometric
           </button>
-          <button type="button" className="flex items-center justify-center gap-2 py-3 bg-[#111111] border border-white/5 rounded-2xl hover:bg-white/5 transition-all text-sm text-gray-300 font-medium group">
-            <svg className="w-4 h-4 text-[#ff5c5c] group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" /></svg>
+          <button style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            padding: '11px', background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: '12px', color: '#bbb', fontSize: '0.8rem', fontWeight: '600',
+            fontFamily: 'inherit', cursor: 'pointer',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
             Google
           </button>
         </div>
 
-        <div className="mt-8 text-center text-xs text-gray-400">
-          New to the summit? <Link to="/auth/register" className="text-[#fcab74] hover:text-[#ffc299] transition-colors font-semibold ml-1">Request an Invite</Link>
-        </div>
+        {/* Register */}
+        <p style={{ textAlign: 'center', marginTop: '24px', color: '#666', fontSize: '0.8rem' }}>
+          New to the summit?{' '}
+          <Link to="/auth/register" style={{ color: '#e8732a', fontWeight: '600', textDecoration: 'none' }}>Request an Invite</Link>
+        </p>
       </div>
-      
-      {/* Bottom left info bubbles */}
-      <div className="absolute bottom-10 left-10 flex-col gap-4 hidden lg:flex z-10">
-        <div className="flex items-center gap-4 bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-full py-2.5 px-5 shadow-2xl">
-          <div className="bg-[#1e1a3b] p-2.5 rounded-full text-[#7b81ff]">
-             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+
+      {/* Bottom Left Stats */}
+      <div style={{ position: 'absolute', bottom: '36px', left: '36px', display: 'flex', flexDirection: 'column', gap: '12px', zIndex: 10 }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '12px',
+          background: 'rgba(17,17,17,0.75)', backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.05)', borderRadius: '999px', padding: '8px 18px',
+        }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(123,129,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7b81ff" strokeWidth="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           </div>
           <div>
-            <div className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-0.5">Base Camp Temp</div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-extrabold text-white text-base leading-none">-14°C</span>
-              <span className="text-xs text-[#7b81ff] font-medium leading-none">Everest</span>
-            </div>
+            <div style={{ fontSize: '0.5rem', color: '#666', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px' }}>Base Camp Temp</div>
+            <div><span style={{ fontWeight: '800', color: '#fff', fontSize: '0.85rem' }}>-14°C</span> <span style={{ color: '#7b81ff', fontWeight: '600', fontSize: '0.7rem' }}>Everest</span></div>
           </div>
         </div>
-        
-        <div className="flex items-center gap-4 bg-[#111111]/80 backdrop-blur-md border border-white/5 rounded-full py-2.5 px-5 shadow-2xl">
-          <div className="bg-[#3a2015] p-2.5 rounded-full text-[#fcab74]">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '12px',
+          background: 'rgba(17,17,17,0.75)', backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.05)', borderRadius: '999px', padding: '8px 18px',
+        }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(232,115,42,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fcab74" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
           </div>
           <div>
-             <div className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-0.5">Active Expeditions</div>
-             <div className="flex items-baseline gap-1.5">
-              <span className="font-extrabold text-white text-base leading-none">42</span>
-              <span className="text-xs text-[#fcab74] font-medium leading-none">Teams</span>
-            </div>
+            <div style={{ fontSize: '0.5rem', color: '#666', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '2px' }}>Active Expeditions</div>
+            <div><span style={{ fontWeight: '800', color: '#fff', fontSize: '0.85rem' }}>42</span> <span style={{ color: '#fcab74', fontWeight: '600', fontSize: '0.7rem' }}>Teams</span></div>
           </div>
         </div>
       </div>
-      
-      {/* Footer text */}
-      <div className="absolute bottom-8 w-full text-center md:flex md:justify-between md:px-14 text-[9px] text-gray-500 uppercase tracking-[0.2em] font-medium z-10 hidden md:block">
-        <div>© 2024 BHATBHATI TOURS & TRAVEL. THE ETHEREAL EXPEDITION.</div>
-        <div className="flex gap-8">
-          <a href="#" className="hover:text-gray-300 transition-colors">Terms of Ascent</a>
-          <a href="#" className="hover:text-gray-300 transition-colors">Safety Protocol</a>
+
+      {/* Footer */}
+      <div style={{
+        position: 'absolute', bottom: '20px', left: 0, right: 0, zIndex: 10,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 48px',
+        fontSize: '0.5rem', color: '#444', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '500',
+      }}>
+        <span>© 2024 Bhatbhati Tours & Travel. The Ethereal Expedition.</span>
+        <div style={{ display: 'flex', gap: '28px' }}>
+          <a href="#" style={{ color: '#444', textDecoration: 'none' }}>Terms of Ascent</a>
+          <a href="#" style={{ color: '#444', textDecoration: 'none' }}>Safety Protocol</a>
         </div>
       </div>
     </div>
