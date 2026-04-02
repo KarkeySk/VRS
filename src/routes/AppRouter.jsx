@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from '../context/AuthContext'
 import { ProtectedRoute } from './ProtectedRoute'
 import Navbar from '../components/layout/Navbar'
@@ -13,12 +13,13 @@ import BookingsPage from '../pages/bookings/BookingsPage'
 import ProfilePage from '../pages/user/ProfilePage'
 import NotFoundPage from '../pages/NotFoundPage'
 
-export function AppRouter() {
+function Layout() {
+    const location = useLocation();
+    const hideNavbar = location.pathname.startsWith('/auth');
     return (
-        <BrowserRouter>
-            <AuthProvider>
-                <Navbar />
-                <Routes>
+        <>
+            {!hideNavbar && <Navbar />}
+            <Routes>
                     {/* Public routes */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/auth/login" element={<LoginPage />} />
@@ -34,6 +35,15 @@ export function AppRouter() {
                     {/* Fallback */}
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>
+        </>
+    );
+}
+
+export function AppRouter() {
+    return (
+        <BrowserRouter>
+            <AuthProvider>
+                <Layout />
             </AuthProvider>
         </BrowserRouter>
     )
