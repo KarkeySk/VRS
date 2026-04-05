@@ -1,0 +1,14 @@
+{
+  "name": "@bhatbhati/shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./lib/*": "./lib/*",
+    "./services/*": "./services/*",
+    "./utils/*": "./utils/*"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4"
+  }
+}
