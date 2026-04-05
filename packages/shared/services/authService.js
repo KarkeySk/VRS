@@ -49,5 +49,17 @@ export const authService = {
         if (!supabase) return { data: { listener: { subscription: { unsubscribe: () => {} } } } }
         return supabase.auth.onAuthStateChange(callback)
     },
+
+    /** Check if a user has admin role */
+    isAdmin: async (userId) => {
+        if (!supabase) return false
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single()
+        if (error) return false
+        return data?.role === 'admin'
+    },
 }
 
