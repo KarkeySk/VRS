@@ -6,7 +6,8 @@ export default function VehiclesPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const searchQuery = searchParams.get('search') || '';
-    const [filter, setFilter] = useState('All Terrain');
+    const terrainParam = searchParams.get('terrain') || '';
+    const [filter, setFilter] = useState(terrainParam || 'All Terrain');
     const [sortHighToLow, setSortHighToLow] = useState(false);
     const [showFilters, setShowFilters] = useState(true);
 
