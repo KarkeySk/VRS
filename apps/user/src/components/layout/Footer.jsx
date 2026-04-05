@@ -7,7 +7,7 @@ export default function Footer() {
         <Link to="/" className="footer-logo" id="footer-logo">
           <span className="logo-dot"></span>
           Bhatbhatify
-        </Link>
+        </Link>  
 
         <div className="footer-links" id="footer-links">
           <a href="#fleet">Fleet</a>
