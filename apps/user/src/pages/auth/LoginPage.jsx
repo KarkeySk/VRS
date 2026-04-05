@@ -64,7 +64,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      navigate('/vehicles');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Failed to login');
     } finally {
