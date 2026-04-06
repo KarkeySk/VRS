@@ -18,10 +18,10 @@ export default function Navbar() {
     };
 
     const navLinks = [
-        { label: 'Expeditions', to: '/vehicles' },
+        { label: 'Dashboard', to: '/dashboard' },
+        { label: 'Terrain', to: '/terrain' },
         { label: 'Fleet', to: '/vehicles' },
-        { label: 'Routes', to: '/bookings' },
-        { label: 'Safety', to: '#' },
+        { label: 'Bookings', to: '/bookings' },
     ];
 
     return (
@@ -132,7 +132,7 @@ export default function Navbar() {
 
                     {user ? (
                         <>
-                            <Link to="/vehicles" style={{
+                            <Link to="/terrain" style={{
                                 textDecoration: 'none',
                                 background: 'linear-gradient(135deg, #fcab73 0%, #e8732a 100%)',
                                 color: '#000',
