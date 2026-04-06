@@ -208,7 +208,7 @@ export default function VehicleDetail() {
                                 </div>
                             </div>
 
-                            <button style={{ width: '100%', padding: '16px', fontSize: '0.875rem', letterSpacing: '0.5px', fontWeight: '700', background: 'linear-gradient(to right, #fcab73, #e8732a)', color: '#000', borderRadius: '30px', border: 'none', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 8px 25px rgba(232, 115, 42, 0.3)' }}
+                            <button onClick={() => navigate(`/inquiry/${vehicle.id}`)} style={{ width: '100%', padding: '16px', fontSize: '0.875rem', letterSpacing: '0.5px', fontWeight: '700', background: 'linear-gradient(to right, #fcab73, #e8732a)', color: '#000', borderRadius: '30px', border: 'none', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 8px 25px rgba(232, 115, 42, 0.3)' }}
                                 onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 30px rgba(232, 115, 42, 0.5)'; }}
                                 onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(232, 115, 42, 0.3)'; }}
                             >
