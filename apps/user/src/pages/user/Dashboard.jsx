@@ -4,48 +4,48 @@ import { ArrowRight } from 'lucide-react';
 
 export default function Dashboard() {
     const { user } = useAuth();
-    const name = user?.user_metadata?.full_name || 'Explorer';
+    const name = user?.user_metadata?.full_name || 'User';
 
     const quickActions = [
         {
-            label: 'Choose Terrain',
-            desc: 'Find vehicles suited to your route',
-            image: 'https://images.unsplash.com/photo-1464822759844-d150baec0494?w=1200&h=900&fit=crop',
+            label: 'Pick Road Type',
+            desc: 'Find vehicles for your route',
+            image: 'https://images.unsplash.com/photo-1758701321116-985af34d993f?w=1200&h=900&auto=format&fit=crop&q=80',
             to: '/terrain',
             color: '#e8732a',
         },
         {
             label: 'Browse Fleet',
-            desc: 'Explore all available vehicles',
+            desc: 'See all available vehicles',
             image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=900&fit=crop',
             to: '/vehicles',
             color: '#7b81ff',
         },
         {
             label: 'My Bookings',
-            desc: 'View your booking history',
-            image: 'https://images.unsplash.com/photo-1506784693919-ef06d93c28d2?w=1200&h=900&fit=crop',
+            desc: 'See your bookings',
+            image: 'https://images.unsplash.com/photo-1643083945816-d7265247256f?w=1200&h=900&auto=format&fit=crop&q=80',
             to: '/bookings',
             color: '#34d399',
         },
         {
             label: 'Profile',
-            desc: 'Manage your account details',
-            image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1200&h=900&fit=crop',
+            desc: 'Update your account',
+            image: 'https://images.unsplash.com/photo-1668071484590-faf28e5ed5a4?w=1200&h=900&auto=format&fit=crop&q=80',
             to: '/profile',
             color: '#f59e0b',
         },
     ];
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', background: '#080808', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif" }}>
             <div className="container">
                 <div style={{ marginBottom: '48px' }}>
                     <p style={{ color: '#e8732a', fontSize: '0.7rem', fontWeight: '700', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '12px' }}>WELCOME BACK</p>
-                    <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', color: '#fff', marginBottom: '8px' }}>
+                    <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
                         Hello, {name}
                     </h1>
-                    <p style={{ color: '#666', fontSize: '1rem' }}>Ready for your next expedition?</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Ready for your next trip?</p>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '60px' }}>
@@ -53,9 +53,9 @@ export default function Dashboard() {
                         return (
                             <Link key={action.label} to={action.to} style={{
                                 textDecoration: 'none',
-                                background: '#111',
+                                background: 'var(--bg-card)',
                                 borderRadius: '22px',
-                                border: '1px solid rgba(255,255,255,0.08)',
+                                border: '1px solid var(--border)',
                                 transition: 'border-color 0.25s, transform 0.25s, box-shadow 0.25s',
                                 cursor: 'pointer',
                                 position: 'relative',
@@ -100,13 +100,13 @@ export default function Dashboard() {
                                     borderRadius: '999px',
                                     background: `${action.color}2b`,
                                     border: `1px solid ${action.color}66`,
-                                    color: '#fff',
+                                    color: 'var(--text-primary)',
                                     fontSize: '0.65rem',
                                     fontWeight: '700',
                                     letterSpacing: '0.8px',
                                     textTransform: 'uppercase',
                                 }}>
-                                    Quick Action
+                                    Quick Link
                                 </div>
                                 <div style={{
                                     position: 'relative',
@@ -117,7 +117,7 @@ export default function Dashboard() {
                                     flexDirection: 'column',
                                     gap: '10px',
                                 }}>
-                                    <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '800', margin: 0 }}>{action.label}</h3>
+                                    <h3 style={{ color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: '800', margin: 0 }}>{action.label}</h3>
                                     <p style={{ color: 'rgba(255,255,255,0.82)', fontSize: '0.85rem', lineHeight: 1.5, margin: 0 }}>{action.desc}</p>
                                     <div style={{
                                         marginTop: '8px',
@@ -133,7 +133,7 @@ export default function Dashboard() {
                                         padding: '8px 12px',
                                         width: 'fit-content',
                                     }}>
-                                        Get Started <ArrowRight size={15} />
+                                        Open <ArrowRight size={15} />
                                     </div>
                                 </div>
                             </Link>
@@ -143,19 +143,19 @@ export default function Dashboard() {
 
                 <div style={{
                     background: 'linear-gradient(135deg, rgba(232,115,42,0.08), rgba(123,129,255,0.05))',
-                    borderRadius: '24px', padding: '40px', border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: '24px', padding: '40px', border: '1px solid var(--border)',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px',
                 }}>
                     <div>
-                        <h2 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: '700', marginBottom: '8px' }}>Not sure which vehicle?</h2>
-                        <p style={{ color: '#888', fontSize: '0.9rem', margin: 0 }}>Tell us your terrain and we'll recommend the perfect ride.</p>
+                        <h2 style={{ color: 'var(--text-primary)', fontSize: '1.4rem', fontWeight: '700', marginBottom: '8px' }}>Not sure which vehicle?</h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>Choose your road type and we will suggest a ride.</p>
                     </div>
                     <Link to="/terrain" style={{
-                        textDecoration: 'none', background: 'linear-gradient(135deg, #fcab73, #e8732a)',
-                        color: '#000', fontWeight: '700', fontSize: '0.85rem', padding: '14px 28px',
+                        textDecoration: 'none', background: 'var(--brand-gradient)',
+                        color: 'var(--accent-ink)', fontWeight: '700', fontSize: '0.85rem', padding: '14px 28px',
                         borderRadius: '999px', display: 'flex', alignItems: 'center', gap: '8px',
                     }}>
-                        Choose Terrain <ArrowRight size={16} />
+                        Pick Road Type <ArrowRight size={16} />
                     </Link>
                 </div>
             </div>

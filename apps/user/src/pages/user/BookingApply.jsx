@@ -33,7 +33,7 @@ export default function BookingApply() {
     useEffect(() => {
         inquiryService.getById(inquiryId)
             .then(setInquiry)
-            .catch(() => setError('Inquiry not found'))
+            .catch(() => setError('Request not found'))
             .finally(() => setLoading(false));
     }, [inquiryId]);
 
@@ -70,37 +70,37 @@ export default function BookingApply() {
 
             navigate(`/booking/confirm/${app.id}`);
         } catch (err) {
-            setError(err.message || 'Failed to submit application');
+            setError(err.message || 'Failed to submit request');
         } finally {
             setSubmitting(false);
         }
     };
 
-    if (loading) return <div style={{ paddingTop: '120px', textAlign: 'center', minHeight: '100vh', background: '#080808', color: '#888' }}>Loading...</div>;
-    if (!inquiry) return <div style={{ paddingTop: '120px', textAlign: 'center', minHeight: '100vh', background: '#080808', color: '#ef4444' }}>Inquiry not found</div>;
+    if (loading) return <div style={{ paddingTop: '120px', textAlign: 'center', minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>Loading...</div>;
+    if (!inquiry) return <div style={{ paddingTop: '120px', textAlign: 'center', minHeight: '100vh', background: 'var(--bg-primary)', color: '#ef4444' }}>Request not found</div>;
 
-    const labelStyle = { display: 'block', color: '#888', fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' };
+    const labelStyle = { display: 'block', color: 'var(--text-secondary)', fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' };
     const inputStyle = {
-        width: '100%', padding: '13px 16px', background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px',
-        color: '#fff', fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
+        width: '100%', padding: '13px 16px', background: 'var(--bg-glass)',
+        border: '1px solid var(--border)', borderRadius: '14px',
+        color: 'var(--text-primary)', fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
     };
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', background: '#080808', fontFamily: "'Inter', sans-serif", paddingBottom: '80px' }}>
+        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '80px' }}>
             <div style={{ maxWidth: '700px', margin: '0 auto', padding: '0 20px' }}>
-                <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#888', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', cursor: 'pointer', marginBottom: '24px' }}>
+                <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', cursor: 'pointer', marginBottom: '24px' }}>
                     <ArrowLeft size={16} /> Back
                 </button>
 
-                <h1 style={{ color: '#fff', fontSize: '1.6rem', fontWeight: '800', marginBottom: '8px' }}>Apply for Booking</h1>
-                <p style={{ color: '#888', fontSize: '0.85rem', marginBottom: '32px' }}>
+                <h1 style={{ color: 'var(--text-primary)', fontSize: '1.6rem', fontWeight: '800', marginBottom: '8px' }}>Complete Booking</h1>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '32px' }}>
                     Vehicle: <span style={{ color: '#e8732a', fontWeight: '600' }}>{inquiry.vehicles?.name}</span> — {inquiry.drive_type === 'with-driver' ? 'With Driver' : 'Self Drive'}
                 </p>
 
                 {/* Step indicators */}
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '36px' }}>
-                    {['Dates & Docs', 'Questionnaire'].map((s, i) => (
+                    {['Dates & Docs', 'Questions'].map((s, i) => (
                         <div key={i} onClick={() => setStep(i + 1)} style={{
                             flex: 1, padding: '12px', borderRadius: '12px', textAlign: 'center', cursor: 'pointer',
                             background: step === i + 1 ? 'rgba(232,115,42,0.1)' : 'rgba(255,255,255,0.03)',
@@ -139,7 +139,7 @@ export default function BookingApply() {
                                 <label style={labelStyle}>{inquiry.drive_type === 'self-drive' ? 'Driving License (Photo/PDF)' : 'ID Document (Photo/PDF)'}</label>
                                 <label style={{
                                     display: 'flex', alignItems: 'center', gap: '12px', padding: '20px',
-                                    background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)',
+                                    background: 'var(--bg-glass)', border: '1px dashed rgba(255,255,255,0.1)',
                                     borderRadius: '14px', cursor: 'pointer', transition: 'border-color 0.2s',
                                 }}>
                                     <Upload size={20} color="#888" />
@@ -147,7 +147,7 @@ export default function BookingApply() {
                                         <div style={{ color: '#aaa', fontSize: '0.85rem', fontWeight: '600' }}>
                                             {inquiry.drive_type === 'self-drive' ? (licenseFile?.name || 'Upload license') : (idFile?.name || 'Upload ID')}
                                         </div>
-                                        <div style={{ color: '#666', fontSize: '0.7rem', marginTop: '4px' }}>JPG, PNG, or PDF — max 5MB</div>
+                                        <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginTop: '4px' }}>JPG, PNG, or PDF — max 5MB</div>
                                     </div>
                                     <input type="file" accept="image/*,.pdf" onChange={(e) => inquiry.drive_type === 'self-drive' ? setLicenseFile(e.target.files[0]) : setIdFile(e.target.files[0])} style={{ display: 'none' }} />
                                 </label>
@@ -158,13 +158,13 @@ export default function BookingApply() {
                                     <label style={labelStyle}>ID Document (Citizenship/Passport)</label>
                                     <label style={{
                                         display: 'flex', alignItems: 'center', gap: '12px', padding: '20px',
-                                        background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)',
+                                        background: 'var(--bg-glass)', border: '1px dashed rgba(255,255,255,0.1)',
                                         borderRadius: '14px', cursor: 'pointer',
                                     }}>
                                         <FileText size={20} color="#888" />
                                         <div>
                                             <div style={{ color: '#aaa', fontSize: '0.85rem', fontWeight: '600' }}>{idFile?.name || 'Upload ID document'}</div>
-                                            <div style={{ color: '#666', fontSize: '0.7rem', marginTop: '4px' }}>JPG, PNG, or PDF — max 5MB</div>
+                                            <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginTop: '4px' }}>JPG, PNG, or PDF — max 5MB</div>
                                         </div>
                                         <input type="file" accept="image/*,.pdf" onChange={(e) => setIdFile(e.target.files[0])} style={{ display: 'none' }} />
                                     </label>
@@ -173,10 +173,10 @@ export default function BookingApply() {
 
                             <button type="button" onClick={() => setStep(2)} style={{
                                 width: '100%', padding: '15px', border: 'none', borderRadius: '14px',
-                                background: 'linear-gradient(135deg, #fcab73, #e8732a)', color: '#000',
+                                background: 'var(--brand-gradient)', color: 'var(--accent-ink)',
                                 fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer',
                             }}>
-                                Continue to Questionnaire
+                                Continue to Questions
                             </button>
                         </div>
                     )}
@@ -186,7 +186,7 @@ export default function BookingApply() {
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={labelStyle}>Driving Experience</label>
                                 <select value={experience} onChange={(e) => setExperience(e.target.value)} required style={{ ...inputStyle, appearance: 'none', cursor: 'pointer', color: experience ? '#fff' : '#555' }}>
-                                    <option value="" disabled>Select experience level</option>
+                                    <option value="" disabled>Select level</option>
                                     <option value="beginner">Beginner (0-2 years)</option>
                                     <option value="intermediate">Intermediate (2-5 years)</option>
                                     <option value="experienced">Experienced (5+ years)</option>
@@ -200,20 +200,20 @@ export default function BookingApply() {
                             </div>
 
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={labelStyle}>Purpose of Trip</label>
+                                <label style={labelStyle}>Trip Purpose</label>
                                 <select value={purpose} onChange={(e) => setPurpose(e.target.value)} required style={{ ...inputStyle, appearance: 'none', cursor: 'pointer', color: purpose ? '#fff' : '#555' }}>
                                     <option value="" disabled>Select purpose</option>
                                     <option value="tourism">Tourism / Sightseeing</option>
                                     <option value="trekking">Trekking Base Camp Transfer</option>
                                     <option value="business">Business Travel</option>
-                                    <option value="photography">Photography Expedition</option>
+                                    <option value="photography">Photography</option>
                                     <option value="other">Other</option>
                                 </select>
                             </div>
 
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={labelStyle}>Medical Conditions (if any)</label>
-                                <textarea value={medicalConditions} onChange={(e) => setMedicalConditions(e.target.value)} placeholder="Any altitude sickness history, allergies, etc." rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
+                                <label style={labelStyle}>Medical Notes (if any)</label>
+                                <textarea value={medicalConditions} onChange={(e) => setMedicalConditions(e.target.value)} placeholder="Any sickness history, allergies, etc." rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
                             </div>
 
                             <div style={{ marginBottom: '32px' }}>
@@ -224,17 +224,17 @@ export default function BookingApply() {
                             <div style={{ display: 'flex', gap: '12px' }}>
                                 <button type="button" onClick={() => setStep(1)} style={{
                                     flex: 1, padding: '15px', borderRadius: '14px', fontSize: '0.85rem', fontWeight: '600',
-                                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer',
+                                    background: 'var(--bg-glass)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer',
                                 }}>
                                     Back
                                 </button>
                                 <button type="submit" disabled={submitting} style={{
                                     flex: 2, padding: '15px', border: 'none', borderRadius: '14px',
-                                    background: 'linear-gradient(135deg, #fcab73, #e8732a)', color: '#000',
+                                    background: 'var(--brand-gradient)', color: 'var(--accent-ink)',
                                     fontSize: '0.9rem', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer',
                                     opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                 }}>
-                                    {submitting ? 'Submitting...' : <><CheckCircle size={16} /> Submit Application</>}
+                                    {submitting ? 'Sending...' : <><CheckCircle size={16} /> Send Request</>}
                                 </button>
                             </div>
                         </div>
