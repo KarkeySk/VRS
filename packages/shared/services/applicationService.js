@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase'
 
 export const applicationService = {
     create: async (applicationData) => {
+        if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase
             .from('booking_applications')
             .insert([applicationData])
@@ -11,6 +12,7 @@ export const applicationService = {
     },
 
     getMyApplications: async (userId) => {
+        if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase
             .from('booking_applications')
             .select('*, vehicles(*), inquiries(*)')
@@ -21,6 +23,7 @@ export const applicationService = {
     },
 
     getById: async (id) => {
+        if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase
             .from('booking_applications')
             .select('*, vehicles(*), inquiries(*), profiles(*)')
@@ -31,6 +34,7 @@ export const applicationService = {
     },
 
     getAll: async () => {
+        if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase
             .from('booking_applications')
             .select('*, vehicles(*), inquiries(*), profiles(*)')
@@ -40,6 +44,7 @@ export const applicationService = {
     },
 
     cancel: async (id) => {
+        if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase
             .from('booking_applications')
             .update({ status: 'cancelled' })
@@ -50,13 +55,42 @@ export const applicationService = {
     },
 
     uploadDocument: async (userId, file, docType) => {
+        if (!supabase) throw new Error('Supabase is not configured')
         const ext = file.name.split('.').pop()
         const path = `${userId}/${docType}-${Date.now()}.${ext}`
         const { error } = await supabase.storage
             .from('documents')
             .upload(path, file, { upsert: true })
         if (error) throw error
-        const { data } = supabase.storage.from('documents').getPublicUrl(path)
-        return data.publicUrl
+        return path
+    },
+
+    updateStatus: async (id, status, adminNotes = null) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase
+            .from('booking_applications')
+            .update({ status, admin_notes: adminNotes })
+            .eq('id', id)
+            .select()
+            .single()
+        if (error) throw error
+        return data
+    },
+
+    /** Generate temporary signed URL for private document bucket */
+    getDocumentUrl: async (path, expiresIn = 3600) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        if (!path) return null
+
+        const normalizedPath = path.includes('/storage/v1/object/')
+            ? path.split('/documents/')[1] ?? ''
+            : path
+        if (!normalizedPath) return null
+
+        const { data, error } = await supabase.storage
+            .from('documents')
+            .createSignedUrl(normalizedPath, expiresIn)
+        if (error) throw error
+        return data?.signedUrl ?? null
     },
 }
