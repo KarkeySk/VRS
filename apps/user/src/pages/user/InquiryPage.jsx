@@ -1,21 +1,48 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { vehicles } from '@bhatbhati/shared/utils/vehicles.js';
+import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js';
 import { inquiryService } from '@bhatbhati/shared/services/inquiryService.js';
 import { Star, Send, ArrowLeft } from 'lucide-react';
+import { normalizeVehicle } from '../../utils/vehicleMapper';
 
 export default function InquiryPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
-    const vehicle = vehicles.find((v) => v.id === id);
+    const [vehicle, setVehicle] = useState(null);
 
     const [driveType, setDriveType] = useState('self-drive');
     const [selectedAddons, setSelectedAddons] = useState([]);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isVehicleLoading, setIsVehicleLoading] = useState(true);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        let mounted = true
+        const loadVehicle = async () => {
+            setIsVehicleLoading(true)
+            try {
+                const data = await vehicleService.getById(id)
+                if (mounted) setVehicle(normalizeVehicle(data))
+            } catch {
+                if (mounted) setVehicle(null)
+            } finally {
+                if (mounted) setIsVehicleLoading(false)
+            }
+        }
+        loadVehicle()
+        return () => { mounted = false }
+    }, [id])
+
+    if (isVehicleLoading) {
+        return (
+            <div style={{ paddingTop: '120px', textAlign: 'center', minHeight: '100vh', background: '#080808' }}>
+                <h2 style={{ color: '#fff' }}>Loading vehicle...</h2>
+            </div>
+        );
+    }
 
     if (!vehicle) {
         return (
