@@ -1,160 +1,179 @@
-import { FileText, Lock, Unlock, Filter, AlertTriangle } from "lucide-react";
-import { consumerLogs } from "@/lib/data";
+import { useEffect, useMemo, useState } from 'react'
+import { FileText, Filter, ExternalLink } from 'lucide-react'
+import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 
-const kycStyles = {
-  "VERIFIED": "bg-status-green/20 text-status-green",
-  "PENDING REVIEW": "bg-status-yellow/20 text-status-yellow",
-  "REJECTED": "bg-status-red/20 text-status-red",
-};
+const statusStyles = {
+  submitted: 'bg-status-yellow/20 text-status-yellow',
+  'under-review': 'bg-brand-orange/20 text-brand-orange',
+  approved: 'bg-status-green/20 text-status-green',
+  rejected: 'bg-status-red/20 text-status-red',
+  confirmed: 'bg-[rgba(100,150,200,0.2)] text-[#64d4ff]',
+  cancelled: 'bg-dark-border text-txt-secondary',
+}
 
 export default function CompliancePage() {
+  const [applications, setApplications] = useState([])
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [busyId, setBusyId] = useState('')
+
+  const loadApplications = async () => {
+    setIsLoading(true)
+    setError('')
+    try {
+      const data = await applicationService.getAll()
+      setApplications(data ?? [])
+    } catch (err) {
+      setError(err.message || 'Failed to load applications')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadApplications()
+  }, [])
+
+  const filtered = useMemo(() => {
+    if (statusFilter === 'all') return applications
+    return applications.filter((app) => app.status === statusFilter)
+  }, [applications, statusFilter])
+
+  const pendingCount = applications.filter((app) => ['submitted', 'under-review'].includes(app.status)).length
+
+  const updateStatus = async (id, status) => {
+    setBusyId(id)
+    try {
+      await applicationService.updateStatus(id, status)
+      await loadApplications()
+    } catch (err) {
+      setError(err.message || 'Failed to update status')
+    } finally {
+      setBusyId('')
+    }
+  }
+
+  const openDocument = async (path) => {
+    if (!path) return
+    try {
+      const signed = await applicationService.getDocumentUrl(path)
+      if (signed) window.open(signed, '_blank', 'noopener,noreferrer')
+    } catch (err) {
+      setError(err.message || 'Failed to open document')
+    }
+  }
+
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-2xl font-bold">Compliance & Logs</h2>
-        <span className="px-2.5 py-1 bg-status-green/20 text-status-green text-xs font-bold rounded-full">
-          SECURE NODE
-        </span>
-      </div>
-
-      <div className="grid grid-cols-[1fr_280px] gap-6 mb-8">
-        {/* Document Verification */}
-        <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-semibold">Document Verification Vault</h3>
-              <p className="text-xs text-txt-secondary">Pending review: 14 active applications</p>
-            </div>
-            <span className="px-3 py-1 bg-brand-orange/20 text-brand-orange text-xs rounded-full font-semibold">
-              Priority Processing
-            </span>
-          </div>
-          <div className="flex gap-6">
-            <div className="flex-1">
-              <p className="text-sm font-semibold mb-3 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-brand-orange" />
-                Passport / Citizenship Scan
-              </p>
-              <div className="bg-dark-deeper rounded-lg p-4 flex items-center gap-4">
-                <div className="w-24 h-28 bg-dark-border rounded-lg flex items-center justify-center text-4xl">👤</div>
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs text-txt-secondary">Facial Match</span>
-                    <span className="text-sm font-bold text-status-green">98.2%</span>
-                  </div>
-                  <p className="text-xs text-status-green mb-1">✓ Machine readable zone (MRZ) valid</p>
-                  <p className="text-xs text-status-green">✓ Expiry date check passed</p>
-                </div>
-              </div>
-              <p className="text-xs text-txt-secondary mt-3">ID: 7129-NPL</p>
-              <p className="text-sm mt-1">
-                <span className="text-xs text-txt-secondary">APPLICANT NAME:</span>
-                <br />
-                <strong>Prakash Gyawali</strong>
-              </p>
-              <div className="flex gap-3 mt-4">
-                <button className="px-4 py-2 bg-status-green/20 text-status-green rounded-md text-sm font-semibold hover:bg-status-green/30 transition-colors">
-                  ✓ Approve
-                </button>
-                <button className="px-4 py-2 bg-status-red/20 text-status-red rounded-md text-sm font-semibold hover:bg-status-red/30 transition-colors">
-                  ✕ Reject
-                </button>
-              </div>
-            </div>
-          </div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">Compliance & Logs</h2>
+          <p className="text-xs text-txt-secondary">Pending review: {pendingCount} applications</p>
         </div>
-
-        {/* FNMIS Engine */}
-        <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-brand-orange/20 flex items-center justify-center">
-              <Lock className="w-5 h-5 text-brand-orange" />
-            </div>
-            <div>
-              <p className="font-semibold text-sm">FNMIS Engine</p>
-              <p className="text-xs text-txt-secondary">6-Digit Secure Protocol</p>
-            </div>
-          </div>
-          <p className="text-xs text-txt-secondary uppercase tracking-wider mb-2">Current Session Token</p>
-          <div className="flex gap-1 mb-4">
-            {["3", "8", "2", "9", "0", "1"].map((d, i) => (
-              <span
-                key={i}
-                className="w-10 h-12 bg-dark-deeper border border-dark-border rounded flex items-center justify-center text-xl font-bold text-brand-orange"
-              >
-              {d}
-              </span>
-            ))}
-          </div>
-          <p className="text-xs text-status-red text-center mb-4">● EXPIRES IN: 02:14</p>
-          <button className="w-full py-2 border border-brand-orange text-brand-orange rounded-md text-sm font-semibold hover:bg-brand-orange/10 transition-colors mb-2">
-            ↻ Generate Token
-          </button>
-          <button className="w-full py-2 border border-dark-border text-txt-secondary rounded-md text-sm hover:text-txt-primary transition-colors">
-            ↻ View Audit Log
-          </button>
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-txt-secondary" />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-dark border border-dark-border rounded-md px-2.5 py-1.5 text-xs text-txt-primary"
+          >
+            <option value="all">All statuses</option>
+            <option value="submitted">Submitted</option>
+            <option value="under-review">Under Review</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
         </div>
       </div>
 
-      {/* Active Consumer Logs */}
+      {error && (
+        <div className="mb-4 rounded-md border border-status-red/30 bg-status-red/10 px-3 py-2 text-xs text-status-red">
+          {error}
+        </div>
+      )}
+
       <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-semibold">Active Consumer Logs</h3>
-            <p className="text-xs text-txt-secondary">Real-time telemetry and compliance status</p>
-          </div>
-          <div className="flex gap-2">
-            <button className="px-3 py-1.5 border border-dark-border text-txt-secondary rounded-md text-xs hover:text-brand-orange transition-colors flex items-center gap-1">
-              <Filter className="w-3 h-3" /> Filter Status
-            </button>
-            <button className="px-3 py-1.5 bg-status-red/20 text-status-red rounded-md text-xs font-semibold flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" /> Purge Data
-            </button>
-          </div>
-        </div>
-
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-xs text-txt-secondary uppercase tracking-wider border-b border-dark-border">
-              <th className="pb-3">Rental ID</th>
-              <th className="pb-3">Consumer Name</th>
-              <th className="pb-3">Vehicle Node</th>
-              <th className="pb-3">KYC Status</th>
-              <th className="pb-3">Encryption</th>
-              <th className="pb-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {consumerLogs.map((log, i) => (
-              <tr key={log.id} className={i < consumerLogs.length - 1 ? "border-b border-dark-border/50" : ""}>
-                <td className="py-3 text-txt-secondary">{log.rentalId}</td>
-                <td>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-full ${log.initialsColor} flex items-center justify-center text-xs font-bold ${log.initialsColor === "bg-brand-orange" ? "text-dark" : ""}`}>
-                      {log.initials}
-                    </div>
-                    <span>{log.name}</span>
-                  </div>
-                </td>
-                <td className="text-txt-secondary">{log.vehicle}</td>
-                <td>
-                  <span className={`px-2 py-0.5 ${kycStyles[log.kycStatus]} text-xs rounded font-semibold`}>
-                    {log.kycStatus}
-                  </span>
-                </td>
-                <td className="text-txt-secondary">
-                  {log.encrypted ? (
-                    <Lock className="w-4 h-4 text-status-green" />
-                  ) : (
-                    <Unlock className="w-4 h-4 text-status-red" />
-                  )}
-                </td>
-                <td className="text-txt-secondary cursor-pointer">⋮</td>
+        {isLoading ? (
+          <p className="text-sm text-txt-secondary">Loading applications...</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs text-txt-secondary uppercase tracking-wider border-b border-dark-border">
+                <th className="pb-3">Application</th>
+                <th className="pb-3">Customer</th>
+                <th className="pb-3">Vehicle</th>
+                <th className="pb-3">Documents</th>
+                <th className="pb-3">Status</th>
+                <th className="pb-3">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map((app, i) => (
+                <tr key={app.id} className={i < filtered.length - 1 ? 'border-b border-dark-border/50' : ''}>
+                  <td className="py-3 text-xs text-txt-secondary">#{app.id.slice(0, 8)}</td>
+                  <td>
+                    <p className="text-sm font-semibold">{app.profiles?.full_name || 'Unknown User'}</p>
+                    <p className="text-xs text-txt-secondary">{app.drive_type}</p>
+                  </td>
+                  <td className="text-sm">{app.vehicles?.name || 'Unknown Vehicle'}</td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => openDocument(app.id_doc_url)}
+                        disabled={!app.id_doc_url}
+                        className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-40 flex items-center gap-1"
+                      >
+                        <FileText className="w-3 h-3" />
+                        ID
+                        <ExternalLink className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openDocument(app.license_doc_url)}
+                        disabled={!app.license_doc_url}
+                        className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-40 flex items-center gap-1"
+                      >
+                        <FileText className="w-3 h-3" />
+                        License
+                        <ExternalLink className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`px-2 py-1 text-xs rounded font-semibold ${statusStyles[app.status] || 'bg-dark-border text-txt-secondary'}`}>
+                      {app.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateStatus(app.id, 'approved')}
+                        disabled={busyId === app.id}
+                        className="px-2.5 py-1 text-xs rounded bg-status-green/20 text-status-green hover:bg-status-green/30 disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateStatus(app.id, 'rejected')}
+                        disabled={busyId === app.id}
+                        className="px-2.5 py-1 text-xs rounded bg-status-red/20 text-status-red hover:bg-status-red/30 disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
-  );
+  )
 }
