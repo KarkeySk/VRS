@@ -6,6 +6,7 @@ export default function HeroSection() {
   const contentRef = useRef(null)
   const overlayRef = useRef(null)
   const animFrame = useRef(null)
+  const canAnimateRef = useRef(true)
 
   // Current and target values for smooth lerping
   const current = useRef({ x: 0, y: 0 })
@@ -15,6 +16,12 @@ export default function HeroSection() {
 
   // Smooth animation loop — runs independently of mouse events
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const hasFinePointer = window.matchMedia('(pointer: fine)').matches
+    canAnimateRef.current = !prefersReducedMotion && hasFinePointer
+
+    if (!canAnimateRef.current) return undefined
+
     const animate = () => {
       // Lerp toward target (0.06 = buttery smooth)
       current.current.x = lerp(current.current.x, target.current.x, 0.06)
@@ -57,6 +64,7 @@ export default function HeroSection() {
   }, [])
 
   const handleMouseMove = useCallback((e) => {
+    if (!canAnimateRef.current) return
     const rect = sectionRef.current?.getBoundingClientRect()
     if (!rect) return
 
@@ -66,6 +74,7 @@ export default function HeroSection() {
   }, [])
 
   const handleMouseLeave = useCallback(() => {
+    if (!canAnimateRef.current) return
     // Smoothly drift back to center
     target.current.x = 0
     target.current.y = 0
@@ -107,18 +116,17 @@ export default function HeroSection() {
           style={{ willChange: 'transform' }}
         >
           <span className="hero-label" id="hero-label">
-            ◆ Expedition-Grade Vehicle Rental
+            ◆ Reliable Vehicle Rental
           </span>
 
           <h1 className="hero-title" id="hero-title">
-            ASCEND THE<br />
-            <span className="highlight">UNKNOWN</span>
+            RIDE THE<br />
+            <span className="highlight">MOUNTAINS</span>
           </h1>
 
           <p className="hero-description" id="hero-description">
-            Conquer the most unforgiving terrain in Nepal with our
-            expedition-hardened fleet. Built to endure what the
-            Himalayas throw at you.
+            Rent strong vehicles for mountain roads in Nepal.
+            Safe, ready, and easy to book.
           </p>
 
           <div className="hero-cta" id="hero-cta">
@@ -137,7 +145,7 @@ export default function HeroSection() {
 
       {/* Scroll Indicator */}
       <div className="hero-scroll-indicator" id="scroll-indicator">
-        <span>Scroll</span>
+        <span>Scroll Down</span>
         <div className="scroll-line"></div>
       </div>
     </section>
