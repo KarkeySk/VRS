@@ -41,6 +41,27 @@ export const bookingService = {
         return data[0]
     },
 
+    /** Update booking fields (admin) */
+    update: async (id, updates) => {
+        const { data, error } = await supabase
+            .from('bookings')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single()
+        if (error) throw error
+        return data
+    },
+
+    /** Delete booking (admin) */
+    delete: async (id) => {
+        const { error } = await supabase
+            .from('bookings')
+            .delete()
+            .eq('id', id)
+        if (error) throw error
+    },
+
     /** Get all bookings (admin) */
     getAll: async () => {
         const { data, error } = await supabase
