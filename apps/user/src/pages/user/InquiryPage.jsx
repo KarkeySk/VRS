@@ -1,18 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js';
 import { inquiryService } from '@bhatbhati/shared/services/inquiryService.js';
 import { Star, Send, ArrowLeft } from 'lucide-react';
 import { normalizeVehicle } from '../../utils/vehicleMapper';
 
+const DRIVER_FEE_PER_DAY = 2000
+
 export default function InquiryPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { user } = useAuth();
     const [vehicle, setVehicle] = useState(null);
 
-    const [driveType, setDriveType] = useState('self-drive');
+    const initialDriveType = new URLSearchParams(location.search).get('driveType') === 'with-driver'
+        ? 'with-driver'
+        : 'self-drive'
+    const [driveType, setDriveType] = useState(initialDriveType);
     const [selectedAddons, setSelectedAddons] = useState([]);
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +63,14 @@ export default function InquiryPage() {
     const toggleAddon = (addonId) => {
         setSelectedAddons((prev) => prev.includes(addonId) ? prev.filter((x) => x !== addonId) : [...prev, addonId]);
     };
+
+    const addonsTotal = selectedAddons.reduce((sum, addonId) => {
+        const addon = vehicle.addons.find((a) => a.id === addonId)
+        return sum + Number(addon?.price || 0)
+    }, 0)
+    const basePrice = Number(vehicle.price || 0)
+    const driverFee = driveType === 'with-driver' ? DRIVER_FEE_PER_DAY : 0
+    const liveTotal = basePrice + addonsTotal + driverFee
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -101,8 +116,15 @@ export default function InquiryPage() {
                         </div>
                     </div>
                     <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#e8732a' }}>${vehicle.price}</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#e8732a' }}>
+                            NPR {liveTotal.toLocaleString()}
+                        </div>
                         <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>per day</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                            {driveType === 'with-driver'
+                                ? `+ NPR ${DRIVER_FEE_PER_DAY.toLocaleString()} driver fee/day`
+                                : 'Self-drive pricing'}
+                        </div>
                     </div>
                 </div>
 
