@@ -38,6 +38,22 @@ body {
   font-family: var(--font-sans);
 }
 
+:root[data-theme='light'] {
+  --color-dark: #f8fafc;
+  --color-dark-deeper: #eef2f7;
+  --color-dark-card: #ffffff;
+  --color-dark-border: #d7dde7;
+  --color-dark-hover: #edf2f7;
+
+  --color-txt-primary: #0f172a;
+  --color-txt-secondary: #475569;
+  --color-txt-muted: #64748b;
+}
+
+:root[data-theme='light'] body {
+  background-color: #eef2f7;
+}
+
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
   width: 6px;
