@@ -71,7 +71,7 @@ export default function BookingsPage({ onNavigate }) {
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-2xl font-bold">Bookings</h2>
-          <p className="text-xs text-txt-secondary">Manage booking lifecycle directly from admin panel.</p>
+          <p className="text-xs text-txt-secondary">Manage all bookings here.</p>
         </div>
         <button onClick={() => onNavigate('new-booking')} className="btn-action px-5 py-2 text-sm">
           + New Booking
@@ -96,7 +96,7 @@ export default function BookingsPage({ onNavigate }) {
             className="bg-dark-deeper border border-dark-border rounded-md px-3 py-2 text-sm"
           >
             {statusOptions.map((s) => (
-              <option key={s} value={s}>{s === 'all' ? 'All Statuses' : s}</option>
+              <option key={s} value={s}>{s === 'all' ? 'All Status' : s}</option>
             ))}
           </select>
         </div>

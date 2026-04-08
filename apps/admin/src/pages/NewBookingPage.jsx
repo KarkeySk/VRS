@@ -130,7 +130,7 @@ export default function NewBookingPage({ onNavigate }) {
     }
 
     if (!selectedRoute) {
-      setError('Please select an expedition route.')
+      setError('Please select a route.')
       return
     }
 
@@ -180,7 +180,7 @@ export default function NewBookingPage({ onNavigate }) {
     <div>
       <div className="flex items-center gap-3 mb-6">
         <h2 className="text-2xl font-bold">New Booking</h2>
-        <span className="text-sm text-txt-secondary">Expedition Reservation</span>
+        <span className="text-sm text-txt-secondary">Booking Form</span>
       </div>
 
       {error && (
@@ -270,14 +270,14 @@ export default function NewBookingPage({ onNavigate }) {
               )}
               {bookingType === 'with-driver' && (
                 <div className="mt-4">
-                  <label className="text-xs text-txt-secondary mb-1.5 block">Preferred Guide / Driver</label>
+                  <label className="text-xs text-txt-secondary mb-1.5 block">Preferred Driver</label>
                   <div className="relative">
                     <select
                       value={form.preferredGuide}
                       onChange={(e) => handleChange('preferredGuide', e.target.value)}
                       className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm appearance-none"
                     >
-                      <option value="">Select a guide (optional)</option>
+                      <option value="">Select a driver (optional)</option>
                       <option value="Karma Sherpa">Karma Sherpa - Annapurna Specialist</option>
                       <option value="Raj Thapa">Raj Thapa - Mustang Expert</option>
                       <option value="Tenzing Lama">Tenzing Lama - High-Altitude Pro</option>
@@ -339,7 +339,7 @@ export default function NewBookingPage({ onNavigate }) {
                 </div>
               </div>
 
-              <label className="text-xs text-txt-secondary mb-2 block">Expedition Route</label>
+              <label className="text-xs text-txt-secondary mb-2 block">Route</label>
               <div className="grid grid-cols-2 gap-2">
                 {routeOptions.map((r) => (
                   <button
@@ -414,8 +414,8 @@ export default function NewBookingPage({ onNavigate }) {
                 </div>
               </div>
               <div className="mt-4">
-                <label className="text-xs text-txt-secondary mb-1.5 block">Special Requests / Notes</label>
-                <textarea value={form.notes} onChange={(e) => handleChange('notes', e.target.value)} placeholder="Any special requirements for this expedition..." rows={3} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm resize-none" />
+                <label className="text-xs text-txt-secondary mb-1.5 block">Notes</label>
+                <textarea value={form.notes} onChange={(e) => handleChange('notes', e.target.value)} placeholder="Any special request for this trip..." rows={3} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm resize-none" />
               </div>
             </div>
 
