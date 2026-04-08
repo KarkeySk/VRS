@@ -11,6 +11,7 @@ Go to your Supabase dashboard **SQL Editor** and run each file **in order**:
 5. `migrations/005_storage_avatars.sql` — Avatar upload storage bucket
 6. `migrations/006_create_inquiries.sql` — Inquiries, booking applications, and document storage policies
 7. `migrations/007_storage_vehicle_images.sql` — Vehicle image storage bucket and admin policies
+8. `migrations/008_create_ui_assets.sql` — UI image asset table (replaces hardcoded image URLs)
 
 ## Seed data
 
@@ -20,6 +21,7 @@ After migrations, run the seed file to populate the fleet:
 - `seed/002_admin_user.sql` — development admin login:
   - email: `admin@gmail.com`
   - password: `admin123`
+- `seed/003_admin_ui_assets.sql` — admin dashboard/operations image URLs
 
 ## Make a user admin
 
