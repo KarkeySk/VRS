@@ -7,10 +7,34 @@ export default function Dashboard() {
     const name = user?.user_metadata?.full_name || 'Explorer';
 
     const quickActions = [
-        { label: 'Choose Terrain', desc: 'Find vehicles suited to your route', image: '/images/hero-mountain.png', to: '/terrain', color: '#e8732a' },
-        { label: 'Browse Fleet', desc: 'Explore all available vehicles', image: '/images/fleet-suv.png', to: '/vehicles', color: '#7b81ff' },
-        { label: 'My Bookings', desc: 'View your booking history', image: '/images/vehicle-hilux.png', to: '/bookings', color: '#34d399' },
-        { label: 'Profile', desc: 'Manage your account details', image: '/images/vehicle-scorpio.png', to: '/profile', color: '#f59e0b' },
+        {
+            label: 'Choose Terrain',
+            desc: 'Find vehicles suited to your route',
+            image: 'https://images.unsplash.com/photo-1464822759844-d150baec0494?w=1200&h=900&fit=crop',
+            to: '/terrain',
+            color: '#e8732a',
+        },
+        {
+            label: 'Browse Fleet',
+            desc: 'Explore all available vehicles',
+            image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&h=900&fit=crop',
+            to: '/vehicles',
+            color: '#7b81ff',
+        },
+        {
+            label: 'My Bookings',
+            desc: 'View your booking history',
+            image: 'https://images.unsplash.com/photo-1506784693919-ef06d93c28d2?w=1200&h=900&fit=crop',
+            to: '/bookings',
+            color: '#34d399',
+        },
+        {
+            label: 'Profile',
+            desc: 'Manage your account details',
+            image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1200&h=900&fit=crop',
+            to: '/profile',
+            color: '#f59e0b',
+        },
     ];
 
     return (
