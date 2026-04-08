@@ -24,34 +24,93 @@ export default function Dashboard() {
                     <p style={{ color: '#666', fontSize: '1rem' }}>Ready for your next expedition?</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '60px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '60px' }}>
                     {quickActions.map((action) => {
                         return (
                             <Link key={action.label} to={action.to} style={{
-                                textDecoration: 'none', background: '#111', borderRadius: '20px', padding: '28px',
-                                border: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: '16px',
-                                transition: 'border-color 0.2s, transform 0.2s', cursor: 'pointer',
+                                textDecoration: 'none',
+                                background: '#111',
+                                borderRadius: '22px',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                transition: 'border-color 0.25s, transform 0.25s, box-shadow 0.25s',
+                                cursor: 'pointer',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                minHeight: '300px',
+                                display: 'flex',
+                                alignItems: 'flex-end',
                             }}
-                            onMouseOver={(e) => { e.currentTarget.style.borderColor = action.color + '40'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                            onMouseOut={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.borderColor = action.color + '70';
+                                e.currentTarget.style.transform = 'translateY(-4px)';
+                                e.currentTarget.style.boxShadow = `0 16px 30px ${action.color}33`;
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
                             >
+                                <img
+                                    src={action.image}
+                                    alt={action.label}
+                                    style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'cover',
+                                        transform: 'scale(1.02)',
+                                    }}
+                                />
                                 <div style={{
-                                    width: '44px', height: '44px', borderRadius: '14px',
-                                    background: action.color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    overflow: 'hidden', border: `1px solid ${action.color}40`,
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background: `linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(8,8,8,0.78) 58%, rgba(8,8,8,0.96) 100%)`,
+                                }} />
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '14px',
+                                    right: '14px',
+                                    padding: '5px 10px',
+                                    borderRadius: '999px',
+                                    background: `${action.color}2b`,
+                                    border: `1px solid ${action.color}66`,
+                                    color: '#fff',
+                                    fontSize: '0.65rem',
+                                    fontWeight: '700',
+                                    letterSpacing: '0.8px',
+                                    textTransform: 'uppercase',
                                 }}>
-                                    <img
-                                        src={action.image}
-                                        alt={action.label}
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
+                                    Quick Action
                                 </div>
-                                <div>
-                                    <h3 style={{ color: '#fff', fontSize: '1.05rem', fontWeight: '700', marginBottom: '4px' }}>{action.label}</h3>
-                                    <p style={{ color: '#888', fontSize: '0.8rem', margin: 0 }}>{action.desc}</p>
-                                </div>
-                                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '6px', color: action.color, fontSize: '0.75rem', fontWeight: '600' }}>
-                                    Get Started <ArrowRight size={14} />
+                                <div style={{
+                                    position: 'relative',
+                                    zIndex: 2,
+                                    width: '100%',
+                                    padding: '22px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '10px',
+                                }}>
+                                    <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '800', margin: 0 }}>{action.label}</h3>
+                                    <p style={{ color: 'rgba(255,255,255,0.82)', fontSize: '0.85rem', lineHeight: 1.5, margin: 0 }}>{action.desc}</p>
+                                    <div style={{
+                                        marginTop: '8px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        color: action.color,
+                                        fontSize: '0.78rem',
+                                        fontWeight: '700',
+                                        background: 'rgba(0,0,0,0.35)',
+                                        border: `1px solid ${action.color}4f`,
+                                        borderRadius: '999px',
+                                        padding: '8px 12px',
+                                        width: 'fit-content',
+                                    }}>
+                                        Get Started <ArrowRight size={15} />
+                                    </div>
                                 </div>
                             </Link>
                         );
