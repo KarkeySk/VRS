@@ -22,6 +22,10 @@ After migrations, run the seed file to populate the fleet:
   - email: `admin@gmail.com`
   - password: `admin123`
 - `seed/003_admin_ui_assets.sql` — admin dashboard/operations image URLs
+  - also seeds user popular route images:
+    - `user_route_upper_mustang`
+    - `user_route_annapurna_base`
+    - `user_route_khumbu`
 
 ## Make a user admin
 
