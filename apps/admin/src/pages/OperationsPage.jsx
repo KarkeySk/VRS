@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Zap, FileText, Cloud, AlertTriangle } from "lucide-react";
 import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
 import { bookingService } from "@bhatbhati/shared/services/bookingService.js";
+import { uiAssetService } from "@bhatbhati/shared/services/uiAssetService.js";
 
 const severityStyles = {
   "URGENT": "bg-status-red/20 text-status-red",
@@ -12,16 +13,22 @@ const severityStyles = {
 export default function OperationsPage() {
   const [vehicles, setVehicles] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [forecastImage, setForecastImage] = useState("");
+  const [gridImage, setGridImage] = useState("");
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [vehicleData, bookingData] = await Promise.all([
+        const [vehicleData, bookingData, assets] = await Promise.all([
           vehicleService.getAllForAdmin(),
           bookingService.getAll(),
+          uiAssetService.getMany(["admin_operations_forecast", "admin_operations_grid"]),
         ]);
         setVehicles(vehicleData ?? []);
         setBookings(bookingData ?? []);
+        const assetMap = new Map((assets ?? []).map((a) => [a.asset_key, a.image_url]));
+        setForecastImage(assetMap.get("admin_operations_forecast") || "");
+        setGridImage(assetMap.get("admin_operations_grid") || "");
       } catch (err) {
         console.error("Failed to load operations:", err);
       }
@@ -148,11 +155,15 @@ export default function OperationsPage() {
 
           {/* Area Forecast */}
           <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop"
-              alt="Himalayan Area Forecast"
-              className="w-full h-36 object-cover"
-            />
+            {forecastImage ? (
+              <img
+                src={forecastImage}
+                alt="Himalayan Area Forecast"
+                className="w-full h-36 object-cover"
+              />
+            ) : (
+              <div className="w-full h-36 bg-[linear-gradient(120deg,#253341_0%,#1d2733_55%,#0f172a_100%)]" />
+            )}
             <div className="p-4">
               <h4 className="text-sm font-semibold mb-1">Area Forecast</h4>
               <p className="text-xs text-txt-secondary flex items-center gap-1">
@@ -165,11 +176,15 @@ export default function OperationsPage() {
         {/* Right: Grid View + Stats */}
         <div className="space-y-4">
           <div className="bg-dark-deeper border border-dark-border rounded-xl overflow-hidden relative">
-            <img
-              src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=160&fit=crop"
-              alt="Live Grid"
-              className="w-full h-28 object-cover opacity-60"
-            />
+            {gridImage ? (
+              <img
+                src={gridImage}
+                alt="Live Grid"
+                className="w-full h-28 object-cover opacity-60"
+              />
+            ) : (
+              <div className="w-full h-28 bg-[linear-gradient(120deg,#253341_0%,#1d2733_55%,#0f172a_100%)]" />
+            )}
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="px-3 py-1 bg-dark/80 border border-dark-border rounded text-xs font-semibold uppercase tracking-wider">
                 Live Grid View
