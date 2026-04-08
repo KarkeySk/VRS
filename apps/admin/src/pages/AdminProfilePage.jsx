@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { authService } from "@bhatbhati/shared/services/authService.js";
 import {
   User,
   Lock,
@@ -19,6 +21,7 @@ import {
 } from "lucide-react";
 
 export default function AdminProfilePage({ onNavigate }) {
+  const navigate = useNavigate();
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
@@ -26,6 +29,19 @@ export default function AdminProfilePage({ onNavigate }) {
   const [notifSms, setNotifSms] = useState(false);
   const [notifPush, setNotifPush] = useState(true);
   const [twoFactor, setTwoFactor] = useState(true);
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      setSigningOut(true);
+      await authService.signOut();
+      navigate("/login", { replace: true });
+    } catch (err) {
+      console.error("Failed to sign out:", err);
+    } finally {
+      setSigningOut(false);
+    }
+  };
 
   return (
     <div>
@@ -299,8 +315,12 @@ export default function AdminProfilePage({ onNavigate }) {
 
           {/* Save & Actions */}
           <div className="flex items-center justify-between">
-            <button className="flex items-center gap-2 text-sm text-status-red hover:text-status-red/80 transition-colors bg-transparent border-none cursor-pointer font-semibold">
-              <LogOut className="w-4 h-4" /> Sign Out of All Devices
+            <button
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="flex items-center gap-2 text-sm text-status-red hover:text-status-red/80 transition-colors bg-transparent border-none cursor-pointer font-semibold disabled:opacity-60"
+            >
+              <LogOut className="w-4 h-4" /> {signingOut ? "Signing Out..." : "Sign Out"}
             </button>
             <div className="flex items-center gap-4">
               <button
