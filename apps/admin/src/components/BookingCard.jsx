@@ -13,8 +13,8 @@ const TYPE_STYLES = {
 };
 
 export default function BookingCard({ booking }) {
-  const status = STATUS_STYLES[booking.status];
-  const type = TYPE_STYLES[booking.type];
+  const status = STATUS_STYLES[booking.status] || STATUS_STYLES.PARTIAL;
+  const type = TYPE_STYLES[booking.type] || TYPE_STYLES["SELF-DRIVE"];
 
   return (
     <div className="booking-card flex gap-4 p-4 bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-lg transition-all duration-200">
