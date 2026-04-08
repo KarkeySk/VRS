@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useAuth } from './AuthContext'
 
 const ThemeContext = createContext(null)
@@ -12,38 +12,43 @@ function getStorageKey(userId) {
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme)
+  document.documentElement.setAttribute('data-brand', 'base')
+}
+
+function readTheme(userId) {
+  if (typeof window === 'undefined') return THEME_DARK
+  const stored = localStorage.getItem(getStorageKey(userId))
+  return stored === THEME_LIGHT ? THEME_LIGHT : THEME_DARK
 }
 
 export function ThemeProvider({ children }) {
   const { user } = useAuth()
   const userId = user?.id ?? 'guest'
-  const [theme, setTheme] = useState(THEME_DARK)
+  const [revision, setRevision] = useState(0)
+  void revision
+  const theme = readTheme(userId)
 
   useEffect(() => {
-    const key = getStorageKey(userId)
-    const stored = localStorage.getItem(key)
-    const initial = stored === THEME_LIGHT ? THEME_LIGHT : THEME_DARK
-    setTheme(initial)
-    applyTheme(initial)
+    applyTheme(theme)
+  }, [theme])
+
+  const updateTheme = useCallback((nextTheme) => {
+    const safeTheme = nextTheme === THEME_LIGHT ? THEME_LIGHT : THEME_DARK
+    localStorage.setItem(getStorageKey(userId), safeTheme)
+    applyTheme(safeTheme)
+    setRevision((prev) => prev + 1)
   }, [userId])
 
-  const updateTheme = (nextTheme) => {
-    const safeTheme = nextTheme === THEME_LIGHT ? THEME_LIGHT : THEME_DARK
-    setTheme(safeTheme)
-    applyTheme(safeTheme)
-    localStorage.setItem(getStorageKey(userId), safeTheme)
-  }
-
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     updateTheme(theme === THEME_DARK ? THEME_LIGHT : THEME_DARK)
-  }
+  }, [theme, updateTheme])
 
   const value = useMemo(() => ({
     theme,
     isDark: theme === THEME_DARK,
     setTheme: updateTheme,
     toggleTheme,
-  }), [theme])
+  }), [theme, updateTheme, toggleTheme])
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

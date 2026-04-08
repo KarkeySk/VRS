@@ -81,8 +81,8 @@ export default function LoginPage() {
         <div className="auth-visual-overlay" />
         <div className="auth-visual-content">
           <div className="auth-brand-row">
-            <img src={logo} alt="Bhatbhati" className="auth-brand-logo" />
-            <span>Bhatbhati</span>
+            <img src={logo} alt="Bhatbhate" className="auth-brand-logo brand-logo-circle" />
+            <span>Bhatbhate</span>
           </div>
           <p className="auth-visual-kicker">{slide.label}</p>
           <h2>{slide.title}</h2>

@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, LogIn, LogOut, Moon, Sun } from 'lucide-react';
+import { LogIn, LogOut, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import logo from '../../assets/logo.png';
@@ -10,14 +9,6 @@ export default function Navbar() {
     const navigate = useNavigate();
     const { user, signOut } = useAuth();
     const { isDark, toggleTheme } = useTheme();
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const handleSearch = (e) => {
-        if (e.key === 'Enter' && searchQuery.trim()) {
-            navigate(`/vehicles?search=${encodeURIComponent(searchQuery.trim())}`);
-            setSearchQuery('');
-        }
-    };
 
     const navLinks = [
         { label: 'Dashboard', to: '/dashboard' },
@@ -25,6 +16,10 @@ export default function Navbar() {
         { label: 'Fleet', to: '/vehicles' },
         { label: 'Bookings', to: '/bookings' },
     ];
+
+    if (location.pathname.startsWith('/auth/')) {
+        return null;
+    }
 
     return (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, padding: '10px 20px' }}>
@@ -43,11 +38,11 @@ export default function Navbar() {
                 <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
                     <img
                         src={logo}
-                        alt="Bhatbhati"
+                        alt="Bhatbhate"
+                        className="brand-logo-circle"
                         style={{
                             width: '42px',
                             height: '42px',
-                            objectFit: 'contain',
                             filter: 'drop-shadow(0 0 8px rgba(232, 115, 42, 0.3))',
                         }}
                     />
@@ -56,11 +51,11 @@ export default function Navbar() {
                         fontSize: '1.2rem',
                         fontWeight: '700',
                         letterSpacing: '-0.01em',
-                        background: 'linear-gradient(135deg, #fcc89b 0%, #e8732a 100%)',
+                        background: 'var(--brand-gradient)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                     }}>
-                        Bhatbhati
+                        Bhatbhate
                     </span>
                 </Link>
 
@@ -91,7 +86,7 @@ export default function Navbar() {
                                         right: '20%',
                                         height: '2px',
                                         borderRadius: '2px',
-                                        background: 'linear-gradient(90deg, #fcab73, #e8732a)',
+                                        background: 'var(--brand-gradient)',
                                     }} />
                                 )}
                             </Link>
@@ -99,39 +94,8 @@ export default function Navbar() {
                     })}
                 </div>
 
-                {/* RIGHT SIDE — SEARCH + BOOK NOW */}
+                {/* RIGHT SIDE — TOGGLES + BOOK NOW */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        background: 'var(--bg-glass)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '20px',
-                        padding: '9px 16px',
-                        transition: 'border-color 0.25s',
-                    }}
-                        onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(232, 115, 42, 0.3)'}
-                        onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
-                    >
-                        <Search size={15} color="#777" strokeWidth={1.8} />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyDown={handleSearch}
-                            placeholder="Search..."
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                outline: 'none',
-                                color: 'var(--text-primary)',
-                                fontSize: '0.8125rem',
-                                width: '120px',
-                            }}
-                        />
-                    </div>
-
                     <button
                         onClick={toggleTheme}
                         title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -155,8 +119,8 @@ export default function Navbar() {
                         <>
                             <Link to="/terrain" style={{
                                 textDecoration: 'none',
-                                background: 'linear-gradient(135deg, #fcab73 0%, #e8732a 100%)',
-                                color: '#000',
+                                background: 'var(--brand-gradient)',
+                                color: 'var(--accent-ink)',
                                 fontWeight: '700',
                                 fontSize: '0.8125rem',
                                 padding: '10px 22px',
@@ -203,8 +167,8 @@ export default function Navbar() {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '6px',
-                            background: 'linear-gradient(135deg, #fcab73 0%, #e8732a 100%)',
-                            color: '#000',
+                            background: 'var(--brand-gradient)',
+                            color: 'var(--accent-ink)',
                             fontWeight: '700',
                             fontSize: '0.8125rem',
                             padding: '10px 22px',

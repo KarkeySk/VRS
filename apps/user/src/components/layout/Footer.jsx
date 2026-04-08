@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container">
         <Link to="/" className="footer-logo" id="footer-logo">
           <span className="logo-dot"></span>
-          Bhatbhatify
+          Bhatbhate
         </Link>  
 
         <div className="footer-links" id="footer-links">
@@ -17,7 +17,7 @@ export default function Footer() {
         </div>
 
         <span className="footer-copy" id="footer-copy">
-          © {new Date().getFullYear()} Bhatbhatify | All rights reserved.
+          © {new Date().getFullYear()} Bhatbhate | All rights reserved.
         </span>
       </div>
     </footer>
