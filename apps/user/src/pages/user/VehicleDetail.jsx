@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { vehicles } from '@bhatbhati/shared/utils/vehicles.js';
+import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js';
+import { useVehicles } from '../../hooks/useVehicles';
+import { normalizeVehicle } from '../../utils/vehicleMapper';
 import {
     CloudRain, Settings, Unlock, Lock, Navigation, Droplet, 
     RefreshCw, Briefcase, Star, Wind, Snowflake, Map as MapIcon, Shield, Activity
@@ -13,10 +15,38 @@ const icons = {
 export default function VehicleDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const vehicle = vehicles.find((v) => v.id === id);
+    const [vehicle, setVehicle] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const { vehicles: dbVehicles } = useVehicles()
+    const relatedVehicles = dbVehicles.map(normalizeVehicle).filter((v) => v.id !== id)
 
     const [driveType, setDriveType] = useState('with-driver');
     const [selectedAddons, setSelectedAddons] = useState([]);
+
+    useEffect(() => {
+        let mounted = true
+        const loadVehicle = async () => {
+            setIsLoading(true)
+            try {
+                const data = await vehicleService.getById(id)
+                if (mounted) setVehicle(normalizeVehicle(data))
+            } catch {
+                if (mounted) setVehicle(null)
+            } finally {
+                if (mounted) setIsLoading(false)
+            }
+        }
+        loadVehicle()
+        return () => { mounted = false }
+    }, [id])
+
+    if (isLoading) {
+        return (
+            <div style={{ paddingTop: '120px', textAlign: 'center', height: '100vh', background: 'var(--bg-primary)' }}>
+                <h2>Loading vehicle...</h2>
+            </div>
+        );
+    }
 
     if (!vehicle) {
         return (
@@ -234,7 +264,7 @@ export default function VehicleDetail() {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-                        {vehicles.filter(v => v.id !== vehicle.id).map(v => (
+                        {relatedVehicles.map(v => (
                             <div key={v.id} style={{ background: '#161616', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => { window.scrollTo(0,0); navigate(`/vehicles/${v.id}`); }} onMouseOver={(e) => e.currentTarget.style.background = '#1a1a1a'} onMouseOut={(e) => e.currentTarget.style.background = '#161616'}>
                                 <div style={{ overflow: 'hidden', height: '200px', borderRadius: '16px', position: 'relative', marginBottom: '16px' }}>
                                     <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2 }}>
