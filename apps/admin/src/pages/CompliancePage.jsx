@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { FileText, Filter, ExternalLink } from 'lucide-react'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
+import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 
 const statusStyles = {
   submitted: 'bg-status-yellow/20 text-status-yellow',
@@ -45,6 +46,35 @@ export default function CompliancePage() {
   const updateStatus = async (id, status) => {
     setBusyId(id)
     try {
+      if (status === 'approved') {
+        const target = applications.find((app) => app.id === id)
+        if (target) {
+          const existing = await bookingService.findMatchingTrip({
+            userId: target.user_id,
+            vehicleId: target.vehicle_id,
+            startDate: target.start_date,
+            endDate: target.end_date,
+          })
+
+          if (!existing) {
+            await bookingService.create({
+              user_id: target.user_id,
+              vehicle_id: target.vehicle_id,
+              start_date: target.start_date,
+              end_date: target.end_date,
+              total_price: target.total_price || 0,
+              status: 'confirmed',
+              addons: target.selected_addons || [],
+              notes: JSON.stringify({
+                source: 'application',
+                application_id: target.id,
+                drive_type: target.drive_type,
+              }),
+            })
+          }
+        }
+      }
+
       await applicationService.updateStatus(id, status)
       await loadApplications()
     } catch (err) {
