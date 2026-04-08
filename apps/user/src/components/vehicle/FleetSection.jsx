@@ -61,7 +61,7 @@ export default function FleetSection() {
     elements?.forEach((el) => observer.observe(el))
 
     return () => observer.disconnect()
-  }, [])
+  }, [loading, vehicles.length])
 
   return (
     <section className="fleet" id="fleet" ref={sectionRef}>

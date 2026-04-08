@@ -111,7 +111,15 @@ export default function RoutesSection() {
               }}
             >
               <div className="route-card-img">
-                <img src={imageUrl} alt={route.name} loading="lazy" />
+                <img
+                  src={imageUrl}
+                  alt={route.name}
+                  loading="lazy"
+                  onError={(e) => {
+                    if (e.currentTarget.src.endsWith(route.image)) return
+                    e.currentTarget.src = route.image
+                  }}
+                />
               </div>
               <div className="route-card-overlay"></div>
               <div className="route-card-content">
