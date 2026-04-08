@@ -1,6 +1,68 @@
-import { Map, User, Cog, Edit, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from 'react'
+import { Map, User, Cog, Edit, AlertTriangle } from 'lucide-react'
+
+const SETTINGS_KEY = 'bhatbhati_admin_settings_v1'
+
+const defaultSettings = {
+  thresholdMeters: '3500',
+  steepness: '15',
+  snowAlert: true,
+  windAlert: false,
+  autoPurge: true,
+}
 
 export default function SettingsPage() {
+  const [settings, setSettings] = useState(defaultSettings)
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    const raw = localStorage.getItem(SETTINGS_KEY)
+    if (!raw) return
+    try {
+      setSettings((prev) => ({ ...prev, ...JSON.parse(raw) }))
+    } catch {
+      localStorage.removeItem(SETTINGS_KEY)
+    }
+  }, [])
+
+  const update = (key, value) => {
+    setSettings((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const save = () => {
+    const threshold = Number(settings.thresholdMeters)
+    const steepness = Number(settings.steepness)
+
+    if (!Number.isFinite(threshold) || threshold <= 0) {
+      setError('Threshold must be a valid number greater than 0.')
+      setMessage('')
+      return
+    }
+    if (!Number.isFinite(steepness) || steepness <= 0) {
+      setError('Steepness sensitivity must be a valid number greater than 0.')
+      setMessage('')
+      return
+    }
+
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+    setError('')
+    setMessage('Settings saved successfully.')
+  }
+
+  const discard = () => {
+    setSettings(defaultSettings)
+    setError('')
+    setMessage('Changes discarded.')
+  }
+
+  const manualPurge = () => {
+    const ok = window.confirm('Run manual purge now? This action cannot be undone.')
+    if (!ok) return
+    setError('')
+    setMessage('Manual purge queued. (Dry-run in current build)')
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -11,15 +73,21 @@ export default function SettingsPage() {
       </div>
       <p className="text-sm text-txt-secondary mb-6">Define operational logic based on Himalayan topography.</p>
 
+      {error && (
+        <div className="mb-4 rounded-md border border-status-red/30 bg-status-red/10 px-3 py-2 text-xs text-status-red">{error}</div>
+      )}
+      {message && (
+        <div className="mb-4 rounded-md border border-status-green/30 bg-status-green/10 px-3 py-2 text-xs text-status-green">{message}</div>
+      )}
+
       <div className="grid grid-cols-[1fr_280px] gap-6 mb-8">
-        {/* 4WD Recommendations */}
         <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="w-10 h-10 rounded-lg bg-brand-orange/20 flex items-center justify-center">
               <Map className="w-5 h-5 text-brand-orange" />
             </div>
             <div className="text-right">
-              <p className="text-3xl font-bold text-brand-orange">3,500m</p>
+              <p className="text-3xl font-bold text-brand-orange">{settings.thresholdMeters}m</p>
               <p className="text-xs text-txt-secondary uppercase">Active Threshold</p>
             </div>
           </div>
@@ -31,23 +99,24 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between border-t border-dark-border pt-3">
               <span className="text-sm text-txt-secondary">Mandatory Threshold (Meters)</span>
               <input
-                type="text"
-                defaultValue="3500"
-                className="w-20 bg-dark-deeper border border-dark-border rounded px-3 py-1 text-sm text-right text-txt-primary"
+                type="number"
+                value={settings.thresholdMeters}
+                onChange={(e) => update('thresholdMeters', e.target.value)}
+                className="w-24 bg-dark-deeper border border-dark-border rounded px-3 py-1 text-sm text-right text-txt-primary"
               />
             </div>
             <div className="flex items-center justify-between border-t border-dark-border pt-3">
               <span className="text-sm text-txt-secondary">Steepness Sensitivity (Grade %)</span>
               <input
-                type="text"
-                defaultValue="15%"
-                className="w-20 bg-dark-deeper border border-dark-border rounded px-3 py-1 text-sm text-right text-txt-primary"
+                type="number"
+                value={settings.steepness}
+                onChange={(e) => update('steepness', e.target.value)}
+                className="w-24 bg-dark-deeper border border-dark-border rounded px-3 py-1 text-sm text-right text-txt-primary"
               />
             </div>
           </div>
         </div>
 
-        {/* Climate Alerts */}
         <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
           <h3 className="text-base font-semibold mb-2">Climate Alerts</h3>
           <p className="text-xs text-txt-secondary mb-4 leading-relaxed">
@@ -55,32 +124,38 @@ export default function SettingsPage() {
           </p>
           <div className="text-5xl text-center mb-4">❄️</div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between bg-dark-deeper rounded-lg px-3 py-2.5">
+            <button
+              type="button"
+              onClick={() => update('snowAlert', !settings.snowAlert)}
+              className="w-full flex items-center justify-between bg-dark-deeper rounded-lg px-3 py-2.5 border border-dark-border"
+            >
               <span className="text-xs">❄ Snowfall &gt; 5cm</span>
-              <div className="w-10 h-5 bg-brand-orange rounded-full relative">
-                <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full" />
+              <div className={`w-10 h-5 rounded-full relative ${settings.snowAlert ? 'bg-brand-orange' : 'bg-dark-border'}`}>
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full ${settings.snowAlert ? 'right-0.5 bg-white' : 'left-0.5 bg-txt-secondary'}`} />
               </div>
-            </div>
-            <div className="flex items-center justify-between bg-dark-deeper rounded-lg px-3 py-2.5">
+            </button>
+            <button
+              type="button"
+              onClick={() => update('windAlert', !settings.windAlert)}
+              className="w-full flex items-center justify-between bg-dark-deeper rounded-lg px-3 py-2.5 border border-dark-border"
+            >
               <span className="text-xs">💨 Gale &gt; 40km/h</span>
-              <div className="w-10 h-5 bg-dark-border rounded-full relative">
-                <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-txt-secondary rounded-full" />
+              <div className={`w-10 h-5 rounded-full relative ${settings.windAlert ? 'bg-brand-orange' : 'bg-dark-border'}`}>
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full ${settings.windAlert ? 'right-0.5 bg-white' : 'left-0.5 bg-txt-secondary'}`} />
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* User Roles + Privacy */}
       <div className="grid grid-cols-2 gap-6 mb-8">
-        {/* User Roles */}
         <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
           <h3 className="text-lg font-semibold mb-4">User Roles</h3>
           <div className="space-y-3">
             {[
-              { title: "Fleet Manager", desc: "Full control over vehicles and routes", icon: User },
-              { title: "Booking Agent", desc: "View access with customer management", icon: User },
-              { title: "Tech Admin", desc: "System settings and API controls", icon: Cog },
+              { title: 'Fleet Manager', desc: 'Full control over vehicles and routes', icon: User },
+              { title: 'Booking Agent', desc: 'View access with customer management', icon: User },
+              { title: 'Tech Admin', desc: 'System settings and API controls', icon: Cog },
             ].map((role) => (
               <div key={role.title} className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3">
                 <div className="flex items-center gap-3">
@@ -92,18 +167,25 @@ export default function SettingsPage() {
                     <p className="text-xs text-txt-secondary">{role.desc}</p>
                   </div>
                 </div>
-                <span className="text-txt-secondary cursor-pointer hover:text-brand-orange transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setMessage(`Edit role: ${role.title} (workflow coming next).`)}
+                  className="text-txt-secondary cursor-pointer hover:text-brand-orange transition-colors bg-transparent border-none"
+                >
                   <Edit className="w-4 h-4" />
-                </span>
+                </button>
               </div>
             ))}
           </div>
-          <button className="w-full mt-4 py-2 text-brand-orange text-sm font-semibold hover:text-brand-orange-dark transition-colors bg-transparent border-none cursor-pointer">
+          <button
+            type="button"
+            onClick={() => setMessage('Create Custom Role clicked. Add role management backend next.')}
+            className="w-full mt-4 py-2 text-brand-orange text-sm font-semibold hover:text-brand-orange-dark transition-colors bg-transparent border-none cursor-pointer"
+          >
             + Create Custom Role
           </button>
         </div>
 
-        {/* Privacy & Data Purge */}
         <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
           <h3 className="text-lg font-semibold mb-4">Privacy & Data Purge</h3>
           <div className="border border-status-red/30 rounded-lg p-4 mb-4">
@@ -111,8 +193,7 @@ export default function SettingsPage() {
               <AlertTriangle className="w-3.5 h-3.5" /> Destructive Actions
             </p>
             <p className="text-xs text-txt-secondary leading-relaxed">
-              Automate the removal of sensitive client data following successful expedition completion.{" "}
-              <span className="text-brand-orange cursor-pointer underline">Legal compliance: Nepal Data Act 2024.</span>
+              Automate the removal of sensitive client data following successful expedition completion.
             </p>
           </div>
           <div className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3 mb-4">
@@ -120,11 +201,19 @@ export default function SettingsPage() {
               <p className="text-sm font-semibold">Auto-Purge Inactive Records</p>
               <p className="text-xs text-txt-secondary">Remove data for 6+ months</p>
             </div>
-            <div className="w-10 h-5 bg-brand-orange rounded-full relative">
-              <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full" />
-            </div>
+            <button
+              type="button"
+              onClick={() => update('autoPurge', !settings.autoPurge)}
+              className={`w-10 h-5 rounded-full relative ${settings.autoPurge ? 'bg-brand-orange' : 'bg-dark-border'}`}
+            >
+              <div className={`absolute top-0.5 w-4 h-4 rounded-full ${settings.autoPurge ? 'right-0.5 bg-white' : 'left-0.5 bg-txt-secondary'}`} />
+            </button>
           </div>
-          <button className="w-full py-2.5 bg-status-red/20 border border-status-red/30 text-status-red rounded-md text-sm font-semibold hover:bg-status-red/30 transition-colors flex items-center justify-center gap-1.5">
+          <button
+            type="button"
+            onClick={manualPurge}
+            className="w-full py-2.5 bg-status-red/20 border border-status-red/30 text-status-red rounded-md text-sm font-semibold hover:bg-status-red/30 transition-colors flex items-center justify-center gap-1.5"
+          >
             <AlertTriangle className="w-4 h-4" />
             Execute Manual System Purge
           </button>
@@ -132,11 +221,11 @@ export default function SettingsPage() {
       </div>
 
       <div className="flex items-center justify-end gap-4">
-        <button className="text-sm text-txt-secondary hover:text-txt-primary transition-colors bg-transparent border-none cursor-pointer">
+        <button type="button" onClick={discard} className="text-sm text-txt-secondary hover:text-txt-primary transition-colors bg-transparent border-none cursor-pointer">
           Discard Changes
         </button>
-        <button className="btn-action px-8 py-2.5 text-sm">Save Changes</button>
+        <button type="button" onClick={save} className="btn-action px-8 py-2.5 text-sm">Save Changes</button>
       </div>
     </div>
-  );
+  )
 }
