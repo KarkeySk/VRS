@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/* ===== CUSTOM THEME ===== */
+@theme {
+  --font-sans: "Inter", sans-serif;
+
+  /* Dark palette */
+  --color-dark: #1a1a1a;
+  --color-dark-deeper: #0f0f0f;
+  --color-dark-card: #1e1e1e;
+  --color-dark-border: #2a2a2a;
+  --color-dark-hover: #252525;
+
+  /* Brand */
+  --color-brand-orange: #ff8f3f;
+  --color-brand-orange-dark: #e67c2d;
+
+  /* Status */
+  --color-status-green: #10b981;
+  --color-status-yellow: #f59e0b;
+  --color-status-red: #ef4444;
+
+  /* Text */
+  --color-txt-primary: #ffffff;
+  --color-txt-secondary: #a0a0a0;
+  --color-txt-muted: #6b6b6b;
+}
+
+/* ===== GLOBAL RESETS ===== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-dark-deeper);
+  color: var(--color-txt-primary);
+  font-family: var(--font-sans);
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}
+
+/* ===== CALENDAR DAY HOVER ===== */
+.cal-day:hover:not(.cal-today):not(.cal-other) {
+  background-color: rgba(255, 143, 63, 0.15);
+}
+
+/* ===== BOOKING CARD HOVER ===== */
+.booking-card:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: #3a3a3a;
+}
+
+/* ===== NAV LINK HOVER ===== */
+.nav-link:hover:not(.nav-active) {
+  background-color: rgba(255, 143, 63, 0.1);
+  color: #ffffff;
+}
+
+/* ===== TAB UNDERLINE ===== */
+.tab-active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #ff8f3f;
+}
+
+/* ===== SEARCH INPUT ===== */
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px #ff8f3f;
+  border-color: #ff8f3f;
+}
+
+/* ===== ACTION BUTTON ===== */
+.btn-action {
+  background: linear-gradient(135deg, #ffd9a0 0%, #ff8f3f 100%) !important;
+  color: #1a1a1a !important;
+  border: none !important;
+  border-radius: 9999px !important;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-action:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(255, 143, 63, 0.3);
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar {
+  transition: width 1s ease-in-out;
+}
+
+/* ===== TRACKING CHART ===== */
+.tracking-chart {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+.chart-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(to top, rgba(255, 143, 63, 0.05) 0%, transparent 100%);
+}
