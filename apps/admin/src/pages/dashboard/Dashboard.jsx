@@ -1,53 +1,71 @@
-import { useEffect, useState } from 'react'
-import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
-import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
+import { useState } from 'react'
+import Sidebar from '@/components/Sidebar'
+import TopBar from '@/components/TopBar'
+import DashboardPage from '@/pages/DashboardPage'
+import FleetPage from '@/pages/FleetPage'
+import BookingsPage from '@/pages/BookingsPage'
+import CompliancePage from '@/pages/CompliancePage'
+import OperationsPage from '@/pages/OperationsPage'
+import SettingsPage from '@/pages/SettingsPage'
+import AddVehiclePage from '@/pages/AddVehiclePage'
+import NewBookingPage from '@/pages/NewBookingPage'
+import AdminProfilePage from '@/pages/AdminProfilePage'
+
+const PAGE_META = {
+  dashboard: { title: 'Booking Management', search: 'Search...', showNewBtn: true },
+  fleet: { title: 'Fleet Overview', search: 'Search fleet...', showNewBtn: false },
+  bookings: { title: 'Bookings', search: 'Search bookings...', showNewBtn: true },
+  compliance: { title: 'Compliance & Logs', search: 'Search records...', showNewBtn: false },
+  operations: { title: 'Operations & Logs', subtitle: 'Admin Portal', search: 'Search fleet logs...', showNewBtn: false },
+  settings: { title: 'Settings', search: 'Search settings...', showNewBtn: false },
+  'add-vehicle': { title: 'Add New Vehicle', subtitle: 'Registration', search: 'Search vehicles...', showNewBtn: false },
+  'new-booking': { title: 'New Booking', subtitle: 'Expedition Reservation', search: 'Search vehicles...', showNewBtn: false },
+  'admin-profile': { title: 'Admin Profile', subtitle: 'Account Settings', search: 'Search settings...', showNewBtn: false },
+}
 
 export default function Dashboard() {
-  const [stats, setStats] = useState({ vehicles: 0, bookings: 0 })
+  const [activePage, setActivePage] = useState('dashboard')
+  const meta = PAGE_META[activePage]
 
-  useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const [vehicles, bookings] = await Promise.all([
-          vehicleService.getAll(),
-          bookingService.getAll(),
-        ])
-        setStats({
-          vehicles: vehicles?.length ?? 0,
-          bookings: bookings?.length ?? 0,
-        })
-      } catch (err) {
-        console.error('Failed to load stats:', err)
-      }
+  const renderPage = () => {
+    switch (activePage) {
+      case 'dashboard':
+        return <DashboardPage />
+      case 'fleet':
+        return <FleetPage />
+      case 'bookings':
+        return <BookingsPage onNavigate={setActivePage} />
+      case 'compliance':
+        return <CompliancePage />
+      case 'operations':
+        return <OperationsPage />
+      case 'settings':
+        return <SettingsPage />
+      case 'add-vehicle':
+        return <AddVehiclePage onNavigate={setActivePage} />
+      case 'new-booking':
+        return <NewBookingPage onNavigate={setActivePage} />
+      case 'admin-profile':
+        return <AdminProfilePage onNavigate={setActivePage} />
+      default:
+        return <DashboardPage />
     }
-    loadStats()
-  }, [])
+  }
 
   return (
-    <div style={{
-      minHeight: '100vh', background: '#0a0a0a', color: '#fff',
-      fontFamily: "'Inter', sans-serif", padding: '40px',
-    }}>
-      <h1 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '32px' }}>
-        Dashboard
-      </h1>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
-        <div style={{
-          background: '#111', borderRadius: '14px', padding: '24px',
-          border: '1px solid rgba(255,255,255,0.06)',
-        }}>
-          <p style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Vehicles</p>
-          <p style={{ fontSize: '2rem', fontWeight: '800', color: '#e8732a', marginTop: '8px' }}>{stats.vehicles}</p>
-        </div>
-
-        <div style={{
-          background: '#111', borderRadius: '14px', padding: '24px',
-          border: '1px solid rgba(255,255,255,0.06)',
-        }}>
-          <p style={{ color: '#888', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Total Bookings</p>
-          <p style={{ fontSize: '2rem', fontWeight: '800', color: '#7b81ff', marginTop: '8px' }}>{stats.bookings}</p>
-        </div>
+    <div className="flex h-screen overflow-hidden bg-dark-deeper text-txt-primary font-sans">
+      <Sidebar activePage={activePage} onNavigate={setActivePage} />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <TopBar
+          title={meta.title}
+          subtitle={meta.subtitle}
+          searchPlaceholder={meta.search}
+          showNewBooking={meta.showNewBtn}
+          onNewBooking={() => setActivePage('new-booking')}
+        />
+        <main className="flex-1 overflow-y-auto p-6">
+          {renderPage()}
+        </main>
       </div>
     </div>
   )
