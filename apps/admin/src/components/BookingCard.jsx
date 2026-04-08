@@ -19,11 +19,15 @@ export default function BookingCard({ booking }) {
   return (
     <div className="booking-card flex gap-4 p-4 bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-lg transition-all duration-200">
       {/* Vehicle image */}
-      <img
-        src={booking.image}
-        alt={booking.vehicle}
-        className="w-[100px] h-[70px] rounded-md object-cover flex-shrink-0"
-      />
+      {booking.image ? (
+        <img
+          src={booking.image}
+          alt={booking.vehicle}
+          className="w-[100px] h-[70px] rounded-md object-cover flex-shrink-0"
+        />
+      ) : (
+        <div className="w-[100px] h-[70px] rounded-md bg-dark-border flex-shrink-0" />
+      )}
 
       {/* Details */}
       <div className="flex-1 min-w-0">
