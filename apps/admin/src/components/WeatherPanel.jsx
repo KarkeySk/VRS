@@ -43,7 +43,7 @@ export default function WeatherPanel() {
 
   return (
     <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
-      <h3 className="text-base font-semibold m-0 mb-4">Weather Outlook</h3>
+      <h3 className="text-base font-semibold m-0 mb-4">Weather</h3>
       <div className="flex items-center gap-4 mb-3">
         <Cloud className="w-12 h-12 text-txt-secondary" />
         <div>
@@ -51,17 +51,17 @@ export default function WeatherPanel() {
             {loading ? "--°C" : `${weather?.temperatureC ?? "--"}°C`}
           </p>
           <p className="text-[13px] text-txt-secondary m-0">
-            {weather?.subtitle || "Loading live weather..."}
+            {weather?.subtitle || "Getting weather..."}
           </p>
         </div>
       </div>
       <p className="text-[13px] text-txt-secondary mt-3 m-0 leading-relaxed">
-        {weather?.recommendation || "Fetching weather intelligence for operations planning."}
+        {weather?.recommendation || "Getting weather details for today."}
       </p>
       <div className="flex items-center gap-4 mt-4 pt-3 border-t border-dark-border">
         <span className="flex items-center gap-1.5 text-xs text-txt-secondary">
           <MapPin className="w-3.5 h-3.5" />
-          {weather?.windText || "Wind unavailable"}
+          {weather?.windText || "No wind data"}
         </span>
         <span className="flex items-center gap-1.5 text-xs text-txt-secondary">
           <span className="w-2 h-2 rounded-full bg-status-green inline-block" />
@@ -69,7 +69,7 @@ export default function WeatherPanel() {
         </span>
       </div>
       <div className="mt-3 text-[11px] text-txt-muted">
-        {error || updatedLabel || "Updating every 60 seconds"}
+        {error || updatedLabel || "Updates every 60 seconds"}
       </div>
     </div>
   );

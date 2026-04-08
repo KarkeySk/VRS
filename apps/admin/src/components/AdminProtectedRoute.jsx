@@ -38,7 +38,7 @@ export default function AdminProtectedRoute({ children }) {
         color: '#fff',
         background: '#0a0a0a',
       }}>
-        Checking admin access...
+        Checking admin login...
       </div>
     )
   }

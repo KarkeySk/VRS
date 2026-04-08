@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { authService } from '@bhatbhati/shared/services/authService.js'
 
 const ThemeContext = createContext(null)
@@ -11,11 +11,20 @@ function storageKey(userId) {
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme)
+  document.documentElement.setAttribute('data-brand', 'base')
+}
+
+function readTheme(userId) {
+  if (typeof window === 'undefined') return THEME_DARK
+  const current = localStorage.getItem(storageKey(userId))
+  return current === THEME_LIGHT ? THEME_LIGHT : THEME_DARK
 }
 
 export function ThemeProvider({ children }) {
   const [userId, setUserId] = useState('guest')
-  const [theme, setTheme] = useState(THEME_DARK)
+  const [revision, setRevision] = useState(0)
+  void revision
+  const theme = readTheme(userId)
 
   useEffect(() => {
     let unsub = null
@@ -40,27 +49,26 @@ export function ThemeProvider({ children }) {
   }, [])
 
   useEffect(() => {
-    const current = localStorage.getItem(storageKey(userId))
-    const next = current === THEME_LIGHT ? THEME_LIGHT : THEME_DARK
-    setTheme(next)
-    applyTheme(next)
+    applyTheme(theme)
+  }, [theme])
+
+  const setAppTheme = useCallback((nextTheme) => {
+    const safe = nextTheme === THEME_LIGHT ? THEME_LIGHT : THEME_DARK
+    localStorage.setItem(storageKey(userId), safe)
+    applyTheme(safe)
+    setRevision((prev) => prev + 1)
   }, [userId])
 
-  const setAppTheme = (nextTheme) => {
-    const safe = nextTheme === THEME_LIGHT ? THEME_LIGHT : THEME_DARK
-    setTheme(safe)
-    applyTheme(safe)
-    localStorage.setItem(storageKey(userId), safe)
-  }
-
-  const toggleTheme = () => setAppTheme(theme === THEME_DARK ? THEME_LIGHT : THEME_DARK)
+  const toggleTheme = useCallback(() => {
+    setAppTheme(theme === THEME_DARK ? THEME_LIGHT : THEME_DARK)
+  }, [theme, setAppTheme])
 
   const value = useMemo(() => ({
     theme,
     isDark: theme === THEME_DARK,
     setTheme: setAppTheme,
     toggleTheme,
-  }), [theme])
+  }), [theme, setAppTheme, toggleTheme])
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

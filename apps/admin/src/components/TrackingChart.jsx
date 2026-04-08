@@ -4,14 +4,14 @@ export default function TrackingChart({ activeUnits = 0 }) {
   return (
     <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
       <div className="flex items-center gap-3 mb-2">
-        <h3 className="text-base font-semibold m-0">Real-time Tracking</h3>
+        <h3 className="text-base font-semibold m-0">Live Tracking</h3>
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-status-green/20 text-status-green text-xs font-bold rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-status-green animate-pulse" />
           LIVE
         </span>
       </div>
       <p className="text-[13px] text-txt-secondary mb-6 m-0">
-        Monitoring {activeUnits} active units across the valley.
+        Watching {activeUnits} active vehicles.
       </p>
 
       {/* Chart Area */}

@@ -17,13 +17,13 @@ export default function HeroBanner({ imageUrl = "", upcomingCount = 0, returnedC
       <div className="relative z-10 p-8 flex justify-between items-end">
         <div>
           <p className="text-xs font-bold text-brand-orange uppercase tracking-widest mb-3">
-            Active Expeditions
+            Active Trips
           </p>
-          <h2 className="text-3xl font-bold m-0 mb-2">Today's Fleet Pulse</h2>
+          <h2 className="text-3xl font-bold m-0 mb-2">Fleet Update</h2>
           <p className="text-sm text-txt-secondary m-0">
-            {activeCount} active rentals navigating the Annapurna
+            {activeCount} vehicles are in use now
             <br />
-            Circuit, {returnedCount} completed returns.
+            and {returnedCount} trips are done.
           </p>
         </div>
         <div className="flex gap-8">

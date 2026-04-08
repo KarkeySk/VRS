@@ -4,26 +4,28 @@
 @theme {
   --font-sans: "Inter", sans-serif;
 
-  /* Dark palette */
-  --color-dark: #1a1a1a;
-  --color-dark-deeper: #0f0f0f;
-  --color-dark-card: #1e1e1e;
-  --color-dark-border: #2a2a2a;
-  --color-dark-hover: #252525;
+  /* Travel palette: vehicle + nature + city */
+  --color-dark: #162127;
+  --color-dark-deeper: #0c1317;
+  --color-dark-card: #1c2a33;
+  --color-dark-border: #2f4250;
+  --color-dark-hover: #243541;
 
   /* Brand */
-  --color-brand-orange: #ff8f3f;
-  --color-brand-orange-dark: #e67c2d;
+  --color-brand-orange: #d3742f;
+  --color-brand-orange-dark: #bf6229;
+  --color-brand-city: #4b7898;
+  --color-brand-nature: #5a8666;
 
   /* Status */
-  --color-status-green: #10b981;
-  --color-status-yellow: #f59e0b;
+  --color-status-green: #5fa776;
+  --color-status-yellow: #d39a3e;
   --color-status-red: #ef4444;
 
   /* Text */
-  --color-txt-primary: #ffffff;
-  --color-txt-secondary: #a0a0a0;
-  --color-txt-muted: #6b6b6b;
+  --color-txt-primary: #eff5f9;
+  --color-txt-secondary: #a8b9c8;
+  --color-txt-muted: #73889a;
 }
 
 /* ===== GLOBAL RESETS ===== */
@@ -39,19 +41,86 @@ body {
 }
 
 :root[data-theme='light'] {
-  --color-dark: #f8fafc;
-  --color-dark-deeper: #eef2f7;
+  --color-dark: #faf6ef;
+  --color-dark-deeper: #f2ede3;
   --color-dark-card: #ffffff;
-  --color-dark-border: #d7dde7;
-  --color-dark-hover: #edf2f7;
+  --color-dark-border: #d2c9bb;
+  --color-dark-hover: #f3ebdd;
 
-  --color-txt-primary: #0f172a;
-  --color-txt-secondary: #475569;
-  --color-txt-muted: #64748b;
+  --color-brand-orange: #be6228;
+  --color-brand-orange-dark: #aa541f;
+  --color-brand-city: #4a7593;
+  --color-brand-nature: #5c8868;
+
+  --color-status-green: #5f9f73;
+  --color-status-yellow: #c18a34;
+
+  --color-txt-primary: #1f2e3a;
+  --color-txt-secondary: #546678;
+  --color-txt-muted: #718394;
 }
 
 :root[data-theme='light'] body {
-  background-color: #eef2f7;
+  background-color: #f2ede3;
+}
+
+/* ===== Brand Variants ===== */
+:root[data-brand='mountain-premium'] {
+  --color-dark: #172129;
+  --color-dark-deeper: #10171d;
+  --color-dark-card: #1f2d36;
+  --color-dark-border: #344955;
+  --color-dark-hover: #2a3c48;
+
+  --color-brand-orange: #a86a37;
+  --color-brand-orange-dark: #945a2d;
+  --color-brand-city: #557a9e;
+  --color-brand-nature: #4d7a65;
+
+  --color-status-green: #5f9b73;
+  --color-status-yellow: #ba8740;
+}
+
+:root[data-theme='light'][data-brand='mountain-premium'] {
+  --color-dark: #f7f2e9;
+  --color-dark-deeper: #f0eadf;
+  --color-dark-card: #fffdf8;
+  --color-dark-border: #d4cabd;
+  --color-dark-hover: #f4ecdf;
+
+  --color-brand-orange: #9f6030;
+  --color-brand-orange-dark: #8e5328;
+  --color-brand-city: #5c7fa6;
+  --color-brand-nature: #567f6a;
+}
+
+:root[data-brand='urban-adventure'] {
+  --color-dark: #17232b;
+  --color-dark-deeper: #0f161d;
+  --color-dark-card: #1d2f3a;
+  --color-dark-border: #325063;
+  --color-dark-hover: #274455;
+
+  --color-brand-orange: #3a6f9a;
+  --color-brand-orange-dark: #315f86;
+  --color-brand-city: #7ba8c9;
+  --color-brand-nature: #4f8a6f;
+
+  --color-status-green: #5f9f78;
+  --color-status-yellow: #ba8b44;
+}
+
+:root[data-theme='light'][data-brand='urban-adventure'] {
+  --color-dark: #f6f1e9;
+  --color-dark-deeper: #efe8dd;
+  --color-dark-card: #fffdf8;
+  --color-dark-border: #cfd2cb;
+  --color-dark-hover: #f3ece2;
+
+  --color-brand-orange: #3f749f;
+  --color-brand-orange-dark: #34628a;
+  --color-brand-city: #4d7ca7;
+  --color-brand-nature: #568d73;
 }
 
 /* ===== SCROLLBAR ===== */
@@ -59,14 +128,14 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: var(--color-dark);
 }
 ::-webkit-scrollbar-thumb {
-  background: #3a3a3a;
+  background: var(--color-dark-border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4a4a4a;
+  background: var(--color-dark-hover);
 }
 
 /* ===== CALENDAR DAY HOVER ===== */
@@ -77,7 +146,7 @@ body {
 /* ===== BOOKING CARD HOVER ===== */
 .booking-card:hover {
   background-color: rgba(255, 255, 255, 0.04);
-  border-color: #3a3a3a;
+  border-color: var(--color-dark-border);
 }
 
 /* ===== NAV LINK HOVER ===== */
@@ -94,19 +163,19 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #ff8f3f;
+  background-color: var(--color-brand-orange);
 }
 
 /* ===== SEARCH INPUT ===== */
 .search-input:focus {
   outline: none;
-  box-shadow: 0 0 0 1px #ff8f3f;
-  border-color: #ff8f3f;
+  box-shadow: 0 0 0 1px var(--color-brand-orange);
+  border-color: var(--color-brand-orange);
 }
 
 /* ===== ACTION BUTTON ===== */
 .btn-action {
-  background: linear-gradient(135deg, #ffd9a0 0%, #ff8f3f 100%) !important;
+  background: linear-gradient(125deg, #eec79f 0%, var(--color-brand-orange) 52%, var(--color-brand-city) 100%) !important;
   color: #1a1a1a !important;
   border: none !important;
   border-radius: 9999px !important;
@@ -117,7 +186,7 @@ body {
 .btn-action:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(255, 143, 63, 0.3);
+  box-shadow: 0 4px 15px rgba(211, 116, 47, 0.3);
 }
 
 /* ===== PROGRESS BAR ===== */
@@ -137,5 +206,146 @@ body {
   left: 0;
   right: 0;
   height: 100%;
-  background: linear-gradient(to top, rgba(255, 143, 63, 0.05) 0%, transparent 100%);
+  background: linear-gradient(to top, rgba(211, 116, 47, 0.08) 0%, transparent 100%);
+}
+
+/* ===== FLEET INTRO ===== */
+@keyframes fleet-road-flow {
+  0% { background-position: 0 0; }
+  100% { background-position: 36px 0; }
+}
+
+@keyframes fleet-drive {
+  0% { transform: translateX(-20%) translateY(0); opacity: 0; }
+  8% { opacity: 1; }
+  40% { transform: translateX(45%) translateY(0); opacity: 1; }
+  60% { transform: translateX(70%) translateY(-1px); opacity: 1; }
+  100% { transform: translateX(125%) translateY(0); opacity: 0; }
+}
+
+.fleet-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(92, 122, 106, 0.18), transparent 35%),
+    radial-gradient(circle at 76% 75%, rgba(75, 120, 152, 0.24), transparent 40%),
+    linear-gradient(135deg, #0b1419 0%, #111c22 52%, #18242c 100%);
+  transition: opacity 320ms ease;
+}
+
+.fleet-intro--leave {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fleet-intro__glow {
+  position: absolute;
+  width: min(72vw, 880px);
+  height: min(38vw, 420px);
+  filter: blur(44px);
+  background: radial-gradient(circle, rgba(211, 116, 47, 0.17), transparent 64%);
+}
+
+.fleet-intro__content {
+  position: relative;
+  width: min(86vw, 860px);
+  padding: 28px 30px 34px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  background: rgba(13, 19, 24, 0.8);
+  backdrop-filter: blur(6px);
+}
+
+.fleet-intro__label {
+  margin: 0 0 8px;
+  color: var(--color-txt-secondary);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.fleet-intro__title {
+  margin: 0 0 18px;
+  font-size: clamp(1.25rem, 1rem + 1.6vw, 2rem);
+  font-weight: 800;
+  color: var(--color-txt-primary);
+}
+
+.fleet-road {
+  position: relative;
+  width: 100%;
+  height: 88px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+    linear-gradient(90deg, rgba(255,255,255,0.16) 0 10px, transparent 10px 24px);
+  background-size: auto, 34px 1px;
+  background-repeat: no-repeat, repeat-x;
+  background-position: 0 0, 0 50%;
+  animation: fleet-road-flow 1100ms linear infinite;
+  overflow: hidden;
+}
+
+.fleet-road__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.fleet-road__line:nth-child(1) { top: 22%; }
+.fleet-road__line:nth-child(2) { top: 50%; }
+.fleet-road__line:nth-child(3) { top: 78%; }
+
+.fleet-vehicle {
+  position: absolute;
+  top: 50%;
+  left: -14%;
+  width: 56px;
+  height: 18px;
+  margin-top: -9px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.24);
+  box-shadow: inset 0 0 0 1px rgba(12, 19, 23, 0.42);
+  animation: fleet-drive 2200ms linear infinite;
+}
+
+.fleet-vehicle::before,
+.fleet-vehicle::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(12, 19, 23, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.fleet-vehicle::before { left: 8px; }
+.fleet-vehicle::after { right: 8px; }
+
+.fleet-vehicle--one {
+  background: linear-gradient(120deg, #eec79f 0%, #d3742f 58%, #4b7898 100%);
+}
+
+.fleet-vehicle--two {
+  width: 50px;
+  margin-top: 10px;
+  animation-delay: 520ms;
+  background: linear-gradient(120deg, #5a8666 0%, #4b7898 60%, #d3742f 100%);
+}
+
+.fleet-vehicle--three {
+  width: 62px;
+  margin-top: -26px;
+  animation-delay: 980ms;
+  background: linear-gradient(120deg, #4b7898 0%, #d3742f 65%, #be6228 100%);
 }

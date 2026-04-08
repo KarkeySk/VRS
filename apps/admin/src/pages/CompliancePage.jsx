@@ -68,8 +68,8 @@ export default function CompliancePage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold">Compliance & Logs</h2>
-          <p className="text-xs text-txt-secondary">Pending review: {pendingCount} applications</p>
+          <h2 className="text-2xl font-bold">Checks & Logs</h2>
+          <p className="text-xs text-txt-secondary">Waiting: {pendingCount} requests</p>
         </div>
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-txt-secondary" />
@@ -78,7 +78,7 @@ export default function CompliancePage() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-dark border border-dark-border rounded-md px-2.5 py-1.5 text-xs text-txt-primary"
           >
-            <option value="all">All statuses</option>
+            <option value="all">All status</option>
             <option value="submitted">Submitted</option>
             <option value="under-review">Under Review</option>
             <option value="approved">Approved</option>
@@ -97,12 +97,12 @@ export default function CompliancePage() {
 
       <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
         {isLoading ? (
-          <p className="text-sm text-txt-secondary">Loading applications...</p>
+          <p className="text-sm text-txt-secondary">Loading requests...</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-txt-secondary uppercase tracking-wider border-b border-dark-border">
-                <th className="pb-3">Application</th>
+                <th className="pb-3">Request</th>
                 <th className="pb-3">Customer</th>
                 <th className="pb-3">Vehicle</th>
                 <th className="pb-3">Documents</th>
