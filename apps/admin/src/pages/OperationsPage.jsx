@@ -1,5 +1,7 @@
+import { useEffect, useMemo, useState } from "react";
 import { Zap, FileText, Cloud, AlertTriangle } from "lucide-react";
-import { telemetryVehicles, serviceAlerts } from "@/lib/data";
+import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
+import { bookingService } from "@bhatbhati/shared/services/bookingService.js";
 
 const severityStyles = {
   "URGENT": "bg-status-red/20 text-status-red",
@@ -8,6 +10,56 @@ const severityStyles = {
 };
 
 export default function OperationsPage() {
+  const [vehicles, setVehicles] = useState([]);
+  const [bookings, setBookings] = useState([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [vehicleData, bookingData] = await Promise.all([
+          vehicleService.getAllForAdmin(),
+          bookingService.getAll(),
+        ]);
+        setVehicles(vehicleData ?? []);
+        setBookings(bookingData ?? []);
+      } catch (err) {
+        console.error("Failed to load operations:", err);
+      }
+    };
+    load();
+  }, []);
+
+  const telemetryVehicles = useMemo(() => vehicles.slice(0, 3).map((v, idx) => ({
+    id: v.id,
+    name: v.name,
+    code: `#${String(idx + 101)}`,
+    route: v.category || "Kathmandu Route",
+    altitude: v.altitude?.target || "2,000m",
+    engineTemp: `${65 + idx * 8}°C`,
+    battery: 80 - (idx * 15),
+    batteryColor: idx === 1 ? "bg-status-yellow" : "bg-status-green",
+  })), [vehicles]);
+
+  const serviceAlerts = useMemo(() => {
+    const unavailable = vehicles.filter((v) => !v.is_available).slice(0, 3).map((v, idx) => ({
+      id: v.id,
+      title: "Vehicle Unavailable",
+      description: `${v.name} · ${v.category || "Fleet"} status requires attention`,
+      severity: idx === 0 ? "URGENT" : "2 DAYS",
+    }));
+
+    if (unavailable.length) return unavailable;
+
+    return bookings.slice(0, 3).map((b, idx) => ({
+      id: b.id,
+      title: "Booking Follow-up",
+      description: `${b.vehicles?.name || "Vehicle"} · ${b.status || "pending"} status`,
+      severity: idx === 0 ? "INFO" : "2 DAYS",
+    }));
+  }, [vehicles, bookings]);
+
+  const activeVehiclesCount = vehicles.filter((v) => v.is_available).length;
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
@@ -25,7 +77,7 @@ export default function OperationsPage() {
               <p className="text-xs text-txt-secondary">Real-time GPS and engine diagnostics across the Himalayan range</p>
             </div>
             <span className="px-3 py-1.5 bg-brand-orange/20 text-brand-orange text-xs rounded-full font-semibold">
-              42 ACTIVE VEHICLES
+              {activeVehiclesCount} ACTIVE VEHICLES
             </span>
           </div>
           <div className="space-y-4">

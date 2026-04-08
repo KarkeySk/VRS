@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import BookingCard from "@/components/BookingCard";
-import { upcomingBookings, pastBookings } from "@/lib/data";
 
-export default function BookingsList() {
+export default function BookingsList({ upcomingBookings = [], pastBookings = [] }) {
   const [activeTab, setActiveTab] = useState("upcoming");
   const bookings = activeTab === "upcoming" ? upcomingBookings : pastBookings;
 
@@ -41,6 +40,11 @@ export default function BookingsList() {
 
       {/* Cards */}
       <div className="space-y-3">
+        {bookings.length === 0 && (
+          <div className="text-sm text-txt-secondary p-4 border border-dark-border rounded-lg">
+            No bookings found.
+          </div>
+        )}
         {bookings.map((booking) => (
           <BookingCard key={booking.id} booking={booking} />
         ))}

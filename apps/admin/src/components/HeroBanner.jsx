@@ -1,4 +1,4 @@
-export default function HeroBanner() {
+export default function HeroBanner({ upcomingCount = 0, returnedCount = 0, activeCount = 0 }) {
   return (
     <div className="relative rounded-xl overflow-hidden mb-6" style={{ minHeight: 180 }}>
       {/* Background Image */}
@@ -17,18 +17,18 @@ export default function HeroBanner() {
           </p>
           <h2 className="text-3xl font-bold m-0 mb-2">Today's Fleet Pulse</h2>
           <p className="text-sm text-txt-secondary m-0">
-            12 active rentals navigating the Annapurna
+            {activeCount} active rentals navigating the Annapurna
             <br />
-            Circuit, 4 scheduled for return by sunset.
+            Circuit, {returnedCount} completed returns.
           </p>
         </div>
         <div className="flex gap-8">
           <div className="text-center">
-            <span className="text-3xl font-bold text-brand-orange block">24</span>
+            <span className="text-3xl font-bold text-brand-orange block">{upcomingCount}</span>
             <span className="text-xs text-txt-secondary uppercase tracking-wider">Upcoming</span>
           </div>
           <div className="text-center">
-            <span className="text-3xl font-bold text-txt-primary block">08</span>
+            <span className="text-3xl font-bold text-txt-primary block">{returnedCount}</span>
             <span className="text-xs text-txt-secondary uppercase tracking-wider">Returned</span>
           </div>
         </div>
