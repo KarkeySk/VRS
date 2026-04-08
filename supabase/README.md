@@ -9,6 +9,8 @@ Go to your Supabase dashboard **SQL Editor** and run each file **in order**:
 3. `migrations/003_create_bookings.sql` — Bookings table
 4. `migrations/004_rls_policies.sql` — Row Level Security for all tables
 5. `migrations/005_storage_avatars.sql` — Avatar upload storage bucket
+6. `migrations/006_create_inquiries.sql` — Inquiries, booking applications, and document storage policies
+7. `migrations/007_storage_vehicle_images.sql` — Vehicle image storage bucket and admin policies
 
 ## Seed data
 
