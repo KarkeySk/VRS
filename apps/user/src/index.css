@@ -37,6 +37,24 @@
   --transition-slow: 0.5s ease;
 
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --nav-bg: rgba(8, 12, 18, 0.8);
+}
+
+:root[data-theme='light'] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f3f4f6;
+  --bg-glass: rgba(0, 0, 0, 0.03);
+  --bg-glass-hover: rgba(0, 0, 0, 0.06);
+
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+
+  --border: rgba(17, 24, 39, 0.12);
+  --border-hover: rgba(17, 24, 39, 0.2);
+  --nav-bg: rgba(255, 255, 255, 0.88);
 }
 
 /* ===== RESET & BASE ===== */
