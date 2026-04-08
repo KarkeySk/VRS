@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { bookingService } from "@bhatbhati/shared/services/bookingService.js";
 import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
+import { uiAssetService } from "@bhatbhati/shared/services/uiAssetService.js";
 import HeroBanner from "@/components/HeroBanner";
 import CalendarPanel from "@/components/CalendarPanel";
 import WeatherPanel from "@/components/WeatherPanel";
@@ -25,16 +26,22 @@ function formatDateRange(start, end) {
 export default function DashboardPage() {
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]);
+  const [heroImage, setHeroImage] = useState("");
+  const [bookingFallbackImage, setBookingFallbackImage] = useState("");
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [bookingsData, vehiclesData] = await Promise.all([
+        const [bookingsData, vehiclesData, assets] = await Promise.all([
           bookingService.getAll(),
           vehicleService.getAllForAdmin(),
+          uiAssetService.getMany(["admin_hero_banner", "admin_booking_fallback"]),
         ]);
         setBookings(bookingsData ?? []);
         setVehicles(vehiclesData ?? []);
+        const assetMap = new Map((assets ?? []).map((a) => [a.asset_key, a.image_url]));
+        setHeroImage(assetMap.get("admin_hero_banner") || "");
+        setBookingFallbackImage(assetMap.get("admin_booking_fallback") || "");
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
       }
@@ -45,14 +52,14 @@ export default function DashboardPage() {
   const mapped = useMemo(() => bookings.map((booking) => ({
     id: booking.id,
     vehicle: booking.vehicles?.name || "Unknown Vehicle",
-    image: booking.vehicles?.image || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=200&h=140&fit=crop",
+    image: booking.vehicles?.image || bookingFallbackImage || "",
     type: "SELF-DRIVE",
     customer: booking.profiles?.full_name || "Unknown Customer",
     dates: formatDateRange(booking.start_date, booking.end_date),
     extras: booking.notes || "Standard package",
     status: mapStatus(booking.status),
     price: `NPR ${Number(booking.total_price || 0).toLocaleString()}`,
-  })), [bookings]);
+  })), [bookings, bookingFallbackImage]);
 
   const upcomingBookings = mapped.filter((b) => b.status === "ACTIVE" || b.status === "PARTIAL");
   const pastBookings = mapped.filter((b) => b.status === "COMPLETED" || b.status === "OVERDUE");
@@ -67,6 +74,7 @@ export default function DashboardPage() {
     <div>
       {/* Hero Banner */}
       <HeroBanner
+        imageUrl={heroImage}
         activeCount={activeCount}
         upcomingCount={upcomingBookings.length}
         returnedCount={returnedCount}
