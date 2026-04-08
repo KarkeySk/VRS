@@ -33,8 +33,8 @@ export default function VehiclesPage() {
         <div style={{ paddingTop: '100px', minHeight: '100vh', paddingBottom: '80px', background: 'var(--bg-primary)' }}>
             <div className="container" style={{ position: 'relative' }}>
                 <div style={{ position: 'absolute', top: '20px', right: '0', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-glass)', padding: '8px 16px', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', color: 'var(--text-primary)' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
                     </div>
                     <div>
                         <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Base Camp</div>
@@ -43,8 +43,8 @@ export default function VehiclesPage() {
                 </div>
 
                 <div className="section-label" style={{ color: '#e8732a', letterSpacing: '2px', fontWeight: '600' }}>FLEET DISCOVERY</div>
-                <h1 className="section-title" style={{ marginBottom: '16px', fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: '800', lineHeight: 1 }}>Bhatbhati:<br/>Choose Your Ride</h1>
-                <p style={{ color: '#a0a0a0', fontSize: '1.125rem', maxWidth: '500px', marginBottom: '40px', lineHeight: 1.5 }}>
+                <h1 className="section-title" style={{ marginBottom: '16px', fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: '800', lineHeight: 1 }}>Bhatbhate:<br/>Choose Your Ride</h1>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', maxWidth: '500px', marginBottom: '40px', lineHeight: 1.5 }}>
                     Choose from vehicles made for city roads and mountain roads.
                 </p>
 
@@ -52,7 +52,7 @@ export default function VehiclesPage() {
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
                     <button 
                         onClick={() => setShowFilters(!showFilters)}
-                        style={{ background: showFilters ? 'linear-gradient(to right, #fcab73, #e8732a)' : 'rgba(255,255,255,0.05)', border: showFilters ? 'none' : '1px solid rgba(255,255,255,0.1)', color: showFilters ? '#000' : '#fff', padding: '10px 24px', borderRadius: '30px', fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.3s' }}
+                        style={{ background: showFilters ? 'linear-gradient(to right, #fcab73, #e8732a)' : 'rgba(255,255,255,0.05)', border: showFilters ? 'none' : '1px solid rgba(255,255,255,0.1)', color: showFilters ? 'var(--accent-ink)' : 'var(--text-primary)', padding: '10px 24px', borderRadius: '30px', fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.3s' }}
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
                         Filters {showFilters ? '✕' : ''}
@@ -64,7 +64,7 @@ export default function VehiclesPage() {
                             style={{ 
                                 background: filter === f ? 'rgba(255,255,255,0.1)' : 'transparent', 
                                 border: filter === f ? 'none' : '1px solid rgba(255,255,255,0.1)', 
-                                color: filter === f ? '#fff' : '#888', 
+                                color: filter === f ? 'var(--text-primary)' : 'var(--text-secondary)', 
                                 padding: '10px 24px', 
                                 borderRadius: '30px', 
                                 fontWeight: '500', 
@@ -84,7 +84,7 @@ export default function VehiclesPage() {
                             style={{
                                 background: wheelsFilter === w ? 'rgba(232,115,42,0.2)' : 'transparent',
                                 border: wheelsFilter === w ? '1px solid rgba(232,115,42,0.55)' : '1px solid rgba(255,255,255,0.1)',
-                                color: wheelsFilter === w ? '#ffd2b1' : '#888',
+                                color: wheelsFilter === w ? 'var(--accent)' : 'var(--text-secondary)',
                                 padding: '10px 20px',
                                 borderRadius: '30px',
                                 fontWeight: '600',
@@ -113,7 +113,7 @@ export default function VehiclesPage() {
                 ) : (
                 <div className="fleet-grid">
                     {filteredVehicles.map(vehicle => (
-                        <div key={vehicle.id} style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => navigate(`/vehicles/${vehicle.id}`)} onMouseOver={(e) => e.currentTarget.style.background = '#1a1a1a'} onMouseOut={(e) => e.currentTarget.style.background = '#111'}>
+                        <div key={vehicle.id} style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => navigate(`/vehicles/${vehicle.id}`)} onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-card-hover)'} onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-card)'}>
                             <div style={{ overflow: 'hidden', height: '240px', borderRadius: '16px', position: 'relative', marginBottom: '20px' }}>
                                 <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2, display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg> {vehicle.altitude?.target} RATED
@@ -132,8 +132,8 @@ export default function VehiclesPage() {
                                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '20px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Good for long and rough roads</p>
                                 
                                 <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
-                                    <span style={{ background: 'var(--bg-glass)', color: '#a0a0a0', fontSize: '0.625rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '6px 12px', borderRadius: '20px' }}>MOUNTAIN READY</span>
-                                    <span style={{ background: 'var(--bg-glass)', color: '#a0a0a0', fontSize: '0.625rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '6px 12px', borderRadius: '20px' }}>LONG TRIP READY</span>
+                                    <span style={{ background: 'var(--bg-glass)', color: 'var(--text-secondary)', fontSize: '0.625rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '6px 12px', borderRadius: '20px' }}>MOUNTAIN READY</span>
+                                    <span style={{ background: 'var(--bg-glass)', color: 'var(--text-secondary)', fontSize: '0.625rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '6px 12px', borderRadius: '20px' }}>LONG TRIP READY</span>
                                 </div>
 
                                 <button onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/9779800000000?text=I'm interested in the ${vehicle.name}`, '_blank'); }} style={{ width: '100%', padding: '14px', background: 'var(--brand-gradient)', border: 'none', borderRadius: '12px', color: 'var(--accent-ink)', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.875rem' }}>
@@ -149,7 +149,7 @@ export default function VehiclesPage() {
                 <div style={{ marginTop: '60px', background: 'linear-gradient(180deg, rgba(25,25,25,0.8) 0%, rgba(15,15,15,0.8) 100%)', borderRadius: '24px', padding: '40px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '800px', margin: '60px auto 0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
                         <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--bg-glass)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <CloudRain size={32} color="#fff" />
+                            <CloudRain size={32} color="var(--text-primary)" />
                         </div>
                         <div>
                             <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '4px' }}>Road Weather</h3>
