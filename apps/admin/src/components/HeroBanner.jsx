@@ -1,12 +1,16 @@
-export default function HeroBanner({ upcomingCount = 0, returnedCount = 0, activeCount = 0 }) {
+export default function HeroBanner({ imageUrl = "", upcomingCount = 0, returnedCount = 0, activeCount = 0 }) {
   return (
     <div className="relative rounded-xl overflow-hidden mb-6" style={{ minHeight: 180 }}>
       {/* Background Image */}
-      <img
-        src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=400&fit=crop"
-        alt="Himalayan Mountains"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt="Himalayan Mountains"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,#253341_0%,#1d2733_55%,#0f172a_100%)]" />
+      )}
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-[rgba(15,25,40,0.85)] via-[rgba(15,25,40,0.6)] to-[rgba(15,25,40,0.3)]" />
       {/* Content */}
