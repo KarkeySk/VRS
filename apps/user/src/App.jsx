@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import Navbar from './components/layout/Navbar'
 
@@ -22,29 +23,31 @@ function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
-                <Navbar />
-                <Routes>
-                    {/* Public routes */}
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/auth/login" element={<LoginPage />} />
-                    <Route path="/auth/register" element={<RegisterPage />} />
+                <ThemeProvider>
+                    <Navbar />
+                    <Routes>
+                        {/* Public routes */}
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/auth/login" element={<LoginPage />} />
+                        <Route path="/auth/register" element={<RegisterPage />} />
 
-                    {/* Protected routes */}
-                    <Route element={<ProtectedRoute />}>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/terrain" element={<TerrainSelect />} />
-                        <Route path="/vehicles" element={<VehiclesPage />} />
-                        <Route path="/vehicles/:id" element={<VehicleDetail />} />
-                        <Route path="/inquiry/:id" element={<InquiryPage />} />
-                        <Route path="/apply/:inquiryId" element={<BookingApply />} />
-                        <Route path="/booking/confirm/:applicationId" element={<BookingConfirm />} />
-                        <Route path="/bookings" element={<BookingsPage />} />
-                        <Route path="/profile" element={<ProfilePage />} />
-                    </Route>
+                        {/* Protected routes */}
+                        <Route element={<ProtectedRoute />}>
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/terrain" element={<TerrainSelect />} />
+                            <Route path="/vehicles" element={<VehiclesPage />} />
+                            <Route path="/vehicles/:id" element={<VehicleDetail />} />
+                            <Route path="/inquiry/:id" element={<InquiryPage />} />
+                            <Route path="/apply/:inquiryId" element={<BookingApply />} />
+                            <Route path="/booking/confirm/:applicationId" element={<BookingConfirm />} />
+                            <Route path="/bookings" element={<BookingsPage />} />
+                            <Route path="/profile" element={<ProfilePage />} />
+                        </Route>
 
-                    {/* Fallback */}
-                    <Route path="*" element={<NotFoundPage />} />
-                </Routes>
+                        {/* Fallback */}
+                        <Route path="*" element={<NotFoundPage />} />
+                    </Routes>
+                </ThemeProvider>
             </AuthProvider>
         </BrowserRouter>
     )
