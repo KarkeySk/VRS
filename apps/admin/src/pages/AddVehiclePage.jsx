@@ -10,6 +10,11 @@ const categories = [
   { id: 'car', title: 'Car', desc: 'City and transfer' },
 ]
 
+const makeOptions = ['Royal Enfield', 'Honda', 'Yamaha', 'KTM', 'Suzuki', 'Bajaj', 'Toyota', 'Mahindra']
+const modelOptions = ['Himalayan 450', 'CRF 250L', 'XPulse 200', 'Duke 250', 'FZ-S', 'Scorpio', 'Hilux', 'Land Cruiser']
+const yearOptions = ['2026', '2025', '2024', '2023', '2022', '2021']
+const subtitleOptions = ['High-altitude support', 'Off-road and touring', 'Mountain expedition', 'City and transfer']
+
 const initialForm = {
   make: '',
   model: '',
@@ -100,21 +105,33 @@ export default function AddVehiclePage({ onNavigate }) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs text-txt-secondary mb-1.5 block">Vehicle Make</label>
-                <input value={form.make} onChange={(e) => handleChange('make', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none" />
+                <input list="vehicle-make-options" value={form.make} onChange={(e) => handleChange('make', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none" />
               </div>
               <div>
                 <label className="text-xs text-txt-secondary mb-1.5 block">Model</label>
-                <input value={form.model} onChange={(e) => handleChange('model', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none" />
+                <input list="vehicle-model-options" value={form.model} onChange={(e) => handleChange('model', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none" />
               </div>
               <div>
                 <label className="text-xs text-txt-secondary mb-1.5 block">Year</label>
-                <input value={form.year} onChange={(e) => handleChange('year', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none" />
+                <input list="vehicle-year-options" value={form.year} onChange={(e) => handleChange('year', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none" />
               </div>
               <div>
                 <label className="text-xs text-txt-secondary mb-1.5 block">Subtitle</label>
-                <input value={form.subtitle} onChange={(e) => handleChange('subtitle', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none" />
+                <input list="vehicle-subtitle-options" value={form.subtitle} onChange={(e) => handleChange('subtitle', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none" />
               </div>
             </div>
+            <datalist id="vehicle-make-options">
+              {makeOptions.map((opt) => <option key={opt} value={opt} />)}
+            </datalist>
+            <datalist id="vehicle-model-options">
+              {modelOptions.map((opt) => <option key={opt} value={opt} />)}
+            </datalist>
+            <datalist id="vehicle-year-options">
+              {yearOptions.map((opt) => <option key={opt} value={opt} />)}
+            </datalist>
+            <datalist id="vehicle-subtitle-options">
+              {subtitleOptions.map((opt) => <option key={opt} value={opt} />)}
+            </datalist>
           </div>
 
           <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
