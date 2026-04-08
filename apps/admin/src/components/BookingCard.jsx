@@ -12,7 +12,7 @@ const TYPE_STYLES = {
   "WITH DRIVER": { bg: "bg-[rgba(139,92,246,0.2)]",  text: "text-[#a78bfa]" },
 };
 
-export default function BookingCard({ booking }) {
+export default function BookingCard({ booking, onManage = () => {} }) {
   const status = STATUS_STYLES[booking.status] || STATUS_STYLES.PARTIAL;
   const type = TYPE_STYLES[booking.type] || TYPE_STYLES["SELF-DRIVE"];
 
@@ -54,9 +54,13 @@ export default function BookingCard({ booking }) {
           <span className={`text-xs ${status.text} font-bold`}>{booking.status}</span>
         </div>
         <p className="text-base font-bold m-0">{booking.price}</p>
-        <p className="text-xs text-brand-orange cursor-pointer mt-1 m-0 hover:text-brand-orange-dark transition-colors">
+        <button
+          type="button"
+          onClick={() => onManage(booking)}
+          className="text-xs text-brand-orange cursor-pointer mt-1 m-0 hover:text-brand-orange-dark transition-colors bg-transparent border-none p-0"
+        >
           Manage Details
-        </p>
+        </button>
       </div>
     </div>
   );
