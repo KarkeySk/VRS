@@ -11,6 +11,7 @@ import {
 const icons = {
     Wind, Snowflake, Map: MapIcon, Shield, Activity, Settings, Unlock, Lock, Navigation, Droplet, RefreshCw, Briefcase
 };
+const DRIVER_FEE_PER_DAY = 2000
 
 export default function VehicleDetail() {
     const { id } = useParams();
@@ -67,10 +68,12 @@ export default function VehicleDetail() {
 
     const addonsTotal = selectedAddons.reduce((sum, addonId) => {
         const addon = vehicle.addons.find((a) => a.id === addonId);
-        return sum + (addon ? addon.price : 0);
+        return sum + Number(addon ? addon.price : 0);
     }, 0);
 
-    const finalPrice = vehicle.price + addonsTotal + (driveType === 'with-driver' ? 20 : 0);
+    const basePricePerDay = Number(vehicle.price || 0)
+    const driverFee = driveType === 'with-driver' ? DRIVER_FEE_PER_DAY : 0
+    const finalPrice = basePricePerDay + addonsTotal + driverFee
 
     return (
         <div style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', minHeight: '100vh', paddingBottom: '100px' }}>
@@ -187,7 +190,9 @@ export default function VehicleDetail() {
                             <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', fontWeight: '600' }}>Price From</div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px' }}>
                                 <div>
-                                    <span style={{ fontSize: '3.5rem', fontWeight: '800', color: 'var(--accent)', lineHeight: 1 }}>${finalPrice}</span>
+                                    <span style={{ fontSize: '3.5rem', fontWeight: '800', color: 'var(--accent)', lineHeight: 1 }}>
+                                        NPR {finalPrice.toLocaleString()}
+                                    </span>
                                     <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>/day</span>
                                 </div>
                                 <div style={{ display: 'flex', gap: '4px' }}>
@@ -195,6 +200,11 @@ export default function VehicleDetail() {
                                         <Star key={star} size={14} fill={star <= Math.floor(vehicle.rating) ? 'var(--accent)' : 'none'} color={star <= Math.floor(vehicle.rating) ? 'var(--accent)' : '#444'} />
                                     ))}
                                 </div>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '-20px', marginBottom: '24px' }}>
+                                {driveType === 'with-driver'
+                                    ? `Includes driver fee: NPR ${DRIVER_FEE_PER_DAY.toLocaleString()}/day`
+                                    : 'Self-drive selected'}
                             </div>
 
                             {/* TABS */}
@@ -238,7 +248,7 @@ export default function VehicleDetail() {
                                 </div>
                             </div>
 
-                            <button onClick={() => navigate(`/inquiry/${vehicle.id}`)} style={{ width: '100%', padding: '16px', fontSize: '0.875rem', letterSpacing: '0.5px', fontWeight: '700', background: 'var(--brand-gradient)', color: 'var(--accent-ink)', borderRadius: '30px', border: 'none', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 8px 25px rgba(232, 115, 42, 0.3)' }}
+                            <button onClick={() => navigate(`/inquiry/${vehicle.id}?driveType=${driveType}`)} style={{ width: '100%', padding: '16px', fontSize: '0.875rem', letterSpacing: '0.5px', fontWeight: '700', background: 'var(--brand-gradient)', color: 'var(--accent-ink)', borderRadius: '30px', border: 'none', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 8px 25px rgba(232, 115, 42, 0.3)' }}
                                 onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 30px rgba(232, 115, 42, 0.5)'; }}
                                 onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(232, 115, 42, 0.3)'; }}
                             >

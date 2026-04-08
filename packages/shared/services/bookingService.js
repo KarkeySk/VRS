@@ -71,4 +71,19 @@ export const bookingService = {
         if (error) throw error
         return data
     },
+
+    /** Find an existing booking for the same user/vehicle/date range */
+    findMatchingTrip: async ({ userId, vehicleId, startDate, endDate }) => {
+        const { data, error } = await supabase
+            .from('bookings')
+            .select('id, status')
+            .eq('user_id', userId)
+            .eq('vehicle_id', vehicleId)
+            .eq('start_date', startDate)
+            .eq('end_date', endDate)
+            .limit(1)
+            .maybeSingle()
+        if (error) throw error
+        return data
+    },
 }
