@@ -132,22 +132,18 @@ export default function AddVehiclePage({ onNavigate }) {
             <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
               <Palette className="w-4 h-4 text-brand-orange" /> Category
             </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {categories.map((cat) => {
-                const active = selectedCategory === cat.id
-                return (
-                  <button
-                    type="button"
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`border-2 rounded-xl p-4 text-left transition-all ${active ? 'border-brand-orange bg-brand-orange/10' : 'border-dark-border hover:border-brand-orange/50'}`}
-                  >
-                    <p className={`text-sm font-semibold ${active ? 'text-brand-orange' : 'text-txt-primary'}`}>{cat.title}</p>
-                    <p className="text-[11px] text-txt-secondary">{cat.desc}</p>
-                  </button>
-                )
-              })}
-            </div>
+            <label className="text-xs text-txt-secondary mb-1.5 block">Vehicle Category</label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none"
+            >
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.title} - {cat.desc}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
