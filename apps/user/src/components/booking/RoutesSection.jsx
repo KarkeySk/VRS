@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { uiAssetService } from '@bhatbhati/shared/services/uiAssetService.js'
 
 const routes = [
   {
@@ -27,8 +28,15 @@ const routes = [
   },
 ]
 
+const routeImageAssetKeys = {
+  'Upper Mustang': 'user_route_upper_mustang',
+  'Annapurna Base': 'user_route_annapurna_base',
+  Khumbu: 'user_route_khumbu',
+}
+
 export default function RoutesSection() {
   const sectionRef = useRef(null)
+  const [routeImageMap, setRouteImageMap] = useState({})
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -48,6 +56,23 @@ export default function RoutesSection() {
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    const loadRouteImages = async () => {
+      try {
+        const assets = await uiAssetService.getMany(Object.values(routeImageAssetKeys))
+        const map = {}
+        for (const asset of assets ?? []) {
+          map[asset.asset_key] = asset.image_url
+        }
+        setRouteImageMap(map)
+      } catch (error) {
+        console.error('Failed to load route images from ui_assets:', error)
+      }
+    }
+
+    loadRouteImages()
+  }, [])
+
   return (
     <section className="routes" id="routes" ref={sectionRef}>
       <div className="container">
@@ -63,7 +88,11 @@ export default function RoutesSection() {
 
         {/* Routes Grid */}
         <div className="routes-grid" id="routes-grid">
-          {routes.map((route, i) => (
+          {routes.map((route, i) => {
+            const assetKey = routeImageAssetKeys[route.name]
+            const imageUrl = (assetKey && routeImageMap[assetKey]) || route.image
+
+            return (
             <div
               className="route-card reveal"
               key={route.id}
@@ -71,7 +100,7 @@ export default function RoutesSection() {
               style={{ transitionDelay: `${i * 0.15}s` }}
             >
               <div className="route-card-img">
-                <img src={route.image} alt={route.name} loading="lazy" />
+                <img src={imageUrl} alt={route.name} loading="lazy" />
               </div>
               <div className="route-card-overlay"></div>
               <div className="route-card-content">
@@ -95,7 +124,7 @@ export default function RoutesSection() {
                 </div>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
     </section>
