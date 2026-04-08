@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+staged_files="$(git diff --cached --name-only --diff-filter=ACMR)"
+if [[ -z "$staged_files" ]]; then
+  exit 0
+fi
+
+email="$(git config --get user.email || true)"
+
+email_for_owner() {
+  case "$1" in
+    swornim-karki) echo "np03cs4a240032@heraldcollege.edu.np" ;;
+    magish-gautam) echo "np03cs4a240172@heraldcollege.edu.np" ;;
+    nikesh-deuja) echo "np03cs4a240352@heraldcollege.edu.np" ;;
+    swornim-shrestha) echo "np03cs4a240239@heraldcollege.edu.np" ;;
+    *) echo "" ;;
+  esac
+}
+
+owner_for_file() {
+  case "$1" in
+    apps/admin/*) echo "swornim-shrestha" ;;
+    supabase/*|packages/shared/*) echo "swornim-karki" ;;
+
+    apps/user/src/pages/HomePage.jsx|\
+    apps/user/src/components/common/*|\
+    apps/user/src/components/vehicle/*|\
+    apps/user/src/components/booking/RoutesSection.jsx|\
+    apps/user/src/pages/user/TerrainSelect.jsx|\
+    apps/user/src/pages/user/VehiclesPage.jsx|\
+    apps/user/src/pages/user/VehicleDetail.jsx|\
+    apps/user/src/hooks/useVehicles.js)
+      echo "magish-gautam"
+      ;;
+
+    apps/user/src/pages/user/BookingApply.jsx|\
+    apps/user/src/pages/user/BookingConfirm.jsx|\
+    apps/user/src/pages/user/BookingsPage.jsx|\
+    apps/user/src/pages/user/InquiryPage.jsx|\
+    apps/user/src/pages/user/Dashboard.jsx|\
+    apps/user/src/pages/user/ProfilePage.jsx|\
+    apps/user/src/hooks/useBookings.js)
+      echo "nikesh-deuja"
+      ;;
+
+    *) echo "" ;;
+  esac
+}
+
+declare -A owners_map=()
+while IFS= read -r file; do
+  [[ -z "$file" ]] && continue
+  owner="$(owner_for_file "$file")"
+  if [[ -n "$owner" ]]; then
+    owners_map["$owner"]=1
+  fi
+done <<< "$staged_files"
+
+owner_count="${#owners_map[@]}"
+if [[ "$owner_count" -eq 0 ]]; then
+  exit 0
+fi
+
+if [[ "$owner_count" -gt 1 ]]; then
+  echo "Commit blocked: staged files span multiple assigned owners."
+  echo "Please split into separate commits by owner/task."
+  echo "Detected owners:"
+  for owner in "${!owners_map[@]}"; do
+    echo "  - $owner ($(email_for_owner "$owner"))"
+  done
+  exit 1
+fi
+
+required_owner=""
+for owner in "${!owners_map[@]}"; do
+  required_owner="$owner"
+done
+
+required_email="$(email_for_owner "$required_owner")"
+if [[ -z "$required_email" ]]; then
+  exit 0
+fi
+
+if [[ "$email" != "$required_email" ]]; then
+  echo "Commit blocked: wrong git identity for staged task area."
+  echo "Required owner: $required_owner"
+  echo "Required email: $required_email"
+  echo "Current email:  ${email:-<not-set>}"
+  echo
+  echo "Run:"
+  echo "  ./scripts/switch-git-identity.sh $required_owner"
+  exit 1
+fi
