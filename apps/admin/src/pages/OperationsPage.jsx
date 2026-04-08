@@ -67,6 +67,34 @@ export default function OperationsPage() {
 
   const activeVehiclesCount = vehicles.filter((v) => v.is_available).length;
 
+  const exportDailyLog = () => {
+    const headers = ['booking_id', 'vehicle', 'status', 'start_date', 'end_date', 'total_price']
+    const rows = bookings.map((b) => [
+      b.id,
+      b.vehicles?.name || 'Unknown Vehicle',
+      b.status,
+      b.start_date,
+      b.end_date,
+      b.total_price,
+    ])
+    const csv = [headers, ...rows]
+      .map((cols) => cols.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `daily-transit-log-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const openMap = () => {
+    window.open('https://www.google.com/maps/place/Mustang,+Nepal', '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
@@ -148,7 +176,11 @@ export default function OperationsPage() {
             <p className="text-xs text-txt-secondary mb-4 leading-relaxed">
               Generate standardized CSV/PDF reports for the Jomsom Police Checkpoint and Mustang Immigration Bureau.
             </p>
-            <button className="btn-action px-5 py-2.5 text-sm flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={exportDailyLog}
+              className="btn-action px-5 py-2.5 text-sm flex items-center gap-1.5"
+            >
               Export Daily Log
             </button>
           </div>
@@ -192,7 +224,13 @@ export default function OperationsPage() {
             </div>
             <div className="p-3 text-center">
               <p className="text-[10px] text-txt-secondary uppercase">Mustang Region · Sector 4</p>
-              <span className="text-xs text-brand-orange font-semibold cursor-pointer">OPEN FULL MAP</span>
+              <button
+                type="button"
+                onClick={openMap}
+                className="text-xs text-brand-orange font-semibold cursor-pointer bg-transparent border-none"
+              >
+                OPEN FULL MAP
+              </button>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
