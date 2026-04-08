@@ -25,7 +25,10 @@ export const profileService = {
 
     /** Upload profile avatar to Supabase Storage */
     uploadAvatar: async (userId, file) => {
-        const path = `avatars/${userId}`
+        const ext = file?.name?.split('.').pop()?.toLowerCase() || 'jpg'
+        const safeExt = ext.replace(/[^a-z0-9]/g, '') || 'jpg'
+        // Keep object under "<userId>/..." so storage RLS can match auth.uid().
+        const path = `${userId}/avatar.${safeExt}`
         const { error: uploadError } = await supabase.storage
             .from('avatars')
             .upload(path, file, { upsert: true })
