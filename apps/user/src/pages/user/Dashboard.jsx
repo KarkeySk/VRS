@@ -1,16 +1,16 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Mountain, Car, ClipboardList, User, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function Dashboard() {
     const { user } = useAuth();
     const name = user?.user_metadata?.full_name || 'Explorer';
 
     const quickActions = [
-        { label: 'Choose Terrain', desc: 'Find vehicles suited to your route', icon: Mountain, to: '/terrain', color: '#e8732a' },
-        { label: 'Browse Fleet', desc: 'Explore all available vehicles', icon: Car, to: '/vehicles', color: '#7b81ff' },
-        { label: 'My Bookings', desc: 'View your booking history', icon: ClipboardList, to: '/bookings', color: '#34d399' },
-        { label: 'Profile', desc: 'Manage your account details', icon: User, to: '/profile', color: '#f59e0b' },
+        { label: 'Choose Terrain', desc: 'Find vehicles suited to your route', image: '/images/hero-mountain.png', to: '/terrain', color: '#e8732a' },
+        { label: 'Browse Fleet', desc: 'Explore all available vehicles', image: '/images/fleet-suv.png', to: '/vehicles', color: '#7b81ff' },
+        { label: 'My Bookings', desc: 'View your booking history', image: '/images/vehicle-hilux.png', to: '/bookings', color: '#34d399' },
+        { label: 'Profile', desc: 'Manage your account details', image: '/images/vehicle-scorpio.png', to: '/profile', color: '#f59e0b' },
     ];
 
     return (
@@ -26,7 +26,6 @@ export default function Dashboard() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '60px' }}>
                     {quickActions.map((action) => {
-                        const Icon = action.icon;
                         return (
                             <Link key={action.label} to={action.to} style={{
                                 textDecoration: 'none', background: '#111', borderRadius: '20px', padding: '28px',
@@ -39,8 +38,13 @@ export default function Dashboard() {
                                 <div style={{
                                     width: '44px', height: '44px', borderRadius: '14px',
                                     background: action.color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    overflow: 'hidden', border: `1px solid ${action.color}40`,
                                 }}>
-                                    <Icon size={22} color={action.color} />
+                                    <img
+                                        src={action.image}
+                                        alt={action.label}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
                                 </div>
                                 <div>
                                     <h3 style={{ color: '#fff', fontSize: '1.05rem', fontWeight: '700', marginBottom: '4px' }}>{action.label}</h3>
