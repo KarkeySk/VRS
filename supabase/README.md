@@ -15,6 +15,9 @@ Go to your Supabase dashboard **SQL Editor** and run each file **in order**:
 After migrations, run the seed file to populate the fleet:
 
 - `seed/001_vehicles.sql` — 9 vehicles (SUVs, jeeps, bike)
+- `seed/002_admin_user.sql` — development admin login:
+  - email: `admin@gmail.com`
+  - password: `admin123`
 
 ## Make a user admin
 
