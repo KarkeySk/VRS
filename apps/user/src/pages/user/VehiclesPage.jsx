@@ -7,7 +7,9 @@ export default function VehiclesPage() {
     const [searchParams] = useSearchParams();
     const searchQuery = searchParams.get('search') || '';
     const terrainParam = searchParams.get('terrain') || '';
+    const wheelsParam = searchParams.get('wheels') || 'all';
     const [filter, setFilter] = useState(terrainParam || 'All Terrain');
+    const [wheelsFilter, setWheelsFilter] = useState(wheelsParam);
     const [sortHighToLow, setSortHighToLow] = useState(false);
     const [showFilters, setShowFilters] = useState(true);
 
@@ -15,7 +17,11 @@ export default function VehiclesPage() {
         .filter(v => {
             const matchesSearch = !searchQuery || v.name.toLowerCase().includes(searchQuery.toLowerCase());
             const matchesFilter = filter === 'All Terrain' || v.category === filter;
-            return matchesSearch && matchesFilter;
+            const isTwoWheeler = v.type === 'bike' || (v.capacity || '').toLowerCase().includes('2 seats');
+            const matchesWheels = wheelsFilter === 'all'
+                || (wheelsFilter === 'two' && isTwoWheeler)
+                || (wheelsFilter === 'four' && !isTwoWheeler);
+            return matchesSearch && matchesFilter && matchesWheels;
         })
         .sort((a, b) => sortHighToLow ? b.price - a.price : a.price - b.price);
 
@@ -65,6 +71,27 @@ export default function VehiclesPage() {
                             }}
                         >
                             {f}
+                        </button>
+                    ))}
+
+                    {showFilters && ['all', 'four', 'two'].map((w) => (
+                        <button
+                            key={w}
+                            onClick={() => setWheelsFilter(w)}
+                            style={{
+                                background: wheelsFilter === w ? 'rgba(232,115,42,0.2)' : 'transparent',
+                                border: wheelsFilter === w ? '1px solid rgba(232,115,42,0.55)' : '1px solid rgba(255,255,255,0.1)',
+                                color: wheelsFilter === w ? '#ffd2b1' : '#888',
+                                padding: '10px 20px',
+                                borderRadius: '30px',
+                                fontWeight: '600',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                textTransform: 'capitalize',
+                            }}
+                        >
+                            {w === 'all' ? 'All Wheels' : `${w} Wheeler`}
                         </button>
                     ))}
                     
