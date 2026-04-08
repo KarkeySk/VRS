@@ -28,6 +28,14 @@ export const authService = {
         if (error) throw error
     },
 
+    /** Update current user password */
+    updatePassword: async (newPassword) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.updateUser({ password: newPassword })
+        if (error) throw error
+        return data.user
+    },
+
     /** Get current session */
     getSession: async () => {
         if (!supabase) return null
@@ -62,4 +70,3 @@ export const authService = {
         return data?.role === 'admin'
     },
 }
-
