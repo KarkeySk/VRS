@@ -5,6 +5,8 @@ import { inquiryService } from '@bhatbhati/shared/services/inquiryService.js';
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js';
 import { ArrowLeft, Upload, FileText, CheckCircle } from 'lucide-react';
 
+const DRIVER_FEE_PER_DAY = 2000
+
 export default function BookingApply() {
     const { inquiryId } = useParams();
     const navigate = useNavigate();
@@ -50,7 +52,7 @@ export default function BookingApply() {
             const days = Math.max(1, Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000));
             const basePrice = inquiry.vehicles?.price_per_day || 0;
             const addonsTotal = (inquiry.selected_addons || []).reduce((s, a) => s + (a.price || 0), 0);
-            const driverFee = inquiry.drive_type === 'with-driver' ? 20 * days : 0;
+            const driverFee = inquiry.drive_type === 'with-driver' ? DRIVER_FEE_PER_DAY * days : 0;
             const totalPrice = (basePrice * days) + addonsTotal + driverFee;
 
             const app = await applicationService.create({
