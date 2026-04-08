@@ -12,15 +12,15 @@ import NewBookingPage from '@/pages/NewBookingPage'
 import AdminProfilePage from '@/pages/AdminProfilePage'
 
 const PAGE_META = {
-  dashboard: { title: 'Booking Management', showNewBtn: true },
-  fleet: { title: 'Fleet Overview', showNewBtn: false },
+  dashboard: { title: 'Bookings', showNewBtn: true },
+  fleet: { title: 'Fleet', showNewBtn: false },
   bookings: { title: 'Bookings', showNewBtn: true },
-  compliance: { title: 'Compliance & Logs', showNewBtn: false },
-  operations: { title: 'Operations & Logs', subtitle: 'Admin Portal', showNewBtn: false },
+  compliance: { title: 'Checks & Logs', showNewBtn: false },
+  operations: { title: 'Operations & Logs', subtitle: 'Admin', showNewBtn: false },
   settings: { title: 'Settings', showNewBtn: false },
-  'add-vehicle': { title: 'Add New Vehicle', subtitle: 'Registration', showNewBtn: false },
-  'new-booking': { title: 'New Booking', subtitle: 'Expedition Reservation', showNewBtn: false },
-  'admin-profile': { title: 'Admin Profile', subtitle: 'Account Settings', showNewBtn: false },
+  'add-vehicle': { title: 'Add Vehicle', subtitle: 'Form', showNewBtn: false },
+  'new-booking': { title: 'New Booking', subtitle: 'Booking Form', showNewBtn: false },
+  'admin-profile': { title: 'Profile', subtitle: 'Account', showNewBtn: false },
 }
 
 export default function Dashboard() {
@@ -62,8 +62,8 @@ export default function Dashboard() {
           subtitle={meta.subtitle}
           showNewBooking={meta.showNewBtn}
           onNewBooking={() => setActivePage('new-booking')}
-          onShowNotifications={() => setTopBarMessage('Notification center is coming next.')}
-          onShowHelp={() => setTopBarMessage('Need help? Use Add Vehicle, New Booking, or Admin Profile to manage operations.')}
+          onShowNotifications={() => setTopBarMessage('Notifications will be added soon.')}
+          onShowHelp={() => setTopBarMessage('Need help? Open Add Vehicle, New Booking, or Profile.')}
         />
         <main className="flex-1 overflow-y-auto p-6">
           {topBarMessage && (

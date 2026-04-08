@@ -3,17 +3,17 @@ import { FileText, Image, Palette, Settings, Upload } from 'lucide-react'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 
 const categories = [
-  { id: 'bike', title: 'Motorbike', desc: 'Off-road and touring' },
-  { id: 'suv', title: 'SUV', desc: 'High-altitude support' },
-  { id: 'jeep', title: 'Jeep', desc: 'Mountain expedition' },
-  { id: 'pickup', title: 'Pickup', desc: 'Cargo and logistics' },
+  { id: 'bike', title: 'Motorbike', desc: 'Road and tour' },
+  { id: 'suv', title: 'SUV', desc: 'High road support' },
+  { id: 'jeep', title: 'Jeep', desc: 'Mountain trip' },
+  { id: 'pickup', title: 'Pickup', desc: 'Cargo and load' },
   { id: 'car', title: 'Car', desc: 'City and transfer' },
 ]
 
 const makeOptions = ['Royal Enfield', 'Honda', 'Yamaha', 'KTM', 'Suzuki', 'Bajaj', 'Toyota', 'Mahindra']
 const modelOptions = ['Himalayan 450', 'CRF 250L', 'XPulse 200', 'Duke 250', 'FZ-S', 'Scorpio', 'Hilux', 'Land Cruiser']
 const yearOptions = ['2026', '2025', '2024', '2023', '2022', '2021']
-const subtitleOptions = ['High-altitude support', 'Off-road and touring', 'Mountain expedition', 'City and transfer']
+const subtitleOptions = ['High road support', 'Road and tour', 'Mountain trip', 'City and transfer']
 
 const initialForm = {
   make: '',
@@ -92,7 +92,7 @@ export default function AddVehiclePage({ onNavigate }) {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-2xl font-bold">Vehicle Registration</h2>
+        <h2 className="text-2xl font-bold">Add Vehicle</h2>
         <span className="text-sm text-txt-secondary">Connected to Supabase</span>
       </div>
 
@@ -199,7 +199,7 @@ export default function AddVehiclePage({ onNavigate }) {
               Cancel
             </button>
             <button type="submit" disabled={isSubmitting} className="btn-action px-8 py-2.5 text-sm disabled:opacity-60">
-              {isSubmitting ? 'Saving...' : 'Register Vehicle'}
+              {isSubmitting ? 'Saving...' : 'Add Vehicle'}
             </button>
           </div>
         </div>
