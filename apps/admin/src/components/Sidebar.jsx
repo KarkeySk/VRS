@@ -13,6 +13,9 @@ const navItems = [
   { id: "fleet", label: "Fleet Management", icon: FileText },
   { id: "bookings", label: "Bookings", icon: CalendarDays },
   { id: "compliance", label: "Compliance", icon: CheckCircle },
+  { id: "fleet", label: "Fleet", icon: FileText },
+  { id: "bookings", label: "Bookings", icon: CalendarDays },
+  { id: "compliance", label: "Checks", icon: CheckCircle },
   { id: "operations", label: "Operations", icon: Cog },
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
@@ -24,6 +27,7 @@ export default function Sidebar({ activePage, onNavigate }) {
       <div className="px-4 py-6 border-b border-dark-border">
         <p className="text-[13px] text-txt-secondary uppercase tracking-wider font-semibold m-0">
           Bhatbhati
+          Bhatbhate
         </p>
         <p className="text-base font-bold text-txt-primary mt-1 m-0 tracking-wide">
           HIMALAYAN FLEET
@@ -41,6 +45,10 @@ export default function Sidebar({ activePage, onNavigate }) {
               href="#"
               onClick={(e) => {
                 e.preventDefault();
+            <button
+              key={item.id}
+              type="button"
+              onClick={(e) => {
                 onNavigate(item.id);
               }}
               className={`nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all duration-200 ${
@@ -52,6 +60,7 @@ export default function Sidebar({ activePage, onNavigate }) {
               <Icon className="w-5 h-5" />
               {item.label}
             </a>
+            </button>
           );
         })}
       </nav>

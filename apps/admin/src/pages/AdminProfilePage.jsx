@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { authService } from '@bhatbhati/shared/services/authService.js'
+import { profileService } from '@bhatbhati/shared/services/profileService.js'
 import {
   User,
   Lock,
@@ -26,6 +30,176 @@ export default function AdminProfilePage({ onNavigate }) {
   const [notifSms, setNotifSms] = useState(false);
   const [notifPush, setNotifPush] = useState(true);
   const [twoFactor, setTwoFactor] = useState(true);
+} from 'lucide-react'
+
+export default function AdminProfilePage({ onNavigate }) {
+  const navigate = useNavigate()
+  const avatarInputRef = useRef(null)
+
+  const [showCurrentPw, setShowCurrentPw] = useState(false)
+  const [showNewPw, setShowNewPw] = useState(false)
+  const [showConfirmPw, setShowConfirmPw] = useState(false)
+
+  const [notifEmail, setNotifEmail] = useState(true)
+  const [notifSms, setNotifSms] = useState(false)
+  const [notifPush, setNotifPush] = useState(true)
+  const [twoFactor, setTwoFactor] = useState(true)
+
+  const [profile, setProfile] = useState({
+    fullName: 'Admin User',
+    displayName: 'Admin',
+    email: '',
+    phone: '',
+    timezone: 'Asia/Kathmandu (NPT +05:45)',
+    role: 'Super Admin',
+    avatarUrl: '',
+  })
+
+  const [passwords, setPasswords] = useState({
+    current: '',
+    next: '',
+    confirm: '',
+  })
+
+  const [sessions, setSessions] = useState([
+    { id: 'current', device: 'Windows PC — Chrome', location: 'Kathmandu, Nepal', time: 'Current session', icon: Monitor, current: true },
+    { id: 'mobile', device: 'iPhone 15 Pro — Safari', location: 'Pokhara, Nepal', time: '2 hours ago', icon: Smartphone, current: false },
+  ])
+
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError('')
+      try {
+        const user = await authService.getUser()
+        if (!user) {
+          navigate('/login', { replace: true })
+          return
+        }
+        const dbProfile = await profileService.getById(user.id)
+        const fullName = dbProfile?.full_name || 'Admin User'
+        const displayName = fullName.split(' ')[0] || 'Admin'
+
+        setProfile((prev) => ({
+          ...prev,
+          fullName,
+          displayName,
+          email: user.email || '',
+          phone: dbProfile?.phone || '',
+          role: dbProfile?.role === 'admin' ? 'Super Admin' : 'User',
+          avatarUrl: dbProfile?.avatar_url || '',
+        }))
+      } catch (err) {
+        setError(err.message || 'Failed to load profile')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [navigate])
+
+  const updateProfileField = (key, value) => {
+    setProfile((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const saveProfile = async () => {
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      const user = await authService.getUser()
+      if (!user) throw new Error('You are signed out. Please log in again.')
+
+      await profileService.update(user.id, {
+        full_name: profile.fullName,
+        phone: profile.phone,
+      })
+
+      if (profile.email && profile.email !== user.email) {
+        setMessage('Profile saved. Email update requires secure verification in Supabase Auth.')
+      } else {
+        setMessage('Profile changes saved.')
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to save profile')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const updatePassword = async () => {
+    setPasswordSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      if (!passwords.current || !passwords.next || !passwords.confirm) {
+        throw new Error('Please fill all password fields.')
+      }
+      if (passwords.next.length < 8) {
+        throw new Error('New password must be at least 8 characters long.')
+      }
+      if (passwords.next !== passwords.confirm) {
+        throw new Error('New password and confirm password do not match.')
+      }
+
+      const currentUser = await authService.getUser()
+      if (!currentUser?.email) throw new Error('Session missing. Please log in again.')
+
+      await authService.signIn(currentUser.email, passwords.current)
+      await authService.updatePassword(passwords.next)
+
+      setPasswords({ current: '', next: '', confirm: '' })
+      setMessage('Password updated successfully.')
+    } catch (err) {
+      setError(err.message || 'Failed to update password')
+    } finally {
+      setPasswordSaving(false)
+    }
+  }
+
+  const handleAvatarUpload = async (file) => {
+    if (!file) return
+    setError('')
+    setMessage('')
+    try {
+      const user = await authService.getUser()
+      if (!user) throw new Error('Session missing. Please log in again.')
+      const avatarUrl = await profileService.uploadAvatar(user.id, file)
+      await profileService.update(user.id, { avatar_url: avatarUrl })
+      setProfile((prev) => ({ ...prev, avatarUrl }))
+      setMessage('Avatar updated.')
+    } catch (err) {
+      setError(err.message || 'Failed to upload avatar')
+    }
+  }
+
+  const handleSignOut = async () => {
+    try {
+      setSigningOut(true)
+      await authService.signOut()
+      navigate('/login', { replace: true })
+    } catch (err) {
+      setError(err.message || 'Failed to sign out')
+    } finally {
+      setSigningOut(false)
+    }
+  }
+
+  const revokeSession = (sessionId) => {
+    setSessions((prev) => prev.filter((s) => s.id !== sessionId))
+    setMessage('Session revoked from this device list.')
+  }
+
+  if (loading) {
+    return <p className="text-sm text-txt-secondary">Loading profile...</p>
+  }
 
   return (
     <div>
@@ -55,16 +229,52 @@ export default function AdminProfilePage({ onNavigate }) {
               {/* Info */}
               <div className="flex-1">
                 <h3 className="text-xl font-bold mb-1">Chakuu</h3>
+      {error && <div className="mb-4 rounded-md border border-status-red/30 bg-status-red/10 px-3 py-2 text-xs text-status-red">{error}</div>}
+      {message && <div className="mb-4 rounded-md border border-status-green/30 bg-status-green/10 px-3 py-2 text-xs text-status-green">{message}</div>}
+
+      <div className="grid grid-cols-[1fr_300px] gap-6">
+        <div className="space-y-6">
+          <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
+            <div className="flex items-start gap-6">
+              <div className="relative group">
+                {profile.avatarUrl ? (
+                  <img src={profile.avatarUrl} alt="Admin avatar" className="w-24 h-24 rounded-xl object-cover" />
+                ) : (
+                  <div className="w-24 h-24 rounded-xl bg-brand-orange flex items-center justify-center text-3xl font-bold text-dark">
+                    <User className="w-12 h-12" />
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="absolute inset-0 rounded-xl bg-dark/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer border-none"
+                >
+                  <Camera className="w-6 h-6 text-white" />
+                </button>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleAvatarUpload(e.target.files?.[0])}
+                />
+                <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-status-green rounded-full border-2 border-dark-deeper" />
+              </div>
+
+              <div className="flex-1">
+                <h3 className="text-xl font-bold mb-1">{profile.displayName || 'Admin'}</h3>
                 <p className="text-sm text-brand-orange font-semibold mb-1">Fleet Director</p>
                 <p className="text-xs text-txt-secondary mb-3">Member since January 2024 · Kathmandu, Nepal</p>
                 <div className="flex items-center gap-3">
                   <span className="px-2.5 py-1 bg-status-green/20 text-status-green text-[10px] font-bold rounded-full uppercase">Active</span>
                   <span className="px-2.5 py-1 bg-brand-orange/20 text-brand-orange text-[10px] font-bold rounded-full uppercase">Super Admin</span>
+                  <span className="px-2.5 py-1 bg-brand-orange/20 text-brand-orange text-[10px] font-bold rounded-full uppercase">{profile.role}</span>
                   <span className="px-2.5 py-1 bg-[rgba(100,150,200,0.2)] text-[#64d4ff] text-[10px] font-bold rounded-full uppercase">Verified</span>
                 </div>
               </div>
 
               <button className="text-xs text-brand-orange border border-brand-orange px-4 py-2 rounded-lg hover:bg-brand-orange/10 transition-colors cursor-pointer bg-transparent font-semibold">
+              <button type="button" onClick={() => setMessage('Edit profile mode is active below.')} className="text-xs text-brand-orange border border-brand-orange px-4 py-2 rounded-lg hover:bg-brand-orange/10 transition-colors cursor-pointer bg-transparent font-semibold">
                 Edit Profile
               </button>
             </div>
@@ -91,6 +301,11 @@ export default function AdminProfilePage({ onNavigate }) {
                   defaultValue="Chakuu"
                   className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none transition-colors"
                 />
+                <input type="text" value={profile.fullName} onChange={(e) => updateProfileField('fullName', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Display Name</label>
+                <input type="text" value={profile.displayName} onChange={(e) => updateProfileField('displayName', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
               </div>
               <div>
                 <label className="text-xs text-txt-secondary mb-1.5 block flex items-center gap-1.5">
@@ -101,6 +316,7 @@ export default function AdminProfilePage({ onNavigate }) {
                   defaultValue="chakuu@bhatbhatifleet.com"
                   className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none transition-colors"
                 />
+                <input type="email" value={profile.email} onChange={(e) => updateProfileField('email', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
               </div>
               <div>
                 <label className="text-xs text-txt-secondary mb-1.5 block flex items-center gap-1.5">
@@ -111,6 +327,7 @@ export default function AdminProfilePage({ onNavigate }) {
                   defaultValue="+977 9841-XXXXXX"
                   className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-primary focus:border-brand-orange focus:outline-none transition-colors"
                 />
+                <input type="tel" value={profile.phone} onChange={(e) => updateProfileField('phone', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
               </div>
               <div>
                 <label className="text-xs text-txt-secondary mb-1.5 block flex items-center gap-1.5">
@@ -130,6 +347,11 @@ export default function AdminProfilePage({ onNavigate }) {
                   readOnly
                   className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-secondary cursor-not-allowed"
                 />
+                <input type="text" value={profile.timezone} onChange={(e) => updateProfileField('timezone', e.target.value)} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Role</label>
+                <input type="text" value={`Fleet Director — ${profile.role}`} readOnly className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-secondary cursor-not-allowed" />
               </div>
             </div>
           </div>
@@ -152,6 +374,8 @@ export default function AdminProfilePage({ onNavigate }) {
                     onClick={() => setShowCurrentPw(!showCurrentPw)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-txt-secondary hover:text-txt-primary transition-colors"
                   >
+                  <input type={showCurrentPw ? 'text' : 'password'} value={passwords.current} onChange={(e) => setPasswords((p) => ({ ...p, current: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 pr-10 text-sm" />
+                  <button type="button" onClick={() => setShowCurrentPw(!showCurrentPw)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-txt-secondary">
                     {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -169,6 +393,8 @@ export default function AdminProfilePage({ onNavigate }) {
                       onClick={() => setShowNewPw(!showNewPw)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-txt-secondary hover:text-txt-primary transition-colors"
                     >
+                    <input type={showNewPw ? 'text' : 'password'} value={passwords.next} onChange={(e) => setPasswords((p) => ({ ...p, next: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 pr-10 text-sm" />
+                    <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-txt-secondary">
                       {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
@@ -185,6 +411,8 @@ export default function AdminProfilePage({ onNavigate }) {
                       onClick={() => setShowConfirmPw(!showConfirmPw)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-txt-secondary hover:text-txt-primary transition-colors"
                     >
+                    <input type={showConfirmPw ? 'text' : 'password'} value={passwords.confirm} onChange={(e) => setPasswords((p) => ({ ...p, confirm: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 pr-10 text-sm" />
+                    <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-txt-secondary">
                       {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
@@ -200,6 +428,10 @@ export default function AdminProfilePage({ onNavigate }) {
                     "One lowercase letter",
                     "One number or symbol",
                   ].map((req) => (
+              <div className="bg-dark-deeper rounded-lg p-3">
+                <p className="text-[10px] text-txt-secondary uppercase tracking-wider font-semibold mb-2">Password Requirements</p>
+                <div className="grid grid-cols-2 gap-1">
+                  {['At least 8 characters', 'One uppercase letter', 'One lowercase letter', 'One number or symbol'].map((req) => (
                     <span key={req} className="text-[11px] text-txt-secondary flex items-center gap-1.5">
                       <CheckCircle className="w-3 h-3 text-txt-muted" /> {req}
                     </span>
@@ -211,6 +443,12 @@ export default function AdminProfilePage({ onNavigate }) {
           </div>
 
           {/* Security & Two-Factor */}
+              <button type="button" onClick={updatePassword} disabled={passwordSaving} className="btn-action px-6 py-2.5 text-sm disabled:opacity-60">
+                {passwordSaving ? 'Updating...' : 'Update Password'}
+              </button>
+            </div>
+          </div>
+
           <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
             <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
               <Shield className="w-4 h-4 text-brand-orange" /> Security Settings
@@ -245,6 +483,17 @@ export default function AdminProfilePage({ onNavigate }) {
                 const Icon = session.icon;
                 return (
                   <div key={session.device} className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3">
+              <button type="button" onClick={() => setTwoFactor(!twoFactor)} className={`w-11 h-6 rounded-full relative border-none ${twoFactor ? 'bg-brand-orange' : 'bg-dark-border'}`}>
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full ${twoFactor ? 'right-0.5 bg-white' : 'left-0.5 bg-txt-secondary'}`} />
+              </button>
+            </div>
+
+            <p className="text-xs text-txt-secondary uppercase tracking-wider font-semibold mb-3">Active Sessions</p>
+            <div className="space-y-2">
+              {sessions.map((session) => {
+                const Icon = session.icon
+                return (
+                  <div key={session.id} className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-dark-border flex items-center justify-center">
                         <Icon className="w-4 h-4 text-txt-secondary" />
@@ -255,17 +504,20 @@ export default function AdminProfilePage({ onNavigate }) {
                           {session.current && (
                             <span className="px-1.5 py-0.5 bg-status-green/20 text-status-green text-[9px] font-bold rounded uppercase">Current</span>
                           )}
+                          {session.current && <span className="px-1.5 py-0.5 bg-status-green/20 text-status-green text-[9px] font-bold rounded uppercase">Current</span>}
                         </p>
                         <p className="text-xs text-txt-secondary">{session.location} · {session.time}</p>
                       </div>
                     </div>
                     {!session.current && (
                       <button className="text-xs text-status-red hover:text-status-red/80 transition-colors bg-transparent border-none cursor-pointer font-semibold">
+                      <button type="button" onClick={() => revokeSession(session.id)} className="text-xs text-status-red hover:text-status-red/80 bg-transparent border-none cursor-pointer font-semibold">
                         Revoke
                       </button>
                     )}
                   </div>
                 );
+                )
               })}
             </div>
           </div>
@@ -280,6 +532,9 @@ export default function AdminProfilePage({ onNavigate }) {
                 { id: "email", label: "Email Notifications", desc: "Booking alerts, compliance updates", value: notifEmail, toggle: setNotifEmail },
                 { id: "sms", label: "SMS Alerts", desc: "Critical fleet warnings only", value: notifSms, toggle: setNotifSms },
                 { id: "push", label: "Push Notifications", desc: "Real-time updates in browser", value: notifPush, toggle: setNotifPush },
+                { id: 'email', label: 'Email Notifications', desc: 'Booking alerts, compliance updates', value: notifEmail, toggle: setNotifEmail },
+                { id: 'sms', label: 'SMS Alerts', desc: 'Critical fleet warnings only', value: notifSms, toggle: setNotifSms },
+                { id: 'push', label: 'Push Notifications', desc: 'Real-time updates in browser', value: notifPush, toggle: setNotifPush },
               ].map((pref) => (
                 <div key={pref.id} className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3">
                   <div>
@@ -291,6 +546,8 @@ export default function AdminProfilePage({ onNavigate }) {
                     className={`w-11 h-6 rounded-full relative cursor-pointer border-none transition-colors ${pref.value ? "bg-brand-orange" : "bg-dark-border"}`}
                   >
                     <div className={`absolute top-0.5 w-5 h-5 rounded-full transition-all ${pref.value ? "right-0.5 bg-white" : "left-0.5 bg-txt-secondary"}`} />
+                  <button type="button" onClick={() => pref.toggle(!pref.value)} className={`w-11 h-6 rounded-full relative border-none ${pref.value ? 'bg-brand-orange' : 'bg-dark-border'}`}>
+                    <div className={`absolute top-0.5 w-5 h-5 rounded-full ${pref.value ? 'right-0.5 bg-white' : 'left-0.5 bg-txt-secondary'}`} />
                   </button>
                 </div>
               ))}
@@ -310,6 +567,17 @@ export default function AdminProfilePage({ onNavigate }) {
                 Cancel
               </button>
               <button className="btn-action px-8 py-2.5 text-sm">Save Changes</button>
+          <div className="flex items-center justify-between">
+            <button onClick={handleSignOut} disabled={signingOut} className="flex items-center gap-2 text-sm text-status-red hover:text-status-red/80 bg-transparent border-none cursor-pointer font-semibold disabled:opacity-60">
+              <LogOut className="w-4 h-4" /> {signingOut ? 'Signing Out...' : 'Sign Out'}
+            </button>
+            <div className="flex items-center gap-4">
+              <button type="button" onClick={() => onNavigate('dashboard')} className="text-sm text-txt-secondary hover:text-txt-primary transition-colors bg-transparent border-none cursor-pointer">
+                Cancel
+              </button>
+              <button type="button" onClick={saveProfile} disabled={saving} className="btn-action px-8 py-2.5 text-sm disabled:opacity-60">
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
             </div>
           </div>
         </div>
@@ -317,6 +585,7 @@ export default function AdminProfilePage({ onNavigate }) {
         {/* Right: Summary Sidebar */}
         <div className="space-y-4">
           {/* Account Overview */}
+        <div className="space-y-4">
           <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
             <h4 className="text-sm font-semibold mb-3">Account Overview</h4>
             <div className="space-y-3">
@@ -326,6 +595,7 @@ export default function AdminProfilePage({ onNavigate }) {
                 </div>
                 <div>
                   <p className="text-sm font-bold">Chakuu</p>
+                  <p className="text-sm font-bold">{profile.displayName || 'Admin'}</p>
                   <p className="text-[10px] text-txt-secondary">Fleet Director</p>
                 </div>
               </div>
@@ -344,6 +614,9 @@ export default function AdminProfilePage({ onNavigate }) {
                     {twoFactor ? "Enabled" : "Disabled"}
                   </span>
                 </div>
+                <div className="flex justify-between text-xs"><span className="text-txt-secondary">Account Status</span><span className="text-status-green font-semibold">Active</span></div>
+                <div className="flex justify-between text-xs"><span className="text-txt-secondary">Role</span><span className="text-brand-orange font-semibold">{profile.role}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-txt-secondary">2FA</span><span className={`font-semibold ${twoFactor ? 'text-status-green' : 'text-status-red'}`}>{twoFactor ? 'Enabled' : 'Disabled'}</span></div>
               </div>
             </div>
           </div>
@@ -357,6 +630,10 @@ export default function AdminProfilePage({ onNavigate }) {
                 { action: "New vehicle added", time: "5 days ago", color: "text-status-green" },
                 { action: "Booking #bk-003 approved", time: "1 week ago", color: "text-[#64d4ff]" },
                 { action: "Login from new device", time: "2 weeks ago", color: "text-status-yellow" },
+                { action: 'Password changed', time: '3 days ago', color: 'text-brand-orange' },
+                { action: 'New vehicle added', time: '5 days ago', color: 'text-status-green' },
+                { action: 'Booking updated', time: '1 week ago', color: 'text-[#64d4ff]' },
+                { action: 'Login from new device', time: '2 weeks ago', color: 'text-status-yellow' },
               ].map((item) => (
                 <div key={item.action} className="flex items-start gap-2">
                   <Clock className="w-3 h-3 text-txt-muted mt-0.5 shrink-0" />
@@ -376,6 +653,11 @@ export default function AdminProfilePage({ onNavigate }) {
               Permanently delete your account and all associated data. This action cannot be undone.
             </p>
             <button className="w-full py-2.5 bg-status-red/20 border border-status-red/30 text-status-red rounded-md text-xs font-semibold hover:bg-status-red/30 transition-colors cursor-pointer">
+            <button
+              type="button"
+              onClick={() => setError('Account deletion requires service-role backend endpoint. Action blocked in client app.')}
+              className="w-full py-2.5 bg-status-red/20 border border-status-red/30 text-status-red rounded-md text-xs font-semibold hover:bg-status-red/30 transition-colors cursor-pointer"
+            >
               Delete Account
             </button>
           </div>
@@ -383,4 +665,5 @@ export default function AdminProfilePage({ onNavigate }) {
       </div>
     </div>
   );
+  )
 }

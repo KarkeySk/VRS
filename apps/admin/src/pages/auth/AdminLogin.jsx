@@ -37,7 +37,7 @@ export default function AdminLogin() {
           Admin Panel
         </h1>
         <p style={{ color: '#666', fontSize: '0.85rem', marginBottom: '28px' }}>
-          Bhatbhati Management Console
+          Bhatbhate Management Console
         </p>
 
         {error && (
@@ -53,7 +53,7 @@ export default function AdminLogin() {
             Email
           </label>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@bhatbhati.com" required
+            placeholder="admin@bhatbhate.com" required
             style={{
               width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px',

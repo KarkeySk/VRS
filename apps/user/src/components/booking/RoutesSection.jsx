@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { uiAssetService } from '@bhatbhati/shared/services/uiAssetService.js'
 
 const routes = [
   {
@@ -13,7 +15,7 @@ const routes = [
     id: 2,
     name: 'Annapurna Base',
     image: '/images/route-annapurna.png',
-    tag: 'Expedition',
+    tag: 'Popular',
     days: '7 Days',
     distance: '480 km',
   },
@@ -27,8 +29,16 @@ const routes = [
   },
 ]
 
+const routeImageAssetKeys = {
+  'Upper Mustang': 'user_route_upper_mustang',
+  'Annapurna Base': 'user_route_annapurna_base',
+  Khumbu: 'user_route_khumbu',
+}
+
 export default function RoutesSection() {
   const sectionRef = useRef(null)
+  const navigate = useNavigate()
+  const [routeImageMap, setRouteImageMap] = useState({})
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -48,30 +58,68 @@ export default function RoutesSection() {
     return () => observer.disconnect()
   }, [])
 
+  useEffect(() => {
+    const loadRouteImages = async () => {
+      try {
+        const assets = await uiAssetService.getMany(Object.values(routeImageAssetKeys))
+        const map = {}
+        for (const asset of assets ?? []) {
+          map[asset.asset_key] = asset.image_url
+        }
+        setRouteImageMap(map)
+      } catch (error) {
+        console.error('Failed to load route images from ui_assets:', error)
+      }
+    }
+
+    loadRouteImages()
+  }, [])
+
   return (
     <section className="routes" id="routes" ref={sectionRef}>
       <div className="container">
         {/* Header */}
         <div className="routes-header reveal">
-          <span className="section-label" id="routes-label">Where legends are forged</span>
-          <h2 className="section-title" id="routes-title">LEGENDARY ROUTES</h2>
+          <span className="section-label" id="routes-label">Best places to ride</span>
+          <h2 className="section-title" id="routes-title">POPULAR ROUTES</h2>
           <p className="section-subtitle" id="routes-subtitle">
-            Hand-picked routes through some of Earth's most extreme terrain.
-            Every path tested, every checkpoint verified.
+            These are popular routes in Nepal.
+            Pick one and find matching vehicles.
           </p>
         </div>
 
         {/* Routes Grid */}
         <div className="routes-grid" id="routes-grid">
-          {routes.map((route, i) => (
+          {routes.map((route, i) => {
+            const assetKey = routeImageAssetKeys[route.name]
+            const imageUrl = (assetKey && routeImageMap[assetKey]) || route.image
+
+            return (
             <div
               className="route-card reveal"
               key={route.id}
               id={`route-card-${route.id}`}
               style={{ transitionDelay: `${i * 0.15}s` }}
+              onClick={() => navigate('/terrain')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  navigate('/terrain')
+                }
+              }}
             >
               <div className="route-card-img">
-                <img src={route.image} alt={route.name} loading="lazy" />
+                <img
+                  src={imageUrl}
+                  alt={route.name}
+                  loading="lazy"
+                  onError={(e) => {
+                    if (e.currentTarget.src.endsWith(route.image)) return
+                    e.currentTarget.src = route.image
+                  }}
+                />
               </div>
               <div className="route-card-overlay"></div>
               <div className="route-card-content">
@@ -95,7 +143,7 @@ export default function RoutesSection() {
                 </div>
               </div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
     </section>

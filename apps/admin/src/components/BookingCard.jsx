@@ -15,6 +15,9 @@ const TYPE_STYLES = {
 export default function BookingCard({ booking }) {
   const status = STATUS_STYLES[booking.status];
   const type = TYPE_STYLES[booking.type];
+export default function BookingCard({ booking, onManage = () => {} }) {
+  const status = STATUS_STYLES[booking.status] || STATUS_STYLES.PARTIAL;
+  const type = TYPE_STYLES[booking.type] || TYPE_STYLES["SELF-DRIVE"];
 
   return (
     <div className="booking-card flex gap-4 p-4 bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-lg transition-all duration-200">
@@ -24,6 +27,15 @@ export default function BookingCard({ booking }) {
         alt={booking.vehicle}
         className="w-[100px] h-[70px] rounded-md object-cover flex-shrink-0"
       />
+      {booking.image ? (
+        <img
+          src={booking.image}
+          alt={booking.vehicle}
+          className="w-[100px] h-[70px] rounded-md object-cover flex-shrink-0"
+        />
+      ) : (
+        <div className="w-[100px] h-[70px] rounded-md bg-dark-border flex-shrink-0" />
+      )}
 
       {/* Details */}
       <div className="flex-1 min-w-0">
@@ -53,6 +65,13 @@ export default function BookingCard({ booking }) {
         <p className="text-xs text-brand-orange cursor-pointer mt-1 m-0 hover:text-brand-orange-dark transition-colors">
           Manage Details
         </p>
+        <button
+          type="button"
+          onClick={() => onManage(booking)}
+          className="text-xs text-brand-orange cursor-pointer mt-1 m-0 hover:text-brand-orange-dark transition-colors bg-transparent border-none p-0"
+        >
+          Manage Details
+        </button>
       </div>
     </div>
   );

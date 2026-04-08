@@ -1,6 +1,45 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Mountain, ArrowRight, Navigation, Thermometer, Wind } from 'lucide-react';
+import nepalProvincePaths from '../../data/nepalProvincePaths.json';
+
+const provinceImages = {
+    koshi: [
+        'https://images.unsplash.com/photo-1585938389612-a552a28d6914?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1486911278844-a81c5267e227?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=80',
+    ],
+    madhesh: [
+        'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80',
+    ],
+    bagmati: [
+        'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?auto=format&fit=crop&w=900&q=80',
+    ],
+    gandaki: [
+        'https://images.unsplash.com/photo-1464822759844-d150ad6d4c06?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1508261305436-58d85039f88a?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=900&q=80',
+    ],
+    lumbini: [
+        'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=900&q=80',
+    ],
+    karnali: [
+        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1464820453369-31d2c0b651af?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80',
+    ],
+    sudurpashchim: [
+        'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=80',
+    ],
+};
 
 const regions = [
     {
@@ -11,11 +50,10 @@ const regions = [
         altitude: '8,848m',
         temp: '-26°C',
         routes: ['Everest Base Camp', 'Kanchenjunga Trek', 'Namche Bazaar'],
-        districts: ['Solukhumbu', 'Taplejung', 'Ilam', 'Jhapa', 'Morang'],
-        desc: 'Home to Mt. Everest. Extreme high-altitude terrain with ice, snow, and the world\'s toughest roads.',
+        desc: 'Home to Mt. Everest. Very high roads with snow and rough tracks.',
         color: '#60a5fa',
-        // SVG path for Province 1 (eastern Nepal)
-        path: 'M580,60 L620,45 L660,55 L700,40 L720,60 L740,90 L730,130 L710,160 L690,200 L720,240 L700,280 L670,300 L640,290 L610,300 L580,280 L560,240 L570,200 L590,170 L600,140 L580,110 L570,80 Z',
+        // Eastern section
+        path: 'M748,132 L785,90 L850,115 L885,150 L875,188 L850,220 L825,245 L840,272 L810,305 L752,322 L742,238 L760,205 L742,170 Z',
     },
     {
         id: 'madhesh',
@@ -25,10 +63,9 @@ const regions = [
         altitude: '60m',
         temp: '38°C',
         routes: ['Janakpur Circuit', 'Rajbiraj Wetlands', 'Birgunj–Raxaul Corridor'],
-        districts: ['Janakpur', 'Birgunj', 'Rajbiraj', 'Dhanusha'],
-        desc: 'Flat Terai plains. Smooth highways and warm climate — ideal for comfortable valley drives.',
+        desc: 'Flat Terai plains with smooth roads and warm weather.',
         color: '#34d399',
-        path: 'M380,280 L420,290 L460,285 L500,290 L540,285 L580,280 L610,300 L640,290 L670,300 L660,330 L620,340 L580,335 L540,340 L500,335 L460,340 L420,335 L380,340 L360,320 L370,300 Z',
+        path: 'M372,280 L438,272 L500,266 L562,270 L628,266 L688,260 L742,238 L752,322 L688,316 L628,325 L562,318 L500,326 L435,320 L372,326 Z',
     },
     {
         id: 'bagmati',
@@ -38,10 +75,9 @@ const regions = [
         altitude: '1,400m',
         temp: '22°C',
         routes: ['Kathmandu Valley', 'Nagarkot Sunrise', 'Langtang Valley', 'Helambu Trek'],
-        districts: ['Kathmandu', 'Lalitpur', 'Bhaktapur', 'Rasuwa', 'Sindhupalchok'],
-        desc: 'Nepal\'s capital region. Mix of city roads, valley highways, and mountain trails leading to Langtang.',
+        desc: 'Nepal\'s capital area with city roads, highways, and some mountain tracks.',
         color: '#e8732a',
-        path: 'M400,140 L430,120 L460,130 L490,115 L520,125 L540,150 L560,180 L570,200 L560,240 L540,260 L500,270 L460,265 L430,270 L400,260 L380,230 L370,200 L380,170 L390,150 Z',
+        path: 'M548,138 L575,90 L650,85 L715,95 L748,132 L742,170 L760,205 L742,238 L705,254 L645,262 L585,254 L552,205 L540,170 Z',
     },
     {
         id: 'gandaki',
@@ -51,10 +87,9 @@ const regions = [
         altitude: '8,167m',
         temp: '-18°C',
         routes: ['Annapurna Circuit', 'Upper Mustang', 'Pokhara Lakeside', 'Jomsom Highway'],
-        districts: ['Kaski', 'Mustang', 'Manang', 'Lamjung', 'Gorkha'],
-        desc: 'Annapurna and Mustang territory. Legendary off-road routes through the world\'s deepest gorge.',
+        desc: 'Annapurna and Mustang area with famous off-road routes.',
         color: '#818cf8',
-        path: 'M260,70 L300,55 L340,65 L370,50 L400,70 L400,140 L390,150 L380,170 L370,200 L380,230 L370,250 L340,260 L310,270 L280,260 L260,230 L250,200 L240,170 L250,130 L260,100 Z',
+        path: 'M388,118 L430,88 L500,80 L545,90 L548,138 L540,170 L552,205 L535,238 L500,252 L438,248 L395,232 L372,230 L360,194 L378,158 Z',
     },
     {
         id: 'lumbini',
@@ -64,10 +99,9 @@ const regions = [
         altitude: '150m',
         temp: '34°C',
         routes: ['Lumbini (Buddha Birthplace)', 'Palpa Hill Station', 'Siddhartha Highway'],
-        districts: ['Rupandehi', 'Palpa', 'Kapilvastu', 'Dang', 'Banke'],
-        desc: 'Southern plains with historic sites. Smooth highways and gentle hill roads perfect for valley exploration.',
+        desc: 'Southern plains with historic places, smooth highways, and easy hill roads.',
         color: '#f59e0b',
-        path: 'M200,220 L230,210 L260,230 L280,260 L310,270 L340,260 L370,250 L380,280 L370,300 L360,320 L380,340 L340,345 L300,340 L260,345 L230,335 L200,320 L190,290 L195,260 Z',
+        path: 'M170,230 L205,250 L245,270 L300,276 L350,262 L372,280 L372,326 L308,320 L244,330 L182,323 L128,312 L165,268 Z',
     },
     {
         id: 'karnali',
@@ -77,10 +111,9 @@ const regions = [
         altitude: '4,200m',
         temp: '-8°C',
         routes: ['Rara Lake', 'Dolpo Trek', 'Jumla–Humla Trail', 'Shey Phoksundo'],
-        districts: ['Jumla', 'Dolpa', 'Humla', 'Mugu', 'Kalikot'],
-        desc: 'Nepal\'s wildest frontier. Remote, rugged, minimal roads — only the toughest vehicles survive here.',
+        desc: 'A remote and rough area with very few roads. Strong vehicles are best here.',
         color: '#f472b6',
-        path: 'M120,55 L160,40 L200,50 L240,42 L260,70 L260,100 L250,130 L240,170 L250,200 L230,210 L200,220 L170,210 L140,200 L120,170 L110,130 L115,90 Z',
+        path: 'M130,110 L185,100 L235,88 L300,95 L360,82 L388,118 L378,158 L360,194 L372,230 L350,262 L300,276 L245,270 L205,250 L170,230 L158,190 L160,150 Z',
     },
     {
         id: 'sudurpashchim',
@@ -90,10 +123,9 @@ const regions = [
         altitude: '7,132m',
         temp: '-12°C',
         routes: ['Api Nampa Conservation', 'Khaptad National Park', 'Mahakali Corridor'],
-        districts: ['Darchula', 'Baitadi', 'Bajhang', 'Kanchanpur', 'Kailali'],
-        desc: 'Far-western Nepal. Unexplored mountain wilderness with challenging trails and border crossings.',
+        desc: 'Far-west Nepal with mountain trails and hard border routes.',
         color: '#a78bfa',
-        path: 'M30,80 L60,55 L90,60 L120,55 L115,90 L110,130 L120,170 L140,200 L170,210 L200,220 L195,260 L190,290 L170,305 L140,310 L110,300 L80,290 L60,260 L40,220 L30,180 L25,140 L28,100 Z',
+        path: 'M20,205 L45,160 L85,130 L130,110 L160,150 L158,190 L170,230 L165,268 L128,312 L88,294 L58,268 L35,238 Z',
     },
 ];
 
@@ -101,8 +133,10 @@ export default function TerrainSelect() {
     const navigate = useNavigate();
     const [hovered, setHovered] = useState(null);
     const [selected, setSelected] = useState(null);
+    const [wheelType, setWheelType] = useState('all');
 
     const activeRegion = regions.find((r) => r.id === (selected || hovered));
+    const activeImages = activeRegion ? (provinceImages[activeRegion.id] || []) : [];
 
     const handleSelect = (regionId) => {
         setSelected(regionId);
@@ -110,23 +144,33 @@ export default function TerrainSelect() {
 
     const handleProceed = () => {
         if (!activeRegion) return;
-        navigate(`/vehicles?terrain=${encodeURIComponent(activeRegion.terrain)}&region=${encodeURIComponent(activeRegion.name)}`);
+        navigate(`/vehicles?terrain=${encodeURIComponent(activeRegion.terrain)}&region=${encodeURIComponent(activeRegion.name)}&wheels=${wheelType}`);
+    };
+
+    const provinceCenters = {
+        koshi: [808, 203],
+        madhesh: [560, 300],
+        bagmati: [640, 198],
+        gandaki: [470, 190],
+        lumbini: [255, 298],
+        karnali: [270, 185],
+        sudurpashchim: [105, 225],
     };
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', background: '#080808', fontFamily: "'Inter', sans-serif", paddingBottom: '80px' }}>
+        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '80px' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
 
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(232,115,42,0.1)', padding: '6px 16px', borderRadius: '30px', fontSize: '0.65rem', fontWeight: '700', letterSpacing: '2px', color: '#e8732a', marginBottom: '16px', border: '1px solid rgba(232,115,42,0.15)' }}>
-                        <MapPin size={12} /> SELECT YOUR DESTINATION
+                        <MapPin size={12} /> PICK YOUR AREA
                     </div>
-                    <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', color: '#fff', marginBottom: '10px' }}>
+                    <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '10px' }}>
                         Where in Nepal?
                     </h1>
-                    <p style={{ color: '#888', fontSize: '0.95rem', maxWidth: '500px', margin: '0 auto' }}>
-                        Click on a province to explore routes and find the perfect vehicle for your terrain.
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '500px', margin: '0 auto' }}>
+                        Click a province to see routes and find the best vehicle for your road type.
                     </p>
                 </div>
 
@@ -136,16 +180,28 @@ export default function TerrainSelect() {
                     <div style={{ flex: '1 1 55%', minWidth: '350px' }}>
                         <div style={{
                             background: '#0c0c0c', borderRadius: '24px', padding: '24px',
-                            border: '1px solid rgba(255,255,255,0.06)', position: 'relative',
+                            border: '1px solid var(--border)', position: 'relative',
                         }}>
-                            <svg viewBox="0 0 760 380" style={{ width: '100%', height: 'auto' }}>
+                            <svg viewBox="0 0 900 380" style={{ width: '100%', height: 'auto' }}>
                                 {/* Nepal outline glow */}
                                 <defs>
                                     <filter id="glow">
                                         <feGaussianBlur stdDeviation="3" result="blur" />
                                         <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                                     </filter>
+                                    <linearGradient id="nepalMapShade" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="rgba(255,255,255,0.07)" />
+                                        <stop offset="100%" stopColor="rgba(255,255,255,0.01)" />
+                                    </linearGradient>
                                 </defs>
+
+                                {/* Nepal silhouette */}
+                                <path
+                                    d={nepalProvincePaths.outline}
+                                    fill="url(#nepalMapShade)"
+                                    stroke="rgba(255,255,255,0.22)"
+                                    strokeWidth="1.3"
+                                />
 
                                 {/* Province shapes */}
                                 {regions.map((region) => {
@@ -155,8 +211,8 @@ export default function TerrainSelect() {
                                     return (
                                         <g key={region.id}>
                                             <path
-                                                d={region.path}
-                                                fill={isActive ? region.color + '30' : 'rgba(255,255,255,0.04)'}
+                                                d={nepalProvincePaths.paths[region.id] || region.path}
+                                                fill={isActive ? region.color + '28' : 'rgba(255,255,255,0.025)'}
                                                 stroke={isActive ? region.color : 'rgba(255,255,255,0.12)'}
                                                 strokeWidth={isActive ? 2.5 : 1}
                                                 style={{ cursor: 'pointer', transition: 'all 0.3s ease', filter: isActive ? 'url(#glow)' : 'none' }}
@@ -171,24 +227,10 @@ export default function TerrainSelect() {
                                 {/* Province labels */}
                                 {regions.map((region) => {
                                     const isActive = hovered === region.id || selected === region.id;
-                                    // Calculate rough center from path for label placement
-                                    const centers = {
-                                        koshi: [650, 170],
-                                        madhesh: [520, 310],
-                                        bagmati: [470, 195],
-                                        gandaki: [330, 160],
-                                        lumbini: [280, 280],
-                                        karnali: [185, 135],
-                                        sudurpashchim: [100, 185],
-                                    };
-                                    const [cx, cy] = centers[region.id];
+                                    const [cx, cy] = provinceCenters[region.id];
                                     return (
                                         <g key={region.id + '-label'}
                                             style={{ pointerEvents: 'none' }}>
-                                            {/* District dot */}
-                                            <circle cx={cx} cy={cy - 12} r={isActive ? 5 : 3}
-                                                fill={isActive ? region.color : '#444'}
-                                                style={{ transition: 'all 0.3s' }} />
                                             {/* Province name */}
                                             <text x={cx} y={cy + 6}
                                                 textAnchor="middle"
@@ -204,7 +246,7 @@ export default function TerrainSelect() {
                                 })}
 
                                 {/* Compass indicator */}
-                                <g transform="translate(720, 350)">
+                                <g transform="translate(860, 346)">
                                     <text textAnchor="middle" fill="#444" fontSize="9" fontWeight="600" fontFamily="Inter, sans-serif">N</text>
                                     <line x1="0" y1="5" x2="0" y2="18" stroke="#333" strokeWidth="1" />
                                     <polygon points="0,5 -3,12 3,12" fill="#444" />
@@ -219,7 +261,7 @@ export default function TerrainSelect() {
                                 { label: 'All Terrain', color: '#e8732a' },
                                 { label: 'Valley Passes', color: '#34d399' },
                             ].map((l) => (
-                                <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: '#888' }}>
+                                <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
                                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: l.color }} />
                                     {l.label}
                                 </div>
@@ -231,7 +273,7 @@ export default function TerrainSelect() {
                     <div style={{ flex: '1 1 35%', minWidth: '300px' }}>
                         {activeRegion ? (
                             <div style={{
-                                background: '#111', borderRadius: '24px', padding: '32px',
+                                background: 'var(--bg-card)', borderRadius: '24px', padding: '32px',
                                 border: `1px solid ${activeRegion.color}25`,
                                 transition: 'all 0.3s',
                             }}>
@@ -246,7 +288,7 @@ export default function TerrainSelect() {
                                         <Mountain size={22} color={activeRegion.color} />
                                     </div>
                                     <div>
-                                        <h2 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '800', marginBottom: '2px' }}>{activeRegion.name}</h2>
+                                        <h2 style={{ color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: '800', marginBottom: '2px' }}>{activeRegion.name}</h2>
                                         <span style={{
                                             fontSize: '0.6rem', fontWeight: '700', letterSpacing: '1.5px',
                                             color: activeRegion.color, textTransform: 'uppercase',
@@ -258,34 +300,69 @@ export default function TerrainSelect() {
                                     {activeRegion.desc}
                                 </p>
 
+                                {activeImages.length > 0 && (
+                                    <div style={{ marginBottom: '24px' }}>
+                                        <img
+                                            src={activeImages[0]}
+                                            alt={`${activeRegion.name} location`}
+                                            loading="lazy"
+                                            style={{
+                                                width: '100%',
+                                                height: '180px',
+                                                objectFit: 'cover',
+                                                borderRadius: '14px',
+                                                border: '1px solid var(--border)',
+                                                marginBottom: '8px',
+                                            }}
+                                        />
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                            {activeImages.slice(1, 3).map((imageUrl, idx) => (
+                                                <img
+                                                    key={imageUrl}
+                                                    src={imageUrl}
+                                                    alt={`${activeRegion.name} view ${idx + 2}`}
+                                                    loading="lazy"
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '86px',
+                                                        objectFit: 'cover',
+                                                        borderRadius: '10px',
+                                                        border: '1px solid var(--border)',
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Stats */}
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-                                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
+                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
                                         <Navigation size={14} color="#888" style={{ marginBottom: '6px' }} />
-                                        <div style={{ fontSize: '0.6rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Altitude</div>
-                                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#fff' }}>{activeRegion.altitude}</div>
+                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Height</div>
+                                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeRegion.altitude}</div>
                                     </div>
-                                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
+                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
                                         <Thermometer size={14} color="#888" style={{ marginBottom: '6px' }} />
-                                        <div style={{ fontSize: '0.6rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Temp</div>
-                                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#fff' }}>{activeRegion.temp}</div>
+                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Temp</div>
+                                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeRegion.temp}</div>
                                     </div>
-                                    <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
+                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
                                         <Wind size={14} color="#888" style={{ marginBottom: '6px' }} />
-                                        <div style={{ fontSize: '0.6rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Routes</div>
-                                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#fff' }}>{activeRegion.routes.length}</div>
+                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Routes</div>
+                                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeRegion.routes.length}</div>
                                     </div>
                                 </div>
 
                                 {/* Popular routes */}
                                 <div style={{ marginBottom: '24px' }}>
-                                    <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px' }}>Popular Routes</div>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px' }}>Top Routes</div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         {activeRegion.routes.map((route) => (
                                             <div key={route} style={{
                                                 display: 'flex', alignItems: 'center', gap: '10px',
                                                 padding: '10px 14px', borderRadius: '12px',
-                                                background: 'rgba(255,255,255,0.03)',
+                                                background: 'var(--bg-glass)',
                                                 border: '1px solid rgba(255,255,255,0.04)',
                                             }}>
                                                 <MapPin size={13} color={activeRegion.color} />
@@ -295,17 +372,30 @@ export default function TerrainSelect() {
                                     </div>
                                 </div>
 
-                                {/* Districts */}
-                                <div style={{ marginBottom: '28px' }}>
-                                    <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>Key Districts</div>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                        {activeRegion.districts.map((d) => (
-                                            <span key={d} style={{
-                                                padding: '5px 12px', borderRadius: '999px', fontSize: '0.7rem',
-                                                fontWeight: '600', color: activeRegion.color,
-                                                background: activeRegion.color + '10',
-                                                border: `1px solid ${activeRegion.color}20`,
-                                            }}>{d}</span>
+                                <div style={{ marginBottom: '20px' }}>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>Vehicle Kind</div>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        {[
+                                            { id: 'all', label: 'All' },
+                                            { id: 'four', label: 'Four Wheeler' },
+                                            { id: 'two', label: 'Two Wheeler' },
+                                        ].map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => setWheelType(item.id)}
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    borderRadius: '999px',
+                                                    border: wheelType === item.id ? `1px solid ${activeRegion.color}` : '1px solid rgba(255,255,255,0.12)',
+                                                    background: wheelType === item.id ? `${activeRegion.color}20` : 'transparent',
+                                                    color: wheelType === item.id ? activeRegion.color : '#ccc',
+                                                    fontSize: '0.72rem',
+                                                    fontWeight: '700',
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                {item.label}
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
@@ -314,7 +404,7 @@ export default function TerrainSelect() {
                                 <button onClick={handleProceed} style={{
                                     width: '100%', padding: '16px', border: 'none', borderRadius: '14px',
                                     background: `linear-gradient(135deg, ${activeRegion.color}cc, ${activeRegion.color})`,
-                                    color: '#000', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer',
+                                    color: 'var(--accent-ink)', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                     boxShadow: `0 8px 25px ${activeRegion.color}30`,
                                     transition: 'transform 0.2s, box-shadow 0.2s',
@@ -322,27 +412,27 @@ export default function TerrainSelect() {
                                 onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
                                 >
-                                    Find Vehicles for {activeRegion.name.replace(' Province', '')} <ArrowRight size={16} />
+                                    See Vehicles in {activeRegion.name.replace(' Province', '')} <ArrowRight size={16} />
                                 </button>
                             </div>
                         ) : (
                             <div style={{
-                                background: '#111', borderRadius: '24px', padding: '48px 32px',
-                                border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center',
+                                background: 'var(--bg-card)', borderRadius: '24px', padding: '48px 32px',
+                                border: '1px solid var(--border)', textAlign: 'center',
                             }}>
                                 <div style={{
                                     width: '64px', height: '64px', borderRadius: '50%',
-                                    background: 'rgba(255,255,255,0.03)', display: 'flex',
+                                    background: 'var(--bg-glass)', display: 'flex',
                                     alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
-                                    border: '1px solid rgba(255,255,255,0.06)',
+                                    border: '1px solid var(--border)',
                                 }}>
                                     <MapPin size={28} color="#444" />
                                 </div>
-                                <h3 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '700', marginBottom: '8px' }}>
-                                    Select a Province
+                                <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '8px' }}>
+                                    Pick a Province
                                 </h3>
-                                <p style={{ color: '#666', fontSize: '0.85rem', lineHeight: 1.5 }}>
-                                    Click on any province on the map to see available routes, terrain info, and recommended vehicles.
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                                    Click any province on the map to see routes, road info, and suggested vehicles.
                                 </p>
                             </div>
                         )}
@@ -350,14 +440,14 @@ export default function TerrainSelect() {
                         {/* Skip button */}
                         <div style={{ textAlign: 'center', marginTop: '20px' }}>
                             <button onClick={() => navigate('/vehicles')} style={{
-                                background: 'transparent', border: '1px solid rgba(255,255,255,0.08)',
-                                color: '#888', padding: '10px 24px', borderRadius: '999px',
+                                background: 'transparent', border: '1px solid var(--border)',
+                                color: 'var(--text-secondary)', padding: '10px 24px', borderRadius: '999px',
                                 fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer',
                             }}
                             onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
                             onMouseOut={(e) => e.currentTarget.style.color = '#888'}
                             >
-                                Skip — Browse All Vehicles
+                                Skip - See All Vehicles
                             </button>
                         </div>
                     </div>

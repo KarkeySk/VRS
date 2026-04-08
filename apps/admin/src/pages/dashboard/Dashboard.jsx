@@ -21,16 +21,27 @@ const PAGE_META = {
   'add-vehicle': { title: 'Add New Vehicle', subtitle: 'Registration', search: 'Search vehicles...', showNewBtn: false },
   'new-booking': { title: 'New Booking', subtitle: 'Expedition Reservation', search: 'Search vehicles...', showNewBtn: false },
   'admin-profile': { title: 'Admin Profile', subtitle: 'Account Settings', search: 'Search settings...', showNewBtn: false },
+  dashboard: { title: 'Bookings', showNewBtn: true },
+  fleet: { title: 'Fleet', showNewBtn: false },
+  bookings: { title: 'Bookings', showNewBtn: true },
+  compliance: { title: 'Checks & Logs', showNewBtn: false },
+  operations: { title: 'Operations & Logs', subtitle: 'Admin', showNewBtn: false },
+  settings: { title: 'Settings', showNewBtn: false },
+  'add-vehicle': { title: 'Add Vehicle', subtitle: 'Form', showNewBtn: false },
+  'new-booking': { title: 'New Booking', subtitle: 'Booking Form', showNewBtn: false },
+  'admin-profile': { title: 'Profile', subtitle: 'Account', showNewBtn: false },
 }
 
 export default function Dashboard() {
   const [activePage, setActivePage] = useState('dashboard')
+  const [topBarMessage, setTopBarMessage] = useState('')
   const meta = PAGE_META[activePage]
 
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard':
         return <DashboardPage />
+        return <DashboardPage onNavigate={setActivePage} />
       case 'fleet':
         return <FleetPage />
       case 'bookings':
@@ -64,6 +75,24 @@ export default function Dashboard() {
           onNewBooking={() => setActivePage('new-booking')}
         />
         <main className="flex-1 overflow-y-auto p-6">
+          showNewBooking={meta.showNewBtn}
+          onNewBooking={() => setActivePage('new-booking')}
+          onShowNotifications={() => setTopBarMessage('Notifications will be added soon.')}
+          onShowHelp={() => setTopBarMessage('Need help? Open Add Vehicle, New Booking, or Profile.')}
+        />
+        <main className="flex-1 overflow-y-auto p-6">
+          {topBarMessage && (
+            <div className="mb-4 rounded-md border border-brand-orange/30 bg-brand-orange/10 px-3 py-2 text-xs text-brand-orange flex items-center justify-between gap-3">
+              <span>{topBarMessage}</span>
+              <button
+                type="button"
+                className="bg-transparent border-none text-brand-orange cursor-pointer text-xs font-semibold"
+                onClick={() => setTopBarMessage('')}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           {renderPage()}
         </main>
       </div>

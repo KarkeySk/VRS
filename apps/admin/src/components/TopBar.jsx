@@ -1,6 +1,19 @@
 import { Search, Bell, CircleHelp } from "lucide-react";
 
 export default function TopBar({ title, subtitle, searchPlaceholder, showNewBooking, onNewBooking }) {
+import { Bell, CircleHelp, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
+
+export default function TopBar({
+  title,
+  subtitle,
+  showNewBooking,
+  onNewBooking,
+  onShowNotifications = () => {},
+  onShowHelp = () => {},
+}) {
+  const { isDark, toggleTheme } = useTheme()
+
   return (
     <header className="flex items-center justify-between px-6 py-4 border-b border-dark-border bg-dark shrink-0">
       <div className="flex items-center gap-4 flex-1">
@@ -23,12 +36,34 @@ export default function TopBar({ title, subtitle, searchPlaceholder, showNewBook
 
         {/* Notification bell */}
         <button className="w-9 h-9 border-none bg-transparent text-txt-secondary cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(255,255,255,0.05)] hover:text-txt-primary flex items-center justify-center">
+        {/* Notification bell */}
+        <button
+          type="button"
+          onClick={onShowNotifications}
+          className="w-9 h-9 border-none bg-transparent text-txt-secondary cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(255,255,255,0.05)] hover:text-txt-primary flex items-center justify-center"
+        >
           <Bell className="w-5 h-5" />
         </button>
 
         {/* Help */}
         <button className="w-9 h-9 border-none bg-transparent text-txt-secondary cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(255,255,255,0.05)] hover:text-txt-primary flex items-center justify-center">
           <CircleHelp className="w-5 h-5" />
+        </button>
+
+        <button
+          type="button"
+          onClick={onShowHelp}
+          className="w-9 h-9 border-none bg-transparent text-txt-secondary cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(255,255,255,0.05)] hover:text-txt-primary flex items-center justify-center"
+        >
+          <CircleHelp className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={toggleTheme}
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="w-9 h-9 border border-dark-border bg-transparent text-txt-secondary cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(255,255,255,0.05)] hover:text-txt-primary flex items-center justify-center"
+        >
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
 
         {/* New Booking */}
