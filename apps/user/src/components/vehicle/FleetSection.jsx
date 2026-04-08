@@ -1,25 +1,6 @@
 import { useEffect, useRef } from 'react'
-
-const vehicles = [
-  {
-    id: 1,
-    name: 'Toyota Hilux Invincible',
-    image: '/images/vehicle-hilux.png',
-    seats: '5 Seats',
-    engine: '2.8L D4D',
-    price: '4,500',
-    unit: '/day',
-  },
-  {
-    id: 2,
-    name: 'Mahindra Scorpio',
-    image: '/images/vehicle-scorpio.png',
-    seats: '7 Seats',
-    engine: '2.2L mHawk',
-    price: '6,000',
-    unit: '/day',
-  },
-]
+import { useVehicles } from '../../hooks/useVehicles'
+import { normalizeVehicle } from '../../utils/vehicleMapper'
 
 const features = [
   {
@@ -59,6 +40,8 @@ const features = [
 
 export default function FleetSection() {
   const sectionRef = useRef(null)
+  const { vehicles: dbVehicles } = useVehicles()
+  const vehicles = dbVehicles.map(normalizeVehicle).slice(0, 2)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -98,7 +81,7 @@ export default function FleetSection() {
               <div style={{ overflow: 'hidden' }}>
                 <img
                   className="vehicle-card-img"
-                  src={v.image}
+                  src={v.image || '/images/vehicle-hilux.png'}
                   alt={v.name}
                   loading="lazy"
                 />
@@ -113,7 +96,7 @@ export default function FleetSection() {
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                     </svg>
-                    {v.seats}
+                    {v.capacity || 'N/A'}
                   </span>
                   <span className="vehicle-meta-item">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -124,8 +107,8 @@ export default function FleetSection() {
                   </span>
                 </div>
                 <div className="vehicle-card-price">
-                  <span className="price">Rs. {v.price}</span>
-                  <span className="unit">{v.unit}</span>
+                  <span className="price">Rs. {Number(v.price).toLocaleString()}</span>
+                  <span className="unit">/day</span>
                 </div>
               </div>
             </div>

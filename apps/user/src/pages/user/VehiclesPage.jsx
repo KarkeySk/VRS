@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { vehicles } from '@bhatbhati/shared/utils/vehicles.js';
 import { Users, Shield, CloudRain } from 'lucide-react';
+import { useVehicles } from '../../hooks/useVehicles';
+import { normalizeVehicle } from '../../utils/vehicleMapper';
 export default function VehiclesPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -12,6 +13,8 @@ export default function VehiclesPage() {
     const [wheelsFilter, setWheelsFilter] = useState(wheelsParam);
     const [sortHighToLow, setSortHighToLow] = useState(false);
     const [showFilters, setShowFilters] = useState(true);
+    const { vehicles: dbVehicles, loading } = useVehicles();
+    const vehicles = dbVehicles.map(normalizeVehicle);
 
     const filteredVehicles = vehicles
         .filter(v => {
@@ -105,6 +108,9 @@ export default function VehiclesPage() {
                     </button>
                 </div>
                 
+                {loading ? (
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Loading vehicles...</p>
+                ) : (
                 <div className="fleet-grid">
                     {filteredVehicles.map(vehicle => (
                         <div key={vehicle.id} style={{ background: '#111', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => navigate(`/vehicles/${vehicle.id}`)} onMouseOver={(e) => e.currentTarget.style.background = '#1a1a1a'} onMouseOut={(e) => e.currentTarget.style.background = '#111'}>
@@ -137,6 +143,7 @@ export default function VehiclesPage() {
                         </div>
                     ))}
                 </div>
+                )}
 
                 {/* Mountain Conditions Widget at the bottom */}
                 <div style={{ marginTop: '60px', background: 'linear-gradient(180deg, rgba(25,25,25,0.8) 0%, rgba(15,15,15,0.8) 100%)', borderRadius: '24px', padding: '40px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '800px', margin: '60px auto 0' }}>
