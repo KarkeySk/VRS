@@ -1,6 +1,6 @@
 import { MapPin } from "lucide-react";
 
-export default function TrackingChart() {
+export default function TrackingChart({ activeUnits = 0 }) {
   return (
     <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
       <div className="flex items-center gap-3 mb-2">
@@ -11,7 +11,7 @@ export default function TrackingChart() {
         </span>
       </div>
       <p className="text-[13px] text-txt-secondary mb-6 m-0">
-        Monitoring 18 active units across the valley.
+        Monitoring {activeUnits} active units across the valley.
       </p>
 
       {/* Chart Area */}
