@@ -32,20 +32,20 @@ export default function VehiclesPage() {
     return (
         <div style={{ paddingTop: '100px', minHeight: '100vh', paddingBottom: '80px', background: 'var(--bg-primary)' }}>
             <div className="container" style={{ position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '20px', right: '0', display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.03)', padding: '8px 16px', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ position: 'absolute', top: '20px', right: '0', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-glass)', padding: '8px 16px', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
                     </div>
                     <div>
-                        <div style={{ fontSize: '0.625rem', color: '#888', textTransform: 'uppercase', letterSpacing: '1px' }}>Base Camp</div>
-                        <div style={{ fontSize: '0.875rem', fontWeight: '700', color: '#fff' }}>5,364m</div>
+                        <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Base Camp</div>
+                        <div style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-primary)' }}>5,364m</div>
                     </div>
                 </div>
 
                 <div className="section-label" style={{ color: '#e8732a', letterSpacing: '2px', fontWeight: '600' }}>FLEET DISCOVERY</div>
-                <h1 className="section-title" style={{ marginBottom: '16px', fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: '800', lineHeight: 1 }}>Bhatbhati: Conquer<br/>the Heights.</h1>
+                <h1 className="section-title" style={{ marginBottom: '16px', fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: '800', lineHeight: 1 }}>Bhatbhati:<br/>Choose Your Ride</h1>
                 <p style={{ color: '#a0a0a0', fontSize: '1.125rem', maxWidth: '500px', marginBottom: '40px', lineHeight: 1.5 }}>
-                    Curated high-end machinery engineered for the world's most demanding terrain. Choose your oxygen-ready vessel.
+                    Choose from vehicles made for city roads and mountain roads.
                 </p>
 
                 {/* Filters */}
@@ -55,7 +55,7 @@ export default function VehiclesPage() {
                         style={{ background: showFilters ? 'linear-gradient(to right, #fcab73, #e8732a)' : 'rgba(255,255,255,0.05)', border: showFilters ? 'none' : '1px solid rgba(255,255,255,0.1)', color: showFilters ? '#000' : '#fff', padding: '10px 24px', borderRadius: '30px', fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.3s' }}
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-                        Filter Fleet {showFilters ? '✕' : ''}
+                        Filters {showFilters ? '✕' : ''}
                     </button>
                     {showFilters && ['All Terrain', 'Ice Peaks', 'Valley Passes'].map((f) => (
                         <button 
@@ -101,9 +101,9 @@ export default function VehiclesPage() {
                     <div style={{ flex: 1 }}></div>
                     <button 
                         onClick={() => setSortHighToLow(!sortHighToLow)}
-                        style={{ background: sortHighToLow ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px 24px', borderRadius: '30px', fontWeight: '500', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', transition: 'all 0.2s' }}
+                        style={{ background: sortHighToLow ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'var(--text-primary)', padding: '10px 24px', borderRadius: '30px', fontWeight: '500', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', transition: 'all 0.2s' }}
                     >
-                        Price: {sortHighToLow ? 'High-Low' : 'Low-High'}
+                        Price: {sortHighToLow ? 'High to Low' : 'Low to High'}
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: sortHighToLow ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                 </div>
@@ -113,9 +113,9 @@ export default function VehiclesPage() {
                 ) : (
                 <div className="fleet-grid">
                     {filteredVehicles.map(vehicle => (
-                        <div key={vehicle.id} style={{ background: '#111', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => navigate(`/vehicles/${vehicle.id}`)} onMouseOver={(e) => e.currentTarget.style.background = '#1a1a1a'} onMouseOut={(e) => e.currentTarget.style.background = '#111'}>
+                        <div key={vehicle.id} style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => navigate(`/vehicles/${vehicle.id}`)} onMouseOver={(e) => e.currentTarget.style.background = '#1a1a1a'} onMouseOut={(e) => e.currentTarget.style.background = '#111'}>
                             <div style={{ overflow: 'hidden', height: '240px', borderRadius: '16px', position: 'relative', marginBottom: '20px' }}>
-                                <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2, display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg> {vehicle.altitude?.target} RATED
                                 </div>
                                 <img src={vehicle.image} alt={vehicle.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -126,18 +126,18 @@ export default function VehiclesPage() {
                                     <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>{vehicle.name}</h3>
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent)', lineHeight: 1 }}>${vehicle.price}</div>
-                                        <div style={{ fontSize: '0.625rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>PER DAY</div>
+                                        <div style={{ fontSize: '0.625rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '4px' }}>PER DAY</div>
                                     </div>
                                 </div>
-                                <p style={{ color: '#888', fontSize: '0.875rem', marginBottom: '20px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Ultra-Reinforced Expedition Series</p>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '20px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Good for long and rough roads</p>
                                 
                                 <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
-                                    <span style={{ background: 'rgba(255,255,255,0.05)', color: '#a0a0a0', fontSize: '0.625rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '6px 12px', borderRadius: '20px' }}>OXYGEN SEALED</span>
-                                    <span style={{ background: 'rgba(255,255,255,0.05)', color: '#a0a0a0', fontSize: '0.625rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '6px 12px', borderRadius: '20px' }}>WINCH READY</span>
+                                    <span style={{ background: 'var(--bg-glass)', color: '#a0a0a0', fontSize: '0.625rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '6px 12px', borderRadius: '20px' }}>MOUNTAIN READY</span>
+                                    <span style={{ background: 'var(--bg-glass)', color: '#a0a0a0', fontSize: '0.625rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '6px 12px', borderRadius: '20px' }}>LONG TRIP READY</span>
                                 </div>
 
-                                <button onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/9779800000000?text=I'm interested in the ${vehicle.name}`, '_blank'); }} style={{ width: '100%', padding: '14px', background: 'linear-gradient(to right, #fcab73, #e8732a)', border: 'none', borderRadius: '12px', color: '#000', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.875rem' }}>
-                                    Verify via WhatsApp <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                <button onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/9779800000000?text=I'm interested in the ${vehicle.name}`, '_blank'); }} style={{ width: '100%', padding: '14px', background: 'var(--brand-gradient)', border: 'none', borderRadius: '12px', color: 'var(--accent-ink)', fontWeight: '600', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontSize: '0.875rem' }}>
+                                    Ask on WhatsApp <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                                 </button>
                             </div>
                         </div>
@@ -148,30 +148,30 @@ export default function VehiclesPage() {
                 {/* Mountain Conditions Widget at the bottom */}
                 <div style={{ marginTop: '60px', background: 'linear-gradient(180deg, rgba(25,25,25,0.8) 0%, rgba(15,15,15,0.8) 100%)', borderRadius: '24px', padding: '40px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '800px', margin: '60px auto 0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                        <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--bg-glass)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CloudRain size={32} color="#fff" />
                         </div>
                         <div>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '4px' }}>Mountain Conditions</h3>
-                            <p style={{ color: '#888', fontSize: '0.875rem', margin: 0 }}>Current stats for Mustang Highway Route</p>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '4px' }}>Road Weather</h3>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0 }}>Live stats for Mustang Highway</p>
                         </div>
                     </div>
                     
                     <div style={{ display: 'flex', gap: '40px' }}>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.625rem', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>TEMP</div>
+                            <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>TEMP</div>
                             <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>-12°C</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.625rem', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>WIND</div>
+                            <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>WIND</div>
                             <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>45km/h</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.625rem', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>VIS</div>
+                            <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>VIS</div>
                             <div style={{ fontSize: '1.5rem', fontWeight: '700' }}>Low</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.625rem', color: '#888', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>PASS</div>
+                            <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>PASS</div>
                             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--accent)' }}>OPEN</div>
                         </div>
                     </div>

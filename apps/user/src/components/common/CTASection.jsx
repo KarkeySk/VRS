@@ -26,7 +26,7 @@ export default function CTASection() {
     <section className="cta" id="cta" ref={sectionRef}>
       <div className="container">
         <h2 className="cta-title reveal" id="cta-title">
-          READY TO<br />BREAK GROUND?
+          READY TO<br />START?
         </h2>
         <div className="cta-buttons reveal">
           <Link to="/vehicles" className="btn btn-primary" id="cta-explore-btn">
@@ -35,9 +35,9 @@ export default function CTASection() {
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </Link>
-          <a href="#fleet" className="btn btn-outline" id="cta-contact-btn">
-            Contact Us
-          </a>
+          <Link to="/terrain" className="btn btn-outline" id="cta-contact-btn">
+            Plan by Terrain
+          </Link>
         </div>
       </div>
     </section>
