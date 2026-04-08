@@ -1,6 +1,9 @@
-import { Search, Bell, CircleHelp } from "lucide-react";
+import { Search, Bell, CircleHelp, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function TopBar({ title, subtitle, searchPlaceholder, showNewBooking, onNewBooking }) {
+  const { isDark, toggleTheme } = useTheme()
+
   return (
     <header className="flex items-center justify-between px-6 py-4 border-b border-dark-border bg-dark shrink-0">
       <div className="flex items-center gap-4 flex-1">
@@ -29,6 +32,14 @@ export default function TopBar({ title, subtitle, searchPlaceholder, showNewBook
         {/* Help */}
         <button className="w-9 h-9 border-none bg-transparent text-txt-secondary cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(255,255,255,0.05)] hover:text-txt-primary flex items-center justify-center">
           <CircleHelp className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={toggleTheme}
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="w-9 h-9 border border-dark-border bg-transparent text-txt-secondary cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(255,255,255,0.05)] hover:text-txt-primary flex items-center justify-center"
+        >
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
 
         {/* New Booking */}
