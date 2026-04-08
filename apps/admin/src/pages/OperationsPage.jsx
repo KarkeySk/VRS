@@ -15,24 +15,32 @@ export default function OperationsPage() {
   const [bookings, setBookings] = useState([]);
   const [forecastImage, setForecastImage] = useState("");
   const [gridImage, setGridImage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const load = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const [vehicleData, bookingData, assets] = await Promise.all([
+        vehicleService.getAllForAdmin(),
+        bookingService.getAll(),
+        uiAssetService.getMany(["admin_operations_forecast", "admin_operations_grid"]),
+      ]);
+      setVehicles(vehicleData ?? []);
+      setBookings(bookingData ?? []);
+      const assetMap = new Map((assets ?? []).map((a) => [a.asset_key, a.image_url]));
+      setForecastImage(assetMap.get("admin_operations_forecast") || "");
+      setGridImage(assetMap.get("admin_operations_grid") || "");
+    } catch (err) {
+      console.error("Failed to load operations:", err);
+      setError(err.message || "Failed to load operations data.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [vehicleData, bookingData, assets] = await Promise.all([
-          vehicleService.getAllForAdmin(),
-          bookingService.getAll(),
-          uiAssetService.getMany(["admin_operations_forecast", "admin_operations_grid"]),
-        ]);
-        setVehicles(vehicleData ?? []);
-        setBookings(bookingData ?? []);
-        const assetMap = new Map((assets ?? []).map((a) => [a.asset_key, a.image_url]));
-        setForecastImage(assetMap.get("admin_operations_forecast") || "");
-        setGridImage(assetMap.get("admin_operations_grid") || "");
-      } catch (err) {
-        console.error("Failed to load operations:", err);
-      }
-    };
     load();
   }, []);
 
@@ -68,6 +76,7 @@ export default function OperationsPage() {
   const activeVehiclesCount = vehicles.filter((v) => v.is_available).length;
 
   const exportDailyLog = () => {
+    if (!bookings.length) return
     const headers = ['booking_id', 'vehicle', 'status', 'start_date', 'end_date', 'total_price']
     const rows = bookings.map((b) => [
       b.id,
@@ -99,8 +108,21 @@ export default function OperationsPage() {
     <div>
       <div className="flex items-center gap-3 mb-6">
         <h2 className="text-2xl font-bold text-brand-orange">Operations & Logs</h2>
-        <span className="text-sm text-txt-secondary">Admin Portal</span>
+        <span className="text-sm text-txt-secondary">Admin</span>
       </div>
+
+      {error && (
+        <div className="mb-4 rounded-md border border-status-red/30 bg-status-red/10 px-3 py-2 text-xs text-status-red flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={load}
+            className="px-2.5 py-1 rounded border border-status-red/40 text-status-red text-[11px] font-semibold bg-transparent cursor-pointer"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Top Row: Telemetry + Service Alerts */}
       <div className="grid grid-cols-[1fr_280px] gap-6 mb-6">
@@ -108,11 +130,11 @@ export default function OperationsPage() {
         <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-lg font-semibold">Live Telemetry Feed</h3>
-              <p className="text-xs text-txt-secondary">Real-time GPS and engine diagnostics across the Himalayan range</p>
+              <h3 className="text-lg font-semibold">Live Vehicle Feed</h3>
+              <p className="text-xs text-txt-secondary">Live GPS and engine info.</p>
             </div>
             <span className="px-3 py-1.5 bg-brand-orange/20 text-brand-orange text-xs rounded-full font-semibold">
-              {activeVehiclesCount} ACTIVE VEHICLES
+              {activeVehiclesCount} ACTIVE
             </span>
           </div>
           <div className="space-y-4">
@@ -126,11 +148,11 @@ export default function OperationsPage() {
                   <p className="text-xs text-txt-secondary">{v.code} · Route: {v.route}</p>
                 </div>
                 <div className="text-center px-3">
-                  <p className="text-[10px] text-txt-secondary uppercase">Altitude</p>
+                  <p className="text-[10px] text-txt-secondary uppercase">Height</p>
                   <p className="text-sm font-bold text-brand-orange">{v.altitude}</p>
                 </div>
                 <div className="text-center px-3">
-                  <p className="text-[10px] text-txt-secondary uppercase">Engine Temp</p>
+                  <p className="text-[10px] text-txt-secondary uppercase">Engine</p>
                   <p className="text-sm font-bold">{v.engineTemp}</p>
                 </div>
                 <div className="flex items-center gap-1">
@@ -147,7 +169,7 @@ export default function OperationsPage() {
         {/* Critical Service Alerts */}
         <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
           <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-status-red" /> Critical Service Alerts
+            <Zap className="w-5 h-5 text-status-red" /> Important Alerts
           </h3>
           <div className="space-y-3">
             {serviceAlerts.map((alert) => (
@@ -171,18 +193,22 @@ export default function OperationsPage() {
           {/* Daily Transit Logs */}
           <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
             <h3 className="text-base font-semibold mb-2 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-brand-orange" /> Daily Transit Logs
+              <FileText className="w-4 h-4 text-brand-orange" /> Daily Logs
             </h3>
             <p className="text-xs text-txt-secondary mb-4 leading-relaxed">
-              Generate standardized CSV/PDF reports for the Jomsom Police Checkpoint and Mustang Immigration Bureau.
+              Download today&apos;s booking list as CSV.
             </p>
             <button
               type="button"
               onClick={exportDailyLog}
+              disabled={!bookings.length || isLoading}
               className="btn-action px-5 py-2.5 text-sm flex items-center gap-1.5"
             >
-              Export Daily Log
+              {isLoading ? 'Loading...' : 'Download CSV'}
             </button>
+            {!isLoading && !bookings.length && (
+              <p className="text-[11px] text-txt-secondary mt-2">No bookings to export.</p>
+            )}
           </div>
 
           {/* Area Forecast */}
@@ -190,16 +216,16 @@ export default function OperationsPage() {
             {forecastImage ? (
               <img
                 src={forecastImage}
-                alt="Himalayan Area Forecast"
+                alt="Weather"
                 className="w-full h-36 object-cover"
               />
             ) : (
               <div className="w-full h-36 bg-[linear-gradient(120deg,#253341_0%,#1d2733_55%,#0f172a_100%)]" />
             )}
             <div className="p-4">
-              <h4 className="text-sm font-semibold mb-1">Area Forecast</h4>
+              <h4 className="text-sm font-semibold mb-1">Weather</h4>
               <p className="text-xs text-txt-secondary flex items-center gap-1">
-                <Cloud className="w-3.5 h-3.5" /> -4°C Clear Skies
+                <Cloud className="w-3.5 h-3.5" /> -4°C Clear
               </p>
             </div>
           </div>
@@ -211,7 +237,7 @@ export default function OperationsPage() {
             {gridImage ? (
               <img
                 src={gridImage}
-                alt="Live Grid"
+                alt="Map"
                 className="w-full h-28 object-cover opacity-60"
               />
             ) : (
@@ -219,17 +245,17 @@ export default function OperationsPage() {
             )}
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="px-3 py-1 bg-dark/80 border border-dark-border rounded text-xs font-semibold uppercase tracking-wider">
-                Live Grid View
+                Live Map
               </span>
             </div>
             <div className="p-3 text-center">
-              <p className="text-[10px] text-txt-secondary uppercase">Mustang Region · Sector 4</p>
+              <p className="text-[10px] text-txt-secondary uppercase">Mustang · Sector 4</p>
               <button
                 type="button"
                 onClick={openMap}
                 className="text-xs text-brand-orange font-semibold cursor-pointer bg-transparent border-none"
               >
-                OPEN FULL MAP
+                OPEN MAP
               </button>
             </div>
           </div>

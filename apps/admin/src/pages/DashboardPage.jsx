@@ -80,7 +80,7 @@ export default function DashboardPage({ onNavigate = () => {} }) {
   const returnedCount = bookings.filter((b) => b.status === "completed").length;
   const capacityPercent = vehicles.length ? Math.round((activeCount / vehicles.length) * 100) : 0;
   const availableVehicles = vehicles.filter((v) => v.is_available).length;
-  const fleetCapacityDescription = `${availableVehicles} vehicles available out of ${vehicles.length || 0}`;
+  const fleetCapacityDescription = `${availableVehicles} vehicles free out of ${vehicles.length || 0}`;
 
   const handleStatusChange = async (status) => {
     if (!selectedBooking?.id) return;
@@ -176,14 +176,14 @@ export default function DashboardPage({ onNavigate = () => {} }) {
       </div>
 
       {isLoading && (
-        <div className="mt-4 text-sm text-txt-secondary">Refreshing dashboard data...</div>
+        <div className="mt-4 text-sm text-txt-secondary">Refreshing data...</div>
       )}
 
       {selectedBooking && (
         <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-lg bg-dark border border-dark-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">Manage Booking</h3>
+              <h3 className="text-lg font-bold">Edit Booking</h3>
               <button
                 type="button"
                 onClick={() => setSelectedBooking(null)}
@@ -196,20 +196,20 @@ export default function DashboardPage({ onNavigate = () => {} }) {
               <p><span className="text-txt-secondary">Booking ID:</span> {selectedBooking.id.slice(0, 8)}</p>
               <p><span className="text-txt-secondary">Customer:</span> {selectedBooking.customer}</p>
               <p><span className="text-txt-secondary">Vehicle:</span> {selectedBooking.vehicle}</p>
-              <p><span className="text-txt-secondary">Current status:</span> {selectedBooking.status}</p>
+              <p><span className="text-txt-secondary">Status:</span> {selectedBooking.status}</p>
             </div>
             <div className="grid grid-cols-2 gap-2 mb-3">
               <button type="button" disabled={isSaving} onClick={() => handleStatusChange("CONFIRMED")} className="px-3 py-2 rounded-md bg-brand-orange/20 text-brand-orange border border-brand-orange/30 disabled:opacity-50">
-                Mark Confirmed
+                Set Confirmed
               </button>
               <button type="button" disabled={isSaving} onClick={() => handleStatusChange("ACTIVE")} className="px-3 py-2 rounded-md bg-status-green/20 text-status-green border border-status-green/30 disabled:opacity-50">
-                Mark Active
+                Set Active
               </button>
               <button type="button" disabled={isSaving} onClick={() => handleStatusChange("COMPLETED")} className="px-3 py-2 rounded-md bg-[rgba(100,150,200,0.2)] text-[#64d4ff] border border-[#64d4ff]/40 disabled:opacity-50">
-                Mark Completed
+                Set Completed
               </button>
               <button type="button" disabled={isSaving} onClick={() => handleStatusChange("CANCELLED")} className="px-3 py-2 rounded-md bg-status-red/20 text-status-red border border-status-red/30 disabled:opacity-50">
-                Cancel Booking
+                Set Cancelled
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -219,14 +219,14 @@ export default function DashboardPage({ onNavigate = () => {} }) {
                 disabled={isSaving}
                 className="px-3 py-2 rounded-md bg-status-red/20 text-status-red border border-status-red/30 disabled:opacity-50"
               >
-                Delete Booking
+                Delete
               </button>
               <button
                 type="button"
                 onClick={() => onNavigate("bookings")}
                 className="btn-action px-5 py-2 text-sm"
               >
-                Open Bookings Page
+                Open Bookings
               </button>
             </div>
           </div>
