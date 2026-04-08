@@ -101,6 +101,7 @@ export default function TerrainSelect() {
     const navigate = useNavigate();
     const [hovered, setHovered] = useState(null);
     const [selected, setSelected] = useState(null);
+    const [wheelType, setWheelType] = useState('all');
 
     const activeRegion = regions.find((r) => r.id === (selected || hovered));
 
@@ -110,7 +111,7 @@ export default function TerrainSelect() {
 
     const handleProceed = () => {
         if (!activeRegion) return;
-        navigate(`/vehicles?terrain=${encodeURIComponent(activeRegion.terrain)}&region=${encodeURIComponent(activeRegion.name)}`);
+        navigate(`/vehicles?terrain=${encodeURIComponent(activeRegion.terrain)}&region=${encodeURIComponent(activeRegion.name)}&wheels=${wheelType}`);
     };
 
     return (
@@ -306,6 +307,34 @@ export default function TerrainSelect() {
                                                 background: activeRegion.color + '10',
                                                 border: `1px solid ${activeRegion.color}20`,
                                             }}>{d}</span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div style={{ marginBottom: '20px' }}>
+                                    <div style={{ fontSize: '0.65rem', color: '#888', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>Vehicle Type</div>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        {[
+                                            { id: 'all', label: 'All' },
+                                            { id: 'four', label: 'Four Wheeler' },
+                                            { id: 'two', label: 'Two Wheeler' },
+                                        ].map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => setWheelType(item.id)}
+                                                style={{
+                                                    padding: '8px 12px',
+                                                    borderRadius: '999px',
+                                                    border: wheelType === item.id ? `1px solid ${activeRegion.color}` : '1px solid rgba(255,255,255,0.12)',
+                                                    background: wheelType === item.id ? `${activeRegion.color}20` : 'transparent',
+                                                    color: wheelType === item.id ? activeRegion.color : '#ccc',
+                                                    fontSize: '0.72rem',
+                                                    fontWeight: '700',
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                {item.label}
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
