@@ -12,25 +12,26 @@ import NewBookingPage from '@/pages/NewBookingPage'
 import AdminProfilePage from '@/pages/AdminProfilePage'
 
 const PAGE_META = {
-  dashboard: { title: 'Booking Management', search: 'Search...', showNewBtn: true },
-  fleet: { title: 'Fleet Overview', search: 'Search fleet...', showNewBtn: false },
-  bookings: { title: 'Bookings', search: 'Search bookings...', showNewBtn: true },
-  compliance: { title: 'Compliance & Logs', search: 'Search records...', showNewBtn: false },
-  operations: { title: 'Operations & Logs', subtitle: 'Admin Portal', search: 'Search fleet logs...', showNewBtn: false },
-  settings: { title: 'Settings', search: 'Search settings...', showNewBtn: false },
-  'add-vehicle': { title: 'Add New Vehicle', subtitle: 'Registration', search: 'Search vehicles...', showNewBtn: false },
-  'new-booking': { title: 'New Booking', subtitle: 'Expedition Reservation', search: 'Search vehicles...', showNewBtn: false },
-  'admin-profile': { title: 'Admin Profile', subtitle: 'Account Settings', search: 'Search settings...', showNewBtn: false },
+  dashboard: { title: 'Booking Management', showNewBtn: true },
+  fleet: { title: 'Fleet Overview', showNewBtn: false },
+  bookings: { title: 'Bookings', showNewBtn: true },
+  compliance: { title: 'Compliance & Logs', showNewBtn: false },
+  operations: { title: 'Operations & Logs', subtitle: 'Admin Portal', showNewBtn: false },
+  settings: { title: 'Settings', showNewBtn: false },
+  'add-vehicle': { title: 'Add New Vehicle', subtitle: 'Registration', showNewBtn: false },
+  'new-booking': { title: 'New Booking', subtitle: 'Expedition Reservation', showNewBtn: false },
+  'admin-profile': { title: 'Admin Profile', subtitle: 'Account Settings', showNewBtn: false },
 }
 
 export default function Dashboard() {
   const [activePage, setActivePage] = useState('dashboard')
+  const [topBarMessage, setTopBarMessage] = useState('')
   const meta = PAGE_META[activePage]
 
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard':
-        return <DashboardPage />
+        return <DashboardPage onNavigate={setActivePage} />
       case 'fleet':
         return <FleetPage />
       case 'bookings':
@@ -59,11 +60,24 @@ export default function Dashboard() {
         <TopBar
           title={meta.title}
           subtitle={meta.subtitle}
-          searchPlaceholder={meta.search}
           showNewBooking={meta.showNewBtn}
           onNewBooking={() => setActivePage('new-booking')}
+          onShowNotifications={() => setTopBarMessage('Notification center is coming next.')}
+          onShowHelp={() => setTopBarMessage('Need help? Use Add Vehicle, New Booking, or Admin Profile to manage operations.')}
         />
         <main className="flex-1 overflow-y-auto p-6">
+          {topBarMessage && (
+            <div className="mb-4 rounded-md border border-brand-orange/30 bg-brand-orange/10 px-3 py-2 text-xs text-brand-orange flex items-center justify-between gap-3">
+              <span>{topBarMessage}</span>
+              <button
+                type="button"
+                className="bg-transparent border-none text-brand-orange cursor-pointer text-xs font-semibold"
+                onClick={() => setTopBarMessage('')}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           {renderPage()}
         </main>
       </div>
