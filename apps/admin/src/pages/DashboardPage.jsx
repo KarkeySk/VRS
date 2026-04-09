@@ -1,14 +1,45 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  Bike,
+  Car,
+  Gauge,
+  Mountain,
+  ShieldCheck,
+  Truck,
+  X,
+} from "lucide-react";
 import { bookingService } from "@bhatbhati/shared/services/bookingService.js";
 import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
 import { uiAssetService } from "@bhatbhati/shared/services/uiAssetService.js";
-import { X } from "lucide-react";
-import HeroBanner from "@/components/HeroBanner";
-import CalendarPanel from "@/components/CalendarPanel";
-import WeatherPanel from "@/components/WeatherPanel";
 import BookingsList from "@/components/BookingsList";
-import TrackingChart from "@/components/TrackingChart";
+import CalendarPanel from "@/components/CalendarPanel";
 import StatsCard from "@/components/StatsCard";
+import TrackingChart from "@/components/TrackingChart";
+import WeatherPanel from "@/components/WeatherPanel";
+
+const VEHICLE_THEME = {
+  bike: {
+    id: "bike",
+    label: "Bikes",
+    subtitle: "Quick city and mountain connectors",
+    accentClass: "theme-bike",
+    Icon: Bike,
+  },
+  car: {
+    id: "car",
+    label: "Cars",
+    subtitle: "Comfort, family and daily fleet",
+    accentClass: "theme-car",
+    Icon: Car,
+  },
+  jeep: {
+    id: "jeep",
+    label: "Jeeps",
+    subtitle: "Off-road and expedition heavy duty",
+    accentClass: "theme-jeep",
+    Icon: Truck,
+  },
+};
 
 function mapStatus(status) {
   if (status === "active" || status === "confirmed") return "ACTIVE";
@@ -24,16 +55,56 @@ function formatDateRange(start, end) {
   return `${startDate} - ${endDate}`;
 }
 
+function classifyVehicleTheme(vehicle) {
+  const haystack = `${vehicle?.type ?? ""} ${vehicle?.name ?? ""} ${vehicle?.category ?? ""}`.toLowerCase();
+  if (haystack.includes("bike") || haystack.includes("motor")) return "bike";
+  if (
+    haystack.includes("jeep") ||
+    haystack.includes("4x4") ||
+    haystack.includes("off-road") ||
+    haystack.includes("offroad") ||
+    haystack.includes("suv")
+  ) return "jeep";
+  return "car";
+}
+
+function extractDriveType(notes) {
+  if (!notes) return "SELF-DRIVE";
+  if (typeof notes !== "string") return "SELF-DRIVE";
+
+  try {
+    const parsed = JSON.parse(notes);
+    return parsed?.bookingType === "with-driver" || parsed?.drive_type === "with-driver"
+      ? "WITH DRIVER"
+      : "SELF-DRIVE";
+  } catch {
+    return "SELF-DRIVE";
+  }
+}
+
+function extractExtras(notes) {
+  if (!notes || typeof notes !== "string") return "Standard package";
+
+  try {
+    const parsed = JSON.parse(notes);
+    if (parsed?.route) return `Route: ${parsed.route}`;
+  } catch {
+    // Notes are sometimes plain text; use as-is below.
+  }
+
+  return notes;
+}
+
 export default function DashboardPage({ onNavigate = () => {} }) {
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]);
-  const [heroImage, setHeroImage] = useState("");
   const [bookingFallbackImage, setBookingFallbackImage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [flashMessage, setFlashMessage] = useState("");
+  const [activeTheme, setActiveTheme] = useState("all");
 
   const load = async () => {
     setIsLoading(true);
@@ -42,12 +113,12 @@ export default function DashboardPage({ onNavigate = () => {} }) {
       const [bookingsData, vehiclesData, assets] = await Promise.all([
         bookingService.getAll(),
         vehicleService.getAllForAdmin(),
-        uiAssetService.getMany(["admin_hero_banner", "admin_booking_fallback"]),
+        uiAssetService.getMany(["admin_booking_fallback"]),
       ]);
       setBookings(bookingsData ?? []);
       setVehicles(vehiclesData ?? []);
+
       const assetMap = new Map((assets ?? []).map((a) => [a.asset_key, a.image_url]));
-      setHeroImage(assetMap.get("admin_hero_banner") || "");
       setBookingFallbackImage(assetMap.get("admin_booking_fallback") || "");
     } catch (err) {
       console.error("Failed to load dashboard data:", err);
@@ -61,26 +132,62 @@ export default function DashboardPage({ onNavigate = () => {} }) {
     load();
   }, []);
 
-  const mapped = useMemo(() => bookings.map((booking) => ({
-    id: booking.id,
-    vehicle: booking.vehicles?.name || "Unknown Vehicle",
-    image: booking.vehicles?.image || bookingFallbackImage || "",
-    type: "SELF-DRIVE",
-    customer: booking.profiles?.full_name || "Unknown Customer",
-    dates: formatDateRange(booking.start_date, booking.end_date),
-    extras: booking.notes || "Standard package",
-    status: mapStatus(booking.status),
-    price: `NPR ${Number(booking.total_price || 0).toLocaleString()}`,
-  })), [bookings, bookingFallbackImage]);
+  const activeCount = bookings.filter((b) => b.status === "active" || b.status === "confirmed").length;
+  const returnedCount = bookings.filter((b) => b.status === "completed").length;
+  const availableVehicles = vehicles.filter((v) => v.is_available).length;
+  const capacityPercent = vehicles.length ? Math.round((activeCount / vehicles.length) * 100) : 0;
+
+  const fleetThemeStats = useMemo(() => {
+    const stats = {
+      bike: { total: 0, available: 0 },
+      car: { total: 0, available: 0 },
+      jeep: { total: 0, available: 0 },
+    };
+
+    vehicles.forEach((vehicle) => {
+      const key = classifyVehicleTheme(vehicle);
+      stats[key].total += 1;
+      if (vehicle.is_available) stats[key].available += 1;
+    });
+
+    return stats;
+  }, [vehicles]);
+
+  const bookingsByTheme = useMemo(() => {
+    const grouped = { bike: [], car: [], jeep: [] };
+
+    bookings.forEach((booking) => {
+      const key = classifyVehicleTheme(booking.vehicles);
+      grouped[key].push(booking);
+    });
+
+    return grouped;
+  }, [bookings]);
+
+  const themedBookings = useMemo(() => {
+    if (activeTheme === "all") return bookings;
+    return bookingsByTheme[activeTheme] ?? [];
+  }, [activeTheme, bookings, bookingsByTheme]);
+
+  const mapped = useMemo(
+    () => themedBookings.map((booking) => ({
+      id: booking.id,
+      vehicle: booking.vehicles?.name || "Unknown Vehicle",
+      image: booking.vehicles?.image || bookingFallbackImage || "",
+      type: extractDriveType(booking.notes),
+      customer: booking.profiles?.full_name || "Unknown Customer",
+      dates: formatDateRange(booking.start_date, booking.end_date),
+      extras: extractExtras(booking.notes),
+      status: mapStatus(booking.status),
+      price: `NPR ${Number(booking.total_price || 0).toLocaleString()}`,
+    })),
+    [themedBookings, bookingFallbackImage],
+  );
 
   const upcomingBookings = mapped.filter((b) => b.status === "ACTIVE" || b.status === "PARTIAL");
   const pastBookings = mapped.filter((b) => b.status === "COMPLETED" || b.status === "OVERDUE");
 
-  const activeCount = bookings.filter((b) => b.status === "active" || b.status === "confirmed").length;
-  const returnedCount = bookings.filter((b) => b.status === "completed").length;
-  const capacityPercent = vehicles.length ? Math.round((activeCount / vehicles.length) * 100) : 0;
-  const availableVehicles = vehicles.filter((v) => v.is_available).length;
-  const fleetCapacityDescription = `${availableVehicles} vehicles free out of ${vehicles.length || 0}`;
+  const activeThemeLabel = activeTheme === "all" ? "All Vehicle Types" : VEHICLE_THEME[activeTheme].label;
 
   const handleStatusChange = async (status) => {
     if (!selectedBooking?.id) return;
@@ -130,50 +237,91 @@ export default function DashboardPage({ onNavigate = () => {} }) {
         </div>
       )}
 
-      {/* Hero Banner */}
-      <HeroBanner
-        imageUrl={heroImage}
-        activeCount={activeCount}
-        upcomingCount={upcomingBookings.length}
-        returnedCount={returnedCount}
-      />
+      <section className="fleet-command-banner mb-6">
+        <div className="fleet-command-banner__content">
+          <p className="fleet-command-banner__kicker">Vehicle Themes Online</p>
+          <h2>Fleet Command Center</h2>
+          <p>
+            Monitor bikes, cars, and jeeps with one clear cockpit. Theme filter is now live for booking operations.
+          </p>
+          <div className="fleet-command-banner__meta">
+            <span><Gauge className="w-4 h-4" /> {activeCount} active trips</span>
+            <span><ShieldCheck className="w-4 h-4" /> {availableVehicles} available units</span>
+            <span><Mountain className="w-4 h-4" /> {returnedCount} completed returns</span>
+          </div>
+        </div>
+      </section>
 
-      {/* Calendar/Weather + Bookings Grid */}
-      <div className="grid grid-cols-[300px_1fr] gap-6 mb-6">
-        {/* Left Column */}
+      <section className="mb-6 grid gap-4 md:grid-cols-3">
+        {Object.values(VEHICLE_THEME).map((theme) => {
+          const stats = fleetThemeStats[theme.id];
+          const Icon = theme.Icon;
+          const isActive = activeTheme === theme.id;
+
+          return (
+            <button
+              key={theme.id}
+              type="button"
+              onClick={() => setActiveTheme((prev) => (prev === theme.id ? "all" : theme.id))}
+              className={`theme-tile ${theme.accentClass} ${isActive ? "theme-tile--active" : ""}`}
+            >
+              <div className="theme-tile__top">
+                <span className="theme-tile__icon"><Icon className="w-5 h-5" /></span>
+                <span className="theme-tile__tag">{stats.available}/{stats.total} free</span>
+              </div>
+              <h3>{theme.label}</h3>
+              <p>{theme.subtitle}</p>
+              <div className="theme-tile__bar">
+                <span style={{ width: `${stats.total ? Math.round((stats.available / stats.total) * 100) : 0}%` }} />
+              </div>
+            </button>
+          );
+        })}
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1fr_310px] mb-6">
+        <div className="vehicle-theme-panel">
+          <div className="vehicle-theme-panel__header">
+            <div>
+              <p className="vehicle-theme-panel__eyebrow">Bookings Stream</p>
+              <h3>{activeThemeLabel}</h3>
+            </div>
+            <button type="button" className="btn-action px-4 py-2 text-xs" onClick={() => onNavigate("bookings")}>
+              Open Full Bookings
+            </button>
+          </div>
+          <BookingsList
+            upcomingBookings={upcomingBookings}
+            pastBookings={pastBookings}
+            onManageBooking={(booking) => setSelectedBooking(booking)}
+          />
+        </div>
+
+        <div className="space-y-6">
+          <StatsCard
+            label="Fleet Deployment"
+            value={`${capacityPercent}%`}
+            description="Share of total fleet currently deployed"
+            progress={capacityPercent}
+            barColor="bg-brand-orange"
+          />
+          <StatsCard
+            label="Availability"
+            value={`${availableVehicles}/${vehicles.length || 0}`}
+            description="Vehicles currently available for new requests"
+            progress={vehicles.length ? Math.round((availableVehicles / vehicles.length) * 100) : 0}
+            barColor="bg-brand-city"
+          />
+        </div>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[300px_1fr]">
         <div className="space-y-6">
           <CalendarPanel />
           <WeatherPanel />
         </div>
-
-        {/* Right Column: Bookings */}
-        <BookingsList
-          upcomingBookings={upcomingBookings}
-          pastBookings={pastBookings}
-          onManageBooking={(booking) => setSelectedBooking(booking)}
-        />
-      </div>
-
-      {/* Tracking + Stats Row */}
-      <div className="grid grid-cols-[1fr_300px] gap-6">
         <TrackingChart activeUnits={activeCount} />
-
-        <div className="space-y-6">
-          <StatsCard
-            label="Driver Availability"
-            value={`${capacityPercent}%`}
-            description="% of fleet currently deployed"
-            progress={capacityPercent}
-          />
-          <StatsCard
-            label="Fleet Capacity"
-            value={`${capacityPercent}%`}
-            description={fleetCapacityDescription}
-            progress={capacityPercent}
-            barColor="bg-[#3b82f6]"
-          />
-        </div>
-      </div>
+      </section>
 
       {isLoading && (
         <div className="mt-4 text-sm text-txt-secondary">Refreshing data...</div>

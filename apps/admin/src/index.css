@@ -349,3 +349,203 @@ body {
   animation-delay: 980ms;
   background: linear-gradient(120deg, #4b7898 0%, #d3742f 65%, #be6228 100%);
 }
+
+/* ===== FLEET COMMAND THEME ===== */
+.fleet-command-banner {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(80, 174, 230, 0.26), transparent 38%),
+    radial-gradient(circle at 86% 74%, rgba(224, 132, 56, 0.22), transparent 44%),
+    linear-gradient(128deg, #101c24 0%, #162833 48%, #1f3645 100%);
+}
+
+.fleet-command-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(110deg, transparent 0 48%, rgba(255,255,255,0.08) 49%, transparent 52%),
+    linear-gradient(130deg, transparent 0 64%, rgba(255,255,255,0.05) 65%, transparent 68%);
+  pointer-events: none;
+}
+
+.fleet-command-banner__content {
+  position: relative;
+  z-index: 1;
+  padding: 30px;
+}
+
+.fleet-command-banner__kicker {
+  margin: 0 0 10px;
+  color: #b5cde0;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.fleet-command-banner h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.55rem, 2.2vw, 2.1rem);
+  letter-spacing: -0.02em;
+}
+
+.fleet-command-banner p {
+  margin: 0;
+  color: var(--color-txt-secondary);
+  max-width: 720px;
+}
+
+.fleet-command-banner__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.fleet-command-banner__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.13);
+  padding: 8px 12px;
+  background: rgba(8, 13, 18, 0.45);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.theme-tile {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.02);
+  text-align: left;
+  color: var(--color-txt-primary);
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.theme-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.22);
+}
+
+.theme-tile--active {
+  box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+}
+
+.theme-tile__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.theme-tile__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.theme-tile__tag {
+  font-size: 11px;
+  color: var(--color-txt-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.theme-tile h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.theme-tile p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-txt-secondary);
+}
+
+.theme-tile__bar {
+  margin-top: 14px;
+  height: 7px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.theme-tile__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.theme-bike {
+  background: linear-gradient(135deg, rgba(84, 174, 233, 0.2), rgba(61, 100, 127, 0.14));
+}
+.theme-bike .theme-tile__icon,
+.theme-bike .theme-tile__bar span { background: rgba(84, 174, 233, 0.28); }
+
+.theme-car {
+  background: linear-gradient(135deg, rgba(110, 203, 165, 0.2), rgba(59, 118, 95, 0.14));
+}
+.theme-car .theme-tile__icon,
+.theme-car .theme-tile__bar span { background: rgba(110, 203, 165, 0.28); }
+
+.theme-jeep {
+  background: linear-gradient(135deg, rgba(232, 138, 64, 0.22), rgba(114, 71, 36, 0.14));
+}
+.theme-jeep .theme-tile__icon,
+.theme-jeep .theme-tile__bar span { background: rgba(232, 138, 64, 0.3); }
+
+.theme-bike.theme-tile--active { border-color: rgba(84, 174, 233, 0.7); }
+.theme-car.theme-tile--active { border-color: rgba(110, 203, 165, 0.7); }
+.theme-jeep.theme-tile--active { border-color: rgba(232, 138, 64, 0.75); }
+
+.vehicle-theme-panel {
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+  padding: 18px;
+}
+
+.vehicle-theme-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.vehicle-theme-panel__eyebrow {
+  margin: 0 0 3px;
+  font-size: 11px;
+  color: var(--color-txt-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-weight: 700;
+}
+
+.vehicle-theme-panel__header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 760px) {
+  .fleet-command-banner__content {
+    padding: 20px;
+  }
+
+  .vehicle-theme-panel__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
