@@ -12,7 +12,7 @@ import NewBookingPage from '@/pages/NewBookingPage'
 import AdminProfilePage from '@/pages/AdminProfilePage'
 
 const PAGE_META = {
-  dashboard: { title: 'Bookings', showNewBtn: true },
+  dashboard: { title: 'Fleet Command', subtitle: 'Bikes • Cars • Jeeps', showNewBtn: true },
   fleet: { title: 'Fleet', showNewBtn: false },
   bookings: { title: 'Bookings', showNewBtn: true },
   compliance: { title: 'Checks & Logs', showNewBtn: false },
