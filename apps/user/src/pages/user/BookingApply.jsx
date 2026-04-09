@@ -44,12 +44,21 @@ export default function BookingApply() {
         setError('');
         setSubmitting(true);
         try {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            if (!startDate || !endDate || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+                throw new Error('Please choose valid start and end dates.');
+            }
+            if (end < start) {
+                throw new Error('End date cannot be earlier than start date.');
+            }
+
             let licenseUrl = '';
             let idUrl = '';
             if (licenseFile) licenseUrl = await applicationService.uploadDocument(user.id, licenseFile, 'license');
             if (idFile) idUrl = await applicationService.uploadDocument(user.id, idFile, 'id');
 
-            const days = Math.max(1, Math.ceil((new Date(endDate) - new Date(startDate)) / 86400000));
+            const days = Math.max(1, Math.ceil((end - start) / 86400000));
             const basePrice = inquiry.vehicles?.price_per_day || 0;
             const addonsTotal = (inquiry.selected_addons || []).reduce((s, a) => s + (a.price || 0), 0);
             const driverFee = inquiry.drive_type === 'with-driver' ? DRIVER_FEE_PER_DAY * days : 0;
@@ -122,11 +131,30 @@ export default function BookingApply() {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
                                 <div>
                                     <label style={labelStyle}>Start Date</label>
-                                    <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required style={{ ...inputStyle, colorScheme: 'dark' }} />
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => {
+                                            const nextStart = e.target.value;
+                                            setStartDate(nextStart);
+                                            if (endDate && nextStart && endDate < nextStart) {
+                                                setEndDate(nextStart);
+                                            }
+                                        }}
+                                        required
+                                        style={{ ...inputStyle, colorScheme: 'dark' }}
+                                    />
                                 </div>
                                 <div>
                                     <label style={labelStyle}>End Date</label>
-                                    <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required style={{ ...inputStyle, colorScheme: 'dark' }} />
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        min={startDate || undefined}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        required
+                                        style={{ ...inputStyle, colorScheme: 'dark' }}
+                                    />
                                 </div>
                             </div>
 
