@@ -1,8 +1,11 @@
 import { supabase } from '../lib/supabase'
+import { profileService } from './profileService'
 
 export const bookingService = {
     /** Create a new booking */
     create: async (bookingData) => {
+        await profileService.ensureExists(bookingData.user_id)
+
         const { data, error } = await supabase.from('bookings').insert([bookingData]).select()
         if (error) throw error
         return data[0]
