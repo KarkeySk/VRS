@@ -1,3 +1,9 @@
-node_modules
-dist
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
 .env
+supabase/.temp/
+supabase/supabase/.temp/
