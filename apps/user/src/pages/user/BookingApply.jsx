@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { inquiryService } from '@bhatbhati/shared/services/inquiryService.js';
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js';
+import { profileService } from '@bhatbhati/shared/services/profileService.js';
 import { ArrowLeft, Upload, FileText, CheckCircle } from 'lucide-react';
 
 const DRIVER_FEE_PER_DAY = 2000
@@ -24,6 +25,9 @@ export default function BookingApply() {
     const [licenseNumber, setLicenseNumber] = useState('');
     const [licenseFile, setLicenseFile] = useState(null);
     const [idFile, setIdFile] = useState(null);
+    const [contactName, setContactName] = useState('');
+    const [contactPhone, setContactPhone] = useState('');
+    const [contactEmail, setContactEmail] = useState('');
 
     // Questionnaire
     const [experience, setExperience] = useState('');
@@ -33,17 +37,39 @@ export default function BookingApply() {
     const [emergencyContact, setEmergencyContact] = useState('');
 
     useEffect(() => {
-        inquiryService.getById(inquiryId)
-            .then(setInquiry)
-            .catch(() => setError('Request not found'))
-            .finally(() => setLoading(false));
-    }, [inquiryId]);
+        let mounted = true;
+        const load = async () => {
+            setLoading(true);
+            setError('');
+            try {
+                const [inquiryData, profile] = await Promise.all([
+                    inquiryService.getById(inquiryId),
+                    user?.id ? profileService.getById(user.id).catch(() => null) : Promise.resolve(null),
+                ]);
+                if (!mounted) return;
+                setInquiry(inquiryData);
+                setContactName(profile?.full_name || user?.user_metadata?.full_name || '');
+                setContactPhone(profile?.phone || '');
+                setContactEmail(user?.email || profile?.email || '');
+            } catch {
+                if (mounted) setError('Request not found');
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+
+        load();
+        return () => { mounted = false; };
+    }, [inquiryId, user?.id, user?.email, user?.user_metadata?.full_name]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setSubmitting(true);
         try {
+            if (!contactName.trim()) throw new Error('Please enter your full name.');
+            if (!contactEmail.trim()) throw new Error('Please enter your email.');
+
             const start = new Date(startDate);
             const end = new Date(endDate);
             if (!startDate || !endDate || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
@@ -64,6 +90,11 @@ export default function BookingApply() {
             const driverFee = inquiry.drive_type === 'with-driver' ? DRIVER_FEE_PER_DAY * days : 0;
             const totalPrice = (basePrice * days) + addonsTotal + driverFee;
 
+            await profileService.update(user.id, {
+                full_name: contactName.trim() || null,
+                phone: contactPhone.trim() || null,
+            });
+
             const app = await applicationService.create({
                 inquiry_id: inquiryId,
                 user_id: user.id,
@@ -76,7 +107,18 @@ export default function BookingApply() {
                 id_doc_url: idUrl,
                 selected_addons: inquiry.selected_addons || [],
                 total_price: totalPrice,
-                questionnaire: { experience, group_size: groupSize, purpose, medical_conditions: medicalConditions, emergency_contact: emergencyContact },
+                questionnaire: {
+                    experience,
+                    group_size: groupSize,
+                    purpose,
+                    medical_conditions: medicalConditions,
+                    emergency_contact: emergencyContact,
+                    customer: {
+                        name: contactName.trim(),
+                        phone: contactPhone.trim(),
+                        email: contactEmail.trim().toLowerCase(),
+                    },
+                },
             });
 
             navigate(`/booking/confirm/${app.id}`);
@@ -128,6 +170,37 @@ export default function BookingApply() {
                 <form onSubmit={handleSubmit}>
                     {step === 1 && (
                         <div>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={labelStyle}>Contact Details</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                    <input
+                                        type="text"
+                                        value={contactName}
+                                        onChange={(e) => setContactName(e.target.value)}
+                                        placeholder="Full name"
+                                        required
+                                        style={inputStyle}
+                                    />
+                                    <input
+                                        type="tel"
+                                        value={contactPhone}
+                                        onChange={(e) => setContactPhone(e.target.value)}
+                                        placeholder="Phone number"
+                                        style={inputStyle}
+                                    />
+                                </div>
+                                <div style={{ marginTop: '12px' }}>
+                                    <input
+                                        type="email"
+                                        value={contactEmail}
+                                        onChange={(e) => setContactEmail(e.target.value)}
+                                        placeholder="Email address"
+                                        required
+                                        style={inputStyle}
+                                    />
+                                </div>
+                            </div>
+
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
                                 <div>
                                     <label style={labelStyle}>Start Date</label>
