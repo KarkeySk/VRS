@@ -1,7 +1,10 @@
 import { supabase } from '../lib/supabase'
+import { profileService } from './profileService'
 
 export const inquiryService = {
     create: async (inquiryData) => {
+        await profileService.ensureExists(inquiryData.user_id)
+
         const { data, error } = await supabase
             .from('inquiries')
             .insert([inquiryData])
