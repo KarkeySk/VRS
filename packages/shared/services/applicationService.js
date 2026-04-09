@@ -1,8 +1,11 @@
 import { supabase } from '../lib/supabase'
+import { profileService } from './profileService'
 
 export const applicationService = {
     create: async (applicationData) => {
         if (!supabase) throw new Error('Supabase is not configured')
+        await profileService.ensureExists(applicationData.user_id)
+
         const { data, error } = await supabase
             .from('booking_applications')
             .insert([applicationData])
