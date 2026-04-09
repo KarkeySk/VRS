@@ -12,6 +12,7 @@ Go to your Supabase dashboard **SQL Editor** and run each file **in order**:
 6. `migrations/006_create_inquiries.sql` — Inquiries, booking applications, and document storage policies
 7. `migrations/007_storage_vehicle_images.sql` — Vehicle image storage bucket and admin policies
 8. `migrations/008_create_ui_assets.sql` — UI image asset table (replaces hardcoded image URLs)
+9. `migrations/009_fix_missing_profiles.sql` — Backfill missing profiles + allow users to self-create own profile row
 
 ## Seed data
 
