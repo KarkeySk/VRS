@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+// Day labels used in the calendar header.
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
+// Month names shown in the title.
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
@@ -24,12 +26,14 @@ const BOOKED_DATES = [
 ];
 
 function hasBooking(year, month, day) {
+  // Check if a given day is marked as booked.
   return BOOKED_DATES.some(
     (b) => b.year === year && b.month === month && b.day === day
   );
 }
 
 function buildCalendarGrid(year, month) {
+  // Build a padded grid for the month view.
   // How many days in this month
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   // What day of the week does the 1st fall on (0 = Sunday)
@@ -61,12 +65,15 @@ function buildCalendarGrid(year, month) {
 }
 
 export default function CalendarPanel() {
+  // Initialize view to current month.
   const now = new Date();
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth());
 
+  // Precompute cells for the current view.
   const cells = buildCalendarGrid(viewYear, viewMonth);
 
+  // Move backward one month.
   const goToPrev = () => {
     if (viewMonth === 0) {
       setViewMonth(11);
@@ -76,6 +83,7 @@ export default function CalendarPanel() {
     }
   };
 
+  // Move forward one month.
   const goToNext = () => {
     if (viewMonth === 11) {
       setViewMonth(0);
@@ -85,12 +93,14 @@ export default function CalendarPanel() {
     }
   };
 
+  // Jump back to today.
   const goToToday = () => {
     const t = new Date();
     setViewYear(t.getFullYear());
     setViewMonth(t.getMonth());
   };
 
+  // Used to decide whether to show the Today button.
   const isCurrentMonth =
     viewYear === now.getFullYear() && viewMonth === now.getMonth();
 

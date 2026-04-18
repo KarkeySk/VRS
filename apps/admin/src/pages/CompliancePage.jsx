@@ -3,6 +3,7 @@ import { FileText, Filter, ExternalLink } from 'lucide-react'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 
+// Badge styles per compliance status.
 const statusStyles = {
   submitted: 'bg-status-yellow/20 text-status-yellow',
   'under-review': 'bg-brand-orange/20 text-brand-orange',
@@ -13,12 +14,16 @@ const statusStyles = {
 }
 
 export default function CompliancePage() {
+  // Raw application data.
   const [applications, setApplications] = useState([])
+  // Active filter for the table.
   const [statusFilter, setStatusFilter] = useState('all')
+  // UI state for loading and errors.
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [busyId, setBusyId] = useState('')
 
+  // Load all compliance applications.
   const loadApplications = async () => {
     setIsLoading(true)
     setError('')
@@ -33,19 +38,24 @@ export default function CompliancePage() {
   }
 
   useEffect(() => {
+    // Initial data fetch.
     loadApplications()
   }, [])
 
+  // Filter list based on the selected status.
   const filtered = useMemo(() => {
     if (statusFilter === 'all') return applications
     return applications.filter((app) => app.status === statusFilter)
   }, [applications, statusFilter])
 
+  // Pending count shown in the header.
   const pendingCount = applications.filter((app) => ['submitted', 'under-review'].includes(app.status)).length
 
+  // Update status and optionally create a booking.
   const updateStatus = async (id, status) => {
     setBusyId(id)
     try {
+      // On approval, create a booking if one does not exist yet.
       if (status === 'approved') {
         const target = applications.find((app) => app.id === id)
         if (target) {
@@ -84,6 +94,7 @@ export default function CompliancePage() {
     }
   }
 
+  // Open signed document URLs in a new tab.
   const openDocument = async (path) => {
     if (!path) return
     try {

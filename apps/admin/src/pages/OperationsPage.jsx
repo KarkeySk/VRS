@@ -4,6 +4,7 @@ import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
 import { bookingService } from "@bhatbhati/shared/services/bookingService.js";
 import { uiAssetService } from "@bhatbhati/shared/services/uiAssetService.js";
 
+// Badge styles for alert severity.
 const severityStyles = {
   "URGENT": "bg-status-red/20 text-status-red",
   "2 DAYS": "bg-status-yellow/20 text-status-yellow",
@@ -11,13 +12,17 @@ const severityStyles = {
 };
 
 export default function OperationsPage() {
+  // Datasets for the dashboard cards.
   const [vehicles, setVehicles] = useState([]);
   const [bookings, setBookings] = useState([]);
+  // Asset URLs for map and forecast.
   const [forecastImage, setForecastImage] = useState("");
   const [gridImage, setGridImage] = useState("");
+  // Loading and error state.
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Fetch operations data and assets.
   const load = async () => {
     setIsLoading(true);
     setError("");
@@ -41,9 +46,11 @@ export default function OperationsPage() {
   };
 
   useEffect(() => {
+    // Initial data load.
     load();
   }, []);
 
+  // Build a short telemetry list for the UI.
   const telemetryVehicles = useMemo(() => vehicles.slice(0, 3).map((v, idx) => ({
     id: v.id,
     name: v.name,
@@ -55,6 +62,7 @@ export default function OperationsPage() {
     batteryColor: idx === 1 ? "bg-status-yellow" : "bg-status-green",
   })), [vehicles]);
 
+  // Build alert cards from unavailable vehicles or bookings.
   const serviceAlerts = useMemo(() => {
     const unavailable = vehicles.filter((v) => !v.is_available).slice(0, 3).map((v, idx) => ({
       id: v.id,
@@ -73,9 +81,12 @@ export default function OperationsPage() {
     }));
   }, [vehicles, bookings]);
 
+  // Count active vehicles for the badge.
   const activeVehiclesCount = vehicles.filter((v) => v.is_available).length;
 
+  // Client-side CSV export for quick reporting.
   const exportDailyLog = () => {
+    // Client-side CSV export for quick reporting.
     if (!bookings.length) return
     const headers = ['booking_id', 'vehicle', 'status', 'start_date', 'end_date', 'total_price']
     const rows = bookings.map((b) => [
@@ -100,6 +111,7 @@ export default function OperationsPage() {
     URL.revokeObjectURL(url)
   }
 
+  // Open the live map view in a new tab.
   const openMap = () => {
     window.open('https://www.google.com/maps/place/Mustang,+Nepal', '_blank', 'noopener,noreferrer')
   }

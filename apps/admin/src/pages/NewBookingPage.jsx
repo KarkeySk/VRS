@@ -15,6 +15,7 @@ import { authService } from '@bhatbhati/shared/services/authService.js'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 
+// Preset routes shown in the UI.
 const routeOptions = [
   { id: 'annapurna', name: 'Annapurna Circuit', duration: '12-16 days', difficulty: 'Moderate' },
   { id: 'mustang', name: 'Upper Mustang', duration: '8-10 days', difficulty: 'Challenging' },
@@ -23,6 +24,7 @@ const routeOptions = [
   { id: 'custom', name: 'Custom Route', duration: 'Flexible', difficulty: 'Varies' },
 ]
 
+// Optional add-ons with pricing.
 const extraAddons = [
   { id: 'offroad', label: 'Off-Road Pack', price: 3500, icon: Bike },
   { id: 'helmet', label: 'Extra Helmet', price: 500, icon: Shield },
@@ -32,6 +34,7 @@ const extraAddons = [
   { id: 'luggage', label: 'Premium Luggage', price: 2000, icon: Thermometer },
 ]
 
+// Base booking form state.
 const initialForm = {
   fullName: '',
   phone: '',
@@ -49,6 +52,7 @@ const initialForm = {
 }
 
 function getDays(start, end) {
+  // Inclusive day count for pricing.
   if (!start || !end) return 0
   const s = new Date(start)
   const e = new Date(end)
@@ -58,12 +62,15 @@ function getDays(start, end) {
 }
 
 export default function NewBookingPage({ onNavigate }) {
+  // Booking type and selection state.
   const [bookingType, setBookingType] = useState('self-drive')
   const [selectedVehicle, setSelectedVehicle] = useState('')
   const [selectedRoute, setSelectedRoute] = useState('')
   const [selectedAddons, setSelectedAddons] = useState([])
+  // Data loaded from services.
   const [vehicles, setVehicles] = useState([])
   const [user, setUser] = useState(null)
+  // Form and UI states.
   const [form, setForm] = useState(initialForm)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -71,6 +78,7 @@ export default function NewBookingPage({ onNavigate }) {
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
+    // Load current user and available vehicles.
     const load = async () => {
       setIsLoading(true)
       setError('')
@@ -90,10 +98,12 @@ export default function NewBookingPage({ onNavigate }) {
     load()
   }, [])
 
+  // Find selected vehicle details for pricing.
   const selectedVehicleDetails = useMemo(() => vehicles.find((v) => v.id === selectedVehicle), [vehicles, selectedVehicle])
   const route = useMemo(() => routeOptions.find((r) => r.id === selectedRoute), [selectedRoute])
 
   const days = useMemo(() => getDays(form.pickupDate, form.returnDate), [form.pickupDate, form.returnDate])
+  // Totals update live as the form changes.
   const addonTotal = useMemo(
     () => selectedAddons.reduce((sum, addonId) => sum + (extraAddons.find((a) => a.id === addonId)?.price || 0), 0),
     [selectedAddons],
@@ -101,14 +111,17 @@ export default function NewBookingPage({ onNavigate }) {
   const rentalTotal = useMemo(() => Number(selectedVehicleDetails?.price_per_day || 0) * days, [selectedVehicleDetails?.price_per_day, days])
   const total = rentalTotal + addonTotal
 
+  // Toggle add-ons in the selection list.
   const toggleAddon = (id) => {
     setSelectedAddons((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]))
   }
 
+  // Generic input handler for form fields.
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
+  // Validate and submit the booking.
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')

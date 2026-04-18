@@ -12,6 +12,7 @@ import NewBookingPage from '@/pages/NewBookingPage'
 import AdminProfilePage from '@/pages/AdminProfilePage'
 
 const PAGE_META = {
+  // Top bar titles + CTA configuration per view.
   dashboard: { title: 'Fleet Command', subtitle: 'Bikes • Cars • Jeeps', showNewBtn: true },
   fleet: { title: 'Fleet', showNewBtn: false },
   bookings: { title: 'Bookings', showNewBtn: true },
@@ -24,11 +25,15 @@ const PAGE_META = {
 }
 
 export default function Dashboard() {
+  // Local routing state for the admin shell.
   const [activePage, setActivePage] = useState('dashboard')
+  // Ephemeral message shown in the top bar area.
   const [topBarMessage, setTopBarMessage] = useState('')
+  // Current page metadata used by TopBar.
   const meta = PAGE_META[activePage]
 
   const renderPage = () => {
+    // Simple view routing driven by local state.
     switch (activePage) {
       case 'dashboard':
         return <DashboardPage onNavigate={setActivePage} />
@@ -54,9 +59,12 @@ export default function Dashboard() {
   }
 
   return (
+    // Full-height layout containing sidebar + content.
     <div className="flex h-screen overflow-hidden bg-dark-deeper text-txt-primary font-sans">
+      {/* Sidebar controls page switching. */}
       <Sidebar activePage={activePage} onNavigate={setActivePage} />
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header with actions and page label. */}
         <TopBar
           title={meta.title}
           subtitle={meta.subtitle}
