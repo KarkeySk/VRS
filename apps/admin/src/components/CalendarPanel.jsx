@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { calendarService } from "@bhatbhati/shared/services/calendarService.js";
 
 // Day labels used in the calendar header.
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -10,54 +11,26 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-// Sample booking dates (month is 0-indexed) — these simulate real bookings
-const BOOKED_DATES = [
-  { year: 2026, month: 3, day: 4 },
-  { year: 2026, month: 3, day: 8 },
-  { year: 2026, month: 3, day: 12 },
-  { year: 2026, month: 3, day: 15 },
-  { year: 2026, month: 3, day: 18 },
-  { year: 2026, month: 3, day: 22 },
-  { year: 2026, month: 3, day: 25 },
-  { year: 2026, month: 4, day: 3 },
-  { year: 2026, month: 4, day: 10 },
-  { year: 2026, month: 4, day: 17 },
-  { year: 2026, month: 4, day: 24 },
-];
-
-function hasBooking(year, month, day) {
-  // Check if a given day is marked as booked.
-  return BOOKED_DATES.some(
-    (b) => b.year === year && b.month === month && b.day === day
-  );
-}
-
-function buildCalendarGrid(year, month) {
-  // Build a padded grid for the month view.
-  // How many days in this month
+function buildCalendarGrid(year, month, bookedDays) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  // What day of the week does the 1st fall on (0 = Sunday)
   const firstDayOfWeek = new Date(year, month, 1).getDay();
-
-  // Get today for comparison
   const now = new Date();
   const todayYear = now.getFullYear();
   const todayMonth = now.getMonth();
   const todayDay = now.getDate();
-
   const cells = [];
 
-  // Leading empty cells for padding
   for (let i = 0; i < firstDayOfWeek; i++) {
     cells.push({ day: null });
   }
 
-  // Actual day cells
   for (let d = 1; d <= daysInMonth; d++) {
+    const dayBookings = bookedDays.filter((b) => b.day === d);
     cells.push({
       day: d,
       isToday: year === todayYear && month === todayMonth && d === todayDay,
-      hasBooking: hasBooking(year, month, d),
+      bookings: dayBookings,
+      hasBooking: dayBookings.length > 0,
     });
   }
 
@@ -65,15 +38,21 @@ function buildCalendarGrid(year, month) {
 }
 
 export default function CalendarPanel() {
-  // Initialize view to current month.
   const now = new Date();
   const [viewYear, setViewYear] = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth());
+  const [bookedDays, setBookedDays] = useState([]);
+  const [hoveredDay, setHoveredDay] = useState(null);
 
-  // Precompute cells for the current view.
-  const cells = buildCalendarGrid(viewYear, viewMonth);
+  // Fetch real booked dates from Supabase
+  useEffect(() => {
+    calendarService.getBookedDatesForMonth(viewYear, viewMonth)
+      .then(setBookedDays)
+      .catch(() => setBookedDays([]));
+  }, [viewYear, viewMonth]);
 
-  // Move backward one month.
+  const cells = buildCalendarGrid(viewYear, viewMonth, bookedDays);
+
   const goToPrev = () => {
     if (viewMonth === 0) {
       setViewMonth(11);
@@ -83,7 +62,6 @@ export default function CalendarPanel() {
     }
   };
 
-  // Move forward one month.
   const goToNext = () => {
     if (viewMonth === 11) {
       setViewMonth(0);
@@ -93,21 +71,21 @@ export default function CalendarPanel() {
     }
   };
 
-  // Jump back to today.
   const goToToday = () => {
     const t = new Date();
     setViewYear(t.getFullYear());
     setViewMonth(t.getMonth());
   };
 
-  // Used to decide whether to show the Today button.
   const isCurrentMonth =
     viewYear === now.getFullYear() && viewMonth === now.getMonth();
+
+  const totalBookedDays = new Set(bookedDays.map((b) => b.day)).size;
 
   return (
     <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <h3 className="text-base font-semibold m-0">Calendar</h3>
         <div className="flex items-center gap-1">
           {!isCurrentMonth && (
@@ -132,9 +110,16 @@ export default function CalendarPanel() {
           </button>
         </div>
       </div>
-      <p className="text-[13px] text-txt-secondary mb-4 m-0">
-        {MONTH_NAMES[viewMonth]} {viewYear}
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[13px] text-txt-secondary m-0">
+          {MONTH_NAMES[viewMonth]} {viewYear}
+        </p>
+        {totalBookedDays > 0 && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-orange/20 text-brand-orange font-semibold">
+            {totalBookedDays} booked day{totalBookedDays > 1 ? 's' : ''}
+          </span>
+        )}
+      </div>
 
       {/* Day headers */}
       <div className="grid grid-cols-7 gap-1 text-center mb-2">
@@ -146,7 +131,7 @@ export default function CalendarPanel() {
       </div>
 
       {/* Day cells */}
-      <div className="grid grid-cols-7 gap-1 text-center">
+      <div className="grid grid-cols-7 gap-1 text-center" style={{ position: 'relative' }}>
         {cells.map((cell, i) => {
           if (cell.day === null) {
             return (
@@ -159,15 +144,44 @@ export default function CalendarPanel() {
           return (
             <div
               key={i}
-              className={`cal-day aspect-square flex items-center justify-center text-[13px] rounded-md cursor-pointer transition-all ${
+              onMouseEnter={() => cell.hasBooking && setHoveredDay(cell.day)}
+              onMouseLeave={() => setHoveredDay(null)}
+              className={`cal-day aspect-square flex flex-col items-center justify-center text-[13px] rounded-md transition-all relative ${
                 cell.isToday
                   ? "cal-today bg-brand-orange text-dark font-semibold"
                   : cell.hasBooking
-                  ? "text-brand-orange font-semibold"
+                  ? "text-brand-orange font-semibold cursor-pointer"
                   : "text-txt-secondary"
               }`}
+              style={cell.hasBooking && !cell.isToday ? {
+                background: 'rgba(232,115,42,0.08)',
+                border: '1px solid rgba(232,115,42,0.15)',
+              } : undefined}
             >
               {cell.day}
+              {cell.hasBooking && !cell.isToday && (
+                <span style={{
+                  width: '4px', height: '4px', borderRadius: '50%',
+                  background: '#e8732a', position: 'absolute', bottom: '3px',
+                }} />
+              )}
+              {/* Tooltip showing vehicle details */}
+              {hoveredDay === cell.day && cell.hasBooking && (
+                <div style={{
+                  position: 'absolute', bottom: 'calc(100% + 6px)', left: '50%',
+                  transform: 'translateX(-50%)', background: '#141414',
+                  border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px',
+                  padding: '8px 12px', whiteSpace: 'nowrap', zIndex: 20,
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                }}>
+                  {cell.bookings.map((b, j) => (
+                    <div key={j} style={{ fontSize: '11px', marginBottom: j < cell.bookings.length - 1 ? '4px' : 0 }}>
+                      <span style={{ color: '#e8732a', fontWeight: '600' }}>{b.vehicleName}</span>
+                      <span style={{ color: '#888', marginLeft: '6px' }}>{b.status}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
