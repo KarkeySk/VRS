@@ -33,8 +33,9 @@ export default function VerifyEmailPage() {
       if (!isMounted) return;
 
       if (error) {
+        const errorMessage = await readFunctionError(error);
         setStatus('error');
-        setMessage(error.message || 'Unable to verify email');
+        setMessage(resolveVerificationError(errorMessage));
         return;
       }
 
@@ -97,8 +98,49 @@ export default function VerifyEmailPage() {
               </Link>
             </>
           )}
+
+          {status === 'error' && (
+            <>
+              <div className="auth-alert" role="alert">
+                {message || 'Invalid or expired verification token'}
+              </div>
+              <button type="button" className="auth-submit" disabled>
+                Resend verification email
+              </button>
+              <p className="auth-switch">
+                Already verified? <Link to="/auth/login">Sign in</Link>
+              </p>
+            </>
+          )}
         </div>
       </main>
     </div>
   );
+}
+
+async function readFunctionError(error) {
+  if (error?.context instanceof Response) {
+    try {
+      const body = await error.context.clone().json();
+      return body?.error || error.message;
+    } catch {
+      return error.message;
+    }
+  }
+
+  return error?.message || '';
+}
+
+function resolveVerificationError(errorMessage = '') {
+  const normalizedMessage = errorMessage.toLowerCase();
+
+  if (normalizedMessage.includes('expired')) {
+    return 'Expired verification token';
+  }
+
+  if (normalizedMessage.includes('required') || normalizedMessage.includes('missing')) {
+    return 'Verification token is required';
+  }
+
+  return 'Invalid verification token';
 }
