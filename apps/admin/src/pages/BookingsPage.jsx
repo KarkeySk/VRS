@@ -4,6 +4,7 @@ import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 import { authService } from '@bhatbhati/shared/services/authService.js'
+import { notificationService } from '@bhatbhati/shared/services/notificationService.js'
 
 // Dropdown choices for status filtering.
 const statusOptions = [
@@ -216,6 +217,16 @@ export default function BookingsPage({ onNavigate }) {
       }
 
       await applicationService.updateStatus(app.id, 'approved')
+
+      // Send notification to user
+      await notificationService.create({
+        userId: app.user_id,
+        type: 'booking_approved',
+        title: 'Booking Approved!',
+        message: `Your booking for ${app.vehicles?.name || 'a vehicle'} has been approved. Pay now to confirm your reservation.`,
+        applicationId: app.id,
+      }).catch((err) => console.warn('Notification failed:', err))
+
       await loadRows()
     } catch (err) {
       setError(err.message || 'Failed to approve request')
@@ -230,6 +241,21 @@ export default function BookingsPage({ onNavigate }) {
     setBusyKey(key)
     try {
       await applicationService.updateStatus(applicationId, nextStatus)
+
+      // Send notification on rejection
+      if (nextStatus === 'rejected') {
+        const row = rows.find((r) => r.id === applicationId)
+        if (row) {
+          await notificationService.create({
+            userId: row.raw.user_id,
+            type: 'booking_rejected',
+            title: 'Booking Rejected',
+            message: `Your booking for ${row.vehicleName || 'a vehicle'} was not approved. Contact us for details.`,
+            applicationId: applicationId,
+          }).catch((err) => console.warn('Notification failed:', err))
+        }
+      }
+
       await loadRows()
     } catch (err) {
       setError(err.message || 'Failed to update request status')
