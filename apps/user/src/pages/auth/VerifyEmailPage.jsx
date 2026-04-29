@@ -1,8 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import logo from '../../assets/logo.png';
 
 export default function VerifyEmailPage() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token')?.trim() || '';
+
   return (
     <div className="auth-shell">
       <aside className="auth-visual">
@@ -28,7 +31,11 @@ export default function VerifyEmailPage() {
         <div className="auth-card">
           <div className="auth-header">
             <h1>Verify email</h1>
-            <p>Please wait while we confirm your email address.</p>
+            <p>
+              {token
+                ? 'Please wait while we confirm your email address.'
+                : 'This verification link is missing a token.'}
+            </p>
           </div>
 
           <Link to="/auth/login" className="auth-submit">
