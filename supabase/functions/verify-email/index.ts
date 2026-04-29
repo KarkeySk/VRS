@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Verification token has expired" }, 400);
     }
 
-    const { error: updateError } = await supabase
+    const { data: verifiedProfile, error: updateError } = await supabase
       .from("profiles")
       .update({
         is_verified: true,
@@ -64,10 +64,16 @@ Deno.serve(async (req) => {
         token_expiry: null,
       })
       .eq("id", profile.id)
-      .eq("verification_token", tokenHash);
+      .eq("verification_token", tokenHash)
+      .select("id")
+      .maybeSingle();
 
     if (updateError) {
       return jsonResponse({ error: updateError.message }, 500);
+    }
+
+    if (!verifiedProfile) {
+      return jsonResponse({ error: "Invalid verification token" }, 400);
     }
 
     return jsonResponse({ message: "Email verified" });
