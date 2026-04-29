@@ -9,6 +9,7 @@ import Navbar from './components/layout/Navbar'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
+import VerifyEmailPage from './pages/auth/VerifyEmailPage'
 import Dashboard from './pages/user/Dashboard'
 import TerrainSelect from './pages/user/TerrainSelect'
 import VehiclesPage from './pages/user/VehiclesPage'
@@ -96,6 +97,7 @@ function AnimatedRoutes() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/auth/login" element={<LoginPage />} />
                     <Route path="/auth/register" element={<RegisterPage />} />
+                    <Route path="/verify" element={<VerifyEmailPage />} />
 
                     {/* Protected routes */}
                     <Route element={<ProtectedRoute />}>
