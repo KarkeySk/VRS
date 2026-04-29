@@ -54,13 +54,21 @@ export default function BookingConfirm() {
                             </div>
                             <div>
                                 <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Total</div>
-                                <div style={{ color: '#e8732a', fontSize: '1.1rem', fontWeight: '800' }}>${app.total_price}</div>
+                                <div style={{ color: '#e8732a', fontSize: '1.1rem', fontWeight: '800' }}>NPR {Number(app.total_price).toLocaleString()}</div>
                             </div>
                             <div>
-                                <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Status</div>
+                                <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Payment</div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <Clock size={14} color="#f59e0b" />
-                                    <span style={{ color: '#f59e0b', fontSize: '0.85rem', fontWeight: '600' }}>Checking</span>
+                                    {app.payment_status === 'completed' ? (<>
+                                        <CheckCircle size={14} color="#34d399" />
+                                        <span style={{ color: '#34d399', fontSize: '0.85rem', fontWeight: '600' }}>Paid</span>
+                                    </>) : app.status === 'approved' ? (<>
+                                        <Clock size={14} color="#60bb46" />
+                                        <span style={{ color: '#60bb46', fontSize: '0.85rem', fontWeight: '600' }}>Awaiting Payment</span>
+                                    </>) : (<>
+                                        <Clock size={14} color="#f59e0b" />
+                                        <span style={{ color: '#f59e0b', fontSize: '0.85rem', fontWeight: '600' }}>Checking</span>
+                                    </>)}
                                 </div>
                             </div>
                         </div>
