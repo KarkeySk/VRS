@@ -10,6 +10,12 @@ export const authService = {
             options: { data: metadata },
         })
         if (error) throw error
+        if (data.user?.id) {
+            const { error: verificationError } = await supabase.functions.invoke('send-verification-email', {
+                body: { user_id: data.user.id },
+            })
+            if (verificationError) throw verificationError
+        }
         return data
     },
 
