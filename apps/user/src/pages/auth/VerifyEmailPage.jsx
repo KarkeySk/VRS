@@ -26,7 +26,7 @@ export default function VerifyEmailPage() {
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('verify-email', {
+      const { error } = await supabase.functions.invoke('verify-email', {
         body: { token },
       });
 
@@ -39,7 +39,7 @@ export default function VerifyEmailPage() {
       }
 
       setStatus('success');
-      setMessage(data?.message || 'Email verified');
+      setMessage('Your email has been successfully verified');
     }
 
     verifyEmail();
@@ -85,6 +85,17 @@ export default function VerifyEmailPage() {
             <div className="auth-switch" role="status" aria-live="polite">
               Verifying your email...
             </div>
+          )}
+
+          {status === 'success' && (
+            <>
+              <div className="auth-switch" role="status" aria-live="polite">
+                Your email has been successfully verified
+              </div>
+              <Link to="/auth/login" className="auth-submit">
+                Go to Login <ArrowRight size={16} />
+              </Link>
+            </>
           )}
         </div>
       </main>
