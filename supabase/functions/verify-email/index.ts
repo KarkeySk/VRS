@@ -22,7 +22,15 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token } = await req.json();
+    let body: { token?: unknown };
+
+    try {
+      body = await req.json();
+    } catch {
+      return jsonResponse({ error: "Request body must be valid JSON" }, 400);
+    }
+
+    const { token } = body;
 
     if (!token || typeof token !== "string") {
       return jsonResponse({ error: "Verification token is required" }, 400);
