@@ -75,15 +75,17 @@ export default function VerifyEmailPage() {
           <div className="auth-header">
             <h1>Verify email</h1>
             <p>
-              {token
-                ? message || 'Please wait while we confirm your email address.'
+              {status === 'loading'
+                ? 'Please wait while we confirm your email address.'
                 : message || 'This verification link is missing a token.'}
             </p>
           </div>
 
-          <Link to="/auth/login" className="auth-submit">
-            Go to Login <ArrowRight size={16} />
-          </Link>
+          {status === 'loading' && (
+            <div className="auth-switch" role="status" aria-live="polite">
+              Verifying your email...
+            </div>
+          )}
         </div>
       </main>
     </div>
