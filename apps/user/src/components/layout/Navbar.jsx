@@ -3,6 +3,7 @@ import { LogIn, LogOut, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import logo from '../../assets/logo.png';
+import NotificationBell from '../common/NotificationBell';
 
 export default function Navbar() {
     const location = useLocation();
@@ -114,6 +115,8 @@ export default function Navbar() {
                     >
                         {isDark ? <Sun size={15} /> : <Moon size={15} />}
                     </button>
+
+                    {user && <NotificationBell />}
 
                     {user ? (
                         <>
