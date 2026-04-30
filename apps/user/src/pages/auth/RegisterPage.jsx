@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { authService } from '@bhatbhati/shared/services/authService.js';
 import logo from '../../assets/logo.png';
 
 const fleetSlides = [
@@ -38,7 +37,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signUp } = useAuth();
+  const { signUp, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
@@ -70,7 +69,7 @@ export default function RegisterPage() {
     setNotice('');
     setIsResending(true);
     try {
-      await authService.resendVerificationEmail(email);
+      await resendVerificationEmail(email);
       setNotice('Verification email sent. Please check your inbox.');
     } catch (err) {
       setError(err.message || 'Failed to resend verification email');
