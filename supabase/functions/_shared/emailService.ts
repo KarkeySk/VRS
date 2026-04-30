@@ -34,7 +34,17 @@ export async function sendVerificationEmail({ to, token }: VerificationEmailInpu
   });
 
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(`Email service failed: ${message}`);
+    throw new Error(await readEmailServiceError(response));
+  }
+}
+
+async function readEmailServiceError(response: Response) {
+  const message = await response.text();
+
+  try {
+    const body = JSON.parse(message);
+    return body?.message || "Email service failed";
+  } catch {
+    return message || "Email service failed";
   }
 }
