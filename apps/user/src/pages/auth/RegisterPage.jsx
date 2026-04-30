@@ -71,7 +71,7 @@ export default function RegisterPage() {
     setIsResending(true);
     try {
       await resendVerificationEmail(email);
-      setNotice('Verification email sent. Please check your inbox.');
+      setNotice('Confirmation email sent. Please check your inbox.');
     } catch (err) {
       setError(err.message || 'Failed to resend verification email');
     } finally {
@@ -172,7 +172,7 @@ export default function RegisterPage() {
               disabled={isResending}
               onClick={handleResendVerification}
             >
-              {isResending ? 'Sending...' : 'Resend verification email'} <ArrowRight size={16} />
+              {isResending ? 'Sending...' : 'Resend confirmation email'} <ArrowRight size={16} />
             </button>
           )}
 
@@ -187,7 +187,7 @@ export default function RegisterPage() {
 
 function resolveRegisterError(message = '') {
   if (message.includes('Edge Function returned a non-2xx status code')) {
-    return 'Account created, but the verification email could not be sent. Use the resend button after checking email settings.';
+    return 'Account created, but the confirmation email could not be sent. Use the resend button after checking Supabase email settings.';
   }
 
   return message || 'Failed to register';

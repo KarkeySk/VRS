@@ -7,12 +7,12 @@ export const authService = {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: metadata },
+            options: {
+                data: metadata,
+                emailRedirectTo: getEmailRedirectUrl(),
+            },
         })
         if (error) throw error
-        if (data.user?.id) {
-            await callFunction('send-verification-email', { user_id: data.user.id })
-        }
         return data
     },
 
@@ -21,23 +21,6 @@ export const authService = {
         if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-
-        const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('is_verified')
-            .eq('id', data.user.id)
-            .maybeSingle()
-
-        if (profileError) {
-            await supabase.auth.signOut()
-            throw profileError
-        }
-
-        if (!profile?.is_verified) {
-            await supabase.auth.signOut()
-            throw new Error('Please verify your email before signing in')
-        }
-
         return data
     },
 
@@ -63,7 +46,15 @@ export const authService = {
         if (!email) throw new Error('Email address is required')
         if (!supabase) throw new Error('Verification service is not configured')
 
-        await callFunction('send-verification-email', { email })
+        const { error } = await supabase.auth.resend({
+            type: 'signup',
+            email,
+            options: {
+                emailRedirectTo: getEmailRedirectUrl(),
+            },
+        })
+
+        if (error) throw error
 
         return { message: 'Verification email sent' }
     },
@@ -109,6 +100,11 @@ export const authService = {
         if (error) return false
         return data?.role === 'admin'
     },
+}
+
+function getEmailRedirectUrl() {
+    if (typeof window === 'undefined') return undefined
+    return `${window.location.origin}/auth/login`
 }
 
 async function callFunction(functionName, body) {

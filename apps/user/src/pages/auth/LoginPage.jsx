@@ -74,7 +74,7 @@ export default function LoginPage() {
     setIsResending(true);
     try {
       await resendVerificationEmail(email);
-      setNotice('Verification email sent. Please check your inbox.');
+      setNotice('Confirmation email sent. Please check your inbox.');
     } catch (err) {
       setError(err.message || 'Failed to resend verification email');
     } finally {
@@ -165,14 +165,14 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {error === 'Please verify your email before signing in' && (
+          {isEmailConfirmationError(error) && (
             <button
               type="button"
               className="auth-submit"
               disabled={isResending || !email}
               onClick={handleResendVerification}
             >
-              {isResending ? 'Sending...' : 'Resend verification email'} <ArrowRight size={16} />
+              {isResending ? 'Sending...' : 'Resend confirmation email'} <ArrowRight size={16} />
             </button>
           )}
 
@@ -187,8 +187,13 @@ export default function LoginPage() {
 
 function resolveLoginError(message = '') {
   if (message.includes('Edge Function returned a non-2xx status code')) {
-    return 'Verification email could not be sent. Check email settings, then try again.';
+    return 'Confirmation email could not be sent. Check Supabase email settings, then try again.';
   }
 
   return message || 'Failed to login';
+}
+
+function isEmailConfirmationError(message = '') {
+  const normalizedMessage = message.toLowerCase();
+  return normalizedMessage.includes('verify your email') || normalizedMessage.includes('email not confirmed');
 }
