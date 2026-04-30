@@ -14,7 +14,9 @@ export const authService = {
             const { error: verificationError } = await supabase.functions.invoke('send-verification-email', {
                 body: { user_id: data.user.id },
             })
-            if (verificationError) throw verificationError
+            if (verificationError) {
+                throw new Error(await readFunctionError(verificationError))
+            }
         }
         return data
     },
