@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { authService } from '@bhatbhati/shared/services/authService.js';
 import logo from '../../assets/logo.png';
 
 const fleetSlides = [
@@ -33,7 +34,9 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [terrain, setTerrain] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
   const { signUp } = useAuth();
   const navigate = useNavigate();
@@ -50,6 +53,7 @@ export default function RegisterPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setNotice('');
     setIsLoading(true);
     try {
       await signUp(email, password, { full_name: fullname, terrain_preference: terrain });
@@ -58,6 +62,20 @@ export default function RegisterPage() {
       setError(err.message || 'Failed to register');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setError('');
+    setNotice('');
+    setIsResending(true);
+    try {
+      await authService.resendVerificationEmail(email);
+      setNotice('Verification email sent. Please check your inbox.');
+    } catch (err) {
+      setError(err.message || 'Failed to resend verification email');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -95,6 +113,7 @@ export default function RegisterPage() {
           </div>
 
           {error && <div className="auth-alert">{error}</div>}
+          {notice && <div className="auth-switch">{notice}</div>}
 
           <form onSubmit={handleRegister} className="auth-form">
             <label htmlFor="register-fullname">Full Name</label>
@@ -145,6 +164,17 @@ export default function RegisterPage() {
               {isLoading ? 'Creating account...' : 'Create Account'} <ArrowRight size={16} />
             </button>
           </form>
+
+          {error && email && error !== 'Failed to register' && (
+            <button
+              type="button"
+              className="auth-submit"
+              disabled={isResending}
+              onClick={handleResendVerification}
+            >
+              {isResending ? 'Sending...' : 'Resend verification email'} <ArrowRight size={16} />
+            </button>
+          )}
 
           <p className="auth-switch">
             Already have an account? <Link to="/auth/login">Sign in</Link>
