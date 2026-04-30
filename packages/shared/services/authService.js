@@ -24,6 +24,23 @@ export const authService = {
         if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
+
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_verified')
+            .eq('id', data.user.id)
+            .maybeSingle()
+
+        if (profileError) {
+            await supabase.auth.signOut()
+            throw profileError
+        }
+
+        if (!profile?.is_verified) {
+            await supabase.auth.signOut()
+            throw new Error('Please verify your email before signing in')
+        }
+
         return data
     },
 
