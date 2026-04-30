@@ -25,17 +25,45 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { user_id: userId } = await req.json();
+    const { user_id: userId, email } = await req.json();
 
-    if (!userId) {
-      return jsonResponse({ error: "user_id is required" }, 400);
+    if (!userId && !email) {
+      return jsonResponse({ error: "user_id or email is required" }, 400);
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const { data: userResult, error: userError } = await supabase.auth.admin.getUserById(userId);
+    let resolvedUserId = userId;
+    let resolvedEmail = email;
 
-    if (userError || !userResult.user?.email) {
-      return jsonResponse({ error: "User not found" }, 404);
+    if (resolvedUserId) {
+      const { data: userResult, error: userError } = await supabase.auth.admin.getUserById(resolvedUserId);
+
+      if (userError || !userResult.user?.email) {
+        return jsonResponse({ error: "User not found" }, 404);
+      }
+
+      resolvedEmail = userResult.user.email;
+    } else {
+      const { data: profile, error: profileLookupError } = await supabase
+        .from("profiles")
+        .select("id, email, is_verified")
+        .eq("email", resolvedEmail)
+        .maybeSingle();
+
+      if (profileLookupError) {
+        return jsonResponse({ error: profileLookupError.message }, 500);
+      }
+
+      if (!profile?.id || !profile.email) {
+        return jsonResponse({ error: "User not found" }, 404);
+      }
+
+      if (profile.is_verified) {
+        return jsonResponse({ message: "Email is already verified" });
+      }
+
+      resolvedUserId = profile.id;
+      resolvedEmail = profile.email;
     }
 
     const rawToken = generateVerificationToken();
@@ -49,14 +77,14 @@ Deno.serve(async (req) => {
         verification_token: tokenHash,
         token_expiry: tokenExpiry,
       })
-      .eq("id", userResult.user.id);
+      .eq("id", resolvedUserId);
 
     if (profileError) {
       return jsonResponse({ error: profileError.message }, 500);
     }
 
     await sendVerificationEmail({
-      to: userResult.user.email,
+      to: resolvedEmail,
       token: rawToken,
     });
 
