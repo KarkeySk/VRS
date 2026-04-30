@@ -62,7 +62,7 @@ export default function LoginPage() {
       await signIn(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Failed to login');
+      setError(resolveLoginError(err.message));
     } finally {
       setIsLoading(false);
     }
@@ -183,4 +183,12 @@ export default function LoginPage() {
       </main>
     </div>
   );
+}
+
+function resolveLoginError(message = '') {
+  if (message.includes('Edge Function returned a non-2xx status code')) {
+    return 'Verification email could not be sent. Check email settings, then try again.';
+  }
+
+  return message || 'Failed to login';
 }

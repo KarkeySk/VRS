@@ -59,7 +59,7 @@ export default function RegisterPage() {
       await signUp(email, password, { full_name: fullname, terrain_preference: terrain });
       navigate('/auth/login');
     } catch (err) {
-      setError(err.message || 'Failed to register');
+      setError(resolveRegisterError(err.message));
     } finally {
       setIsLoading(false);
     }
@@ -183,4 +183,12 @@ export default function RegisterPage() {
       </main>
     </div>
   );
+}
+
+function resolveRegisterError(message = '') {
+  if (message.includes('Edge Function returned a non-2xx status code')) {
+    return 'Account created, but the verification email could not be sent. Use the resend button after checking email settings.';
+  }
+
+  return message || 'Failed to register';
 }
