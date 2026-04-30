@@ -31,16 +31,6 @@ export const authService = {
         if (error) throw error
     },
 
-    /** Verify user email with token from verification link */
-    verifyEmail: async (token) => {
-        if (!token) throw new Error('Verification token is required')
-        if (!supabase) throw new Error('Verification service is not configured')
-
-        await callFunction('verify-email', { token })
-
-        return { message: 'Your email has been successfully verified' }
-    },
-
     /** Resend verification email for an existing account */
     resendVerificationEmail: async (email) => {
         if (!email) throw new Error('Email address is required')
@@ -105,39 +95,4 @@ export const authService = {
 function getEmailRedirectUrl() {
     if (typeof window === 'undefined') return undefined
     return `${window.location.origin}/auth/login`
-}
-
-async function callFunction(functionName, body) {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
-
-    if (!supabaseUrl) {
-        throw new Error('Supabase URL is not configured')
-    }
-
-    const response = await fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-    })
-    const payload = await readResponseBody(response)
-
-    if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || 'Verification service request failed')
-    }
-
-    return payload
-}
-
-async function readResponseBody(response) {
-    const text = await response.text()
-
-    if (!text) return null
-
-    try {
-        return JSON.parse(text)
-    } catch {
-        return { error: text }
-    }
 }
