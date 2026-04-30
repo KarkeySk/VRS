@@ -94,5 +94,5 @@ export const authService = {
 
 function getEmailRedirectUrl() {
     if (typeof window === 'undefined') return undefined
-    return `${window.location.origin}/auth/login`
+    return `${window.location.origin}/auth/confirmed`
 }
