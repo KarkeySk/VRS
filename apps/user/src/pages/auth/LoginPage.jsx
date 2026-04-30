@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { resendVerificationEmail } from '../../utils/emailVerification';
 import logo from '../../assets/logo.png';
 
 const fleetSlides = [
@@ -40,7 +41,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signIn, resendVerificationEmail } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
