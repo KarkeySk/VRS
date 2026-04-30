@@ -69,6 +69,22 @@ export const authService = {
         return { message: 'Your email has been successfully verified' }
     },
 
+    /** Resend verification email for an existing account */
+    resendVerificationEmail: async (email) => {
+        if (!email) throw new Error('Email address is required')
+        if (!supabase) throw new Error('Verification service is not configured')
+
+        const { error } = await supabase.functions.invoke('send-verification-email', {
+            body: { email },
+        })
+
+        if (error) {
+            throw new Error(await readFunctionError(error))
+        }
+
+        return { message: 'Verification email sent' }
+    },
+
     /** Update current user password */
     updatePassword: async (newPassword) => {
         if (!supabase) throw new Error('Supabase is not configured')
