@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev:user": "pnpm --filter @bhatbhati/user dev",
-    "dev:admin": "pnpm --filter @bhatbhati/admin dev",
-    "build:user": "pnpm --filter @bhatbhati/user build",
-    "build:admin": "pnpm --filter @bhatbhati/admin build",
-    "dev": "pnpm --parallel --filter './apps/*' dev"
+    "dev": "npm --prefix apps/user run dev",
+    "dev:user": "npm --prefix apps/user run dev",
+    "dev:admin": "npm --prefix apps/admin run dev",
+    "build:user": "npm --prefix apps/user run build",
+    "build:admin": "npm --prefix apps/admin run build"
   }
 }
