@@ -34,6 +34,22 @@ export const authService = {
         if (error) throw error
     },
 
+    /** Verify user email with token from verification link */
+    verifyEmail: async (token) => {
+        if (!token) throw new Error('Verification token is required')
+        if (!supabase) throw new Error('Verification service is not configured')
+
+        const { error } = await supabase.functions.invoke('verify-email', {
+            body: { token },
+        })
+
+        if (error) {
+            throw new Error(await readFunctionError(error))
+        }
+
+        return { message: 'Your email has been successfully verified' }
+    },
+
     /** Update current user password */
     updatePassword: async (newPassword) => {
         if (!supabase) throw new Error('Supabase is not configured')
@@ -75,4 +91,17 @@ export const authService = {
         if (error) return false
         return data?.role === 'admin'
     },
+}
+
+async function readFunctionError(error) {
+    if (error?.context instanceof Response) {
+        try {
+            const body = await error.context.clone().json()
+            return body?.error || error.message
+        } catch {
+            return error.message
+        }
+    }
+
+    return error?.message || 'Unable to verify email'
 }

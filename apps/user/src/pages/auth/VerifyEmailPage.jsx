@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { supabase } from '@bhatbhati/shared/lib/supabase';
+import { authService } from '@bhatbhati/shared/services/authService.js';
 import logo from '../../assets/logo.png';
 
 export default function VerifyEmailPage() {
@@ -20,24 +20,16 @@ export default function VerifyEmailPage() {
         return;
       }
 
-      if (!supabase) {
+      try {
+        await authService.verifyEmail(token);
+      } catch (error) {
+        if (!isMounted) return;
         setStatus('error');
-        setMessage('Verification service is not configured');
+        setMessage(resolveVerificationError(error.message));
         return;
       }
-
-      const { error } = await supabase.functions.invoke('verify-email', {
-        body: { token },
-      });
 
       if (!isMounted) return;
-
-      if (error) {
-        const errorMessage = await readFunctionError(error);
-        setStatus('error');
-        setMessage(resolveVerificationError(errorMessage));
-        return;
-      }
 
       setStatus('success');
       setMessage('Your email has been successfully verified');
@@ -116,19 +108,6 @@ export default function VerifyEmailPage() {
       </main>
     </div>
   );
-}
-
-async function readFunctionError(error) {
-  if (error?.context instanceof Response) {
-    try {
-      const body = await error.context.clone().json();
-      return body?.error || error.message;
-    } catch {
-      return error.message;
-    }
-  }
-
-  return error?.message || '';
 }
 
 function resolveVerificationError(errorMessage = '') {
