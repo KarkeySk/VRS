@@ -56,7 +56,9 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       await signUp(email, password, { full_name: fullname, terrain_preference: terrain });
-      navigate('/auth/login');
+      navigate('/auth/login', {
+        state: { notice: 'Account created. Please check your inbox to confirm your email before signing in.' },
+      });
     } catch (err) {
       setError(resolveRegisterError(err.message));
     } finally {

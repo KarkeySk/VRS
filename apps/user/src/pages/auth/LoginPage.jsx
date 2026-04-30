@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
@@ -38,7 +38,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const location = useLocation();
+  const [notice, setNotice] = useState(location.state?.notice || '');
   const [currentSlide, setCurrentSlide] = useState(0);
   const { signIn, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
