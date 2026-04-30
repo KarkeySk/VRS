@@ -11,12 +11,7 @@ export const authService = {
         })
         if (error) throw error
         if (data.user?.id) {
-            const { error: verificationError } = await supabase.functions.invoke('send-verification-email', {
-                body: { user_id: data.user.id },
-            })
-            if (verificationError) {
-                throw new Error(await readFunctionError(verificationError))
-            }
+            await callFunction('send-verification-email', { user_id: data.user.id })
         }
         return data
     },
@@ -58,13 +53,7 @@ export const authService = {
         if (!token) throw new Error('Verification token is required')
         if (!supabase) throw new Error('Verification service is not configured')
 
-        const { error } = await supabase.functions.invoke('verify-email', {
-            body: { token },
-        })
-
-        if (error) {
-            throw new Error(await readFunctionError(error))
-        }
+        await callFunction('verify-email', { token })
 
         return { message: 'Your email has been successfully verified' }
     },
@@ -74,13 +63,7 @@ export const authService = {
         if (!email) throw new Error('Email address is required')
         if (!supabase) throw new Error('Verification service is not configured')
 
-        const { error } = await supabase.functions.invoke('send-verification-email', {
-            body: { email },
-        })
-
-        if (error) {
-            throw new Error(await readFunctionError(error))
-        }
+        await callFunction('send-verification-email', { email })
 
         return { message: 'Verification email sent' }
     },
@@ -128,15 +111,37 @@ export const authService = {
     },
 }
 
-async function readFunctionError(error) {
-    if (error?.context instanceof Response) {
-        try {
-            const body = await error.context.clone().json()
-            return body?.error || error.message
-        } catch {
-            return error.message
-        }
+async function callFunction(functionName, body) {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
+
+    if (!supabaseUrl) {
+        throw new Error('Supabase URL is not configured')
     }
 
-    return error?.message || 'Unable to verify email'
+    const response = await fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    })
+    const payload = await readResponseBody(response)
+
+    if (!response.ok) {
+        throw new Error(payload?.error || payload?.message || 'Verification service request failed')
+    }
+
+    return payload
+}
+
+async function readResponseBody(response) {
+    const text = await response.text()
+
+    if (!text) return null
+
+    try {
+        return JSON.parse(text)
+    } catch {
+        return { error: text }
+    }
 }
