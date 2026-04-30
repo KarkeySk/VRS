@@ -2,17 +2,23 @@ import { useEffect, useMemo, useState } from 'react'
 import { Search, Truck, ToggleLeft, Trash2, PencilLine } from 'lucide-react'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 
+// Styles for availability badges.
 const availabilityStyles = {
   true: 'bg-status-green/20 text-status-green',
   false: 'bg-status-red/20 text-status-red',
 }
 
 export default function FleetPage() {
+  // Full fleet list from Supabase.
   const [vehicles, setVehicles] = useState([])
+  // Search query for filtering.
   const [query, setQuery] = useState('')
+  // Loading/error state for fetch and actions.
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  // Guard to disable row actions.
   const [busyId, setBusyId] = useState('')
+  // Inline edit state.
   const [editVehicleId, setEditVehicleId] = useState('')
   const [isSavingEdit, setIsSavingEdit] = useState(false)
   const [editForm, setEditForm] = useState({
@@ -24,6 +30,7 @@ export default function FleetPage() {
     is_available: true,
   })
 
+  // Fetch vehicles for admin view.
   const loadVehicles = async () => {
     setIsLoading(true)
     setError('')
@@ -38,9 +45,11 @@ export default function FleetPage() {
   }
 
   useEffect(() => {
+    // Initial data load.
     loadVehicles()
   }, [])
 
+  // Filter vehicles by name or type.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return vehicles
@@ -55,6 +64,7 @@ export default function FleetPage() {
   const availableCount = vehicles.filter((v) => v.is_available).length
   const unavailableCount = total - availableCount
 
+  // Toggle availability for a single vehicle.
   const handleToggleAvailability = async (vehicle) => {
     setBusyId(vehicle.id)
     try {
@@ -67,6 +77,7 @@ export default function FleetPage() {
     }
   }
 
+  // Delete a vehicle after confirmation.
   const handleDelete = async (vehicle) => {
     const ok = window.confirm(`Delete vehicle "${vehicle.name}"?`)
     if (!ok) return
@@ -82,7 +93,9 @@ export default function FleetPage() {
     }
   }
 
+  // Copy the selected vehicle into local edit state.
   const openEdit = (vehicle) => {
+    // Copy the selected vehicle into local edit state.
     setEditVehicleId(vehicle.id)
     setEditForm({
       name: vehicle.name || '',
@@ -94,6 +107,7 @@ export default function FleetPage() {
     })
   }
 
+  // Reset the inline edit form.
   const cancelEdit = () => {
     setEditVehicleId('')
     setEditForm({
@@ -106,6 +120,7 @@ export default function FleetPage() {
     })
   }
 
+  // Persist inline edits.
   const saveEdit = async (e) => {
     e.preventDefault()
     if (!editVehicleId) return

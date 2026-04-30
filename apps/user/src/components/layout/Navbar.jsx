@@ -3,7 +3,7 @@ import { LogIn, LogOut, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import logo from '../../assets/logo.png';
-import NotificationBell from "../NotificationBell";
+import NotificationBell from '../common/NotificationBell';
 
 export default function Navbar() {
     const location = useLocation();
@@ -98,81 +98,82 @@ export default function Navbar() {
                 {/* RIGHT SIDE — TOGGLES + BOOK NOW */}
 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
 
-    {/* THEME BUTTON */}
-    <button
-        onClick={toggleTheme}
-        title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-        style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '38px',
-            height: '38px',
-            background: 'var(--bg-glass)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            borderRadius: '999px',
-            cursor: 'pointer',
-        }}
-    >
-        {isDark ? <Sun size={15} /> : <Moon size={15} />}
-    </button>
+                    {user && <NotificationBell />}
 
-    {/* 🔔 NOTIFICATION BELL */}
-    <NotificationBell />
-
-    {user ? (
-        <>
-            <Link to="/terrain" style={{
-                textDecoration: 'none',
-                background: 'var(--brand-gradient)',
-                color: 'var(--accent-ink)',
-                fontWeight: '700',
-                fontSize: '0.8125rem',
-                padding: '10px 22px',
-                borderRadius: '999px',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                boxShadow: '0 4px 15px rgba(232, 115, 42, 0.25)',
-            }}>
-                Book Now
-            </Link>
-
-            <button
-                onClick={() => { signOut(); navigate('/'); }}
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    background: 'var(--bg-glass)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-primary)',
-                    fontWeight: '600',
-                    fontSize: '0.8125rem',
-                    padding: '10px 20px',
-                    borderRadius: '999px',
-                    cursor: 'pointer',
-                }}
-            >
-                <LogOut size={14} /> Logout
-            </button>
-        </>
-    ) : (
-        <Link to="/auth/login" style={{
-            textDecoration: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            background: 'var(--brand-gradient)',
-            color: 'var(--accent-ink)',
-            fontWeight: '700',
-            fontSize: '0.8125rem',
-            padding: '10px 22px',
-            borderRadius: '999px',
-        }}>
-            <LogIn size={14} /> Login
-        </Link>
-    )}
-</div>
+                    {user ? (
+                        <>
+                            <Link to="/terrain" style={{
+                                textDecoration: 'none',
+                                background: 'var(--brand-gradient)',
+                                color: 'var(--accent-ink)',
+                                fontWeight: '700',
+                                fontSize: '0.8125rem',
+                                padding: '10px 22px',
+                                borderRadius: '999px',
+                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                boxShadow: '0 4px 15px rgba(232, 115, 42, 0.25)',
+                            }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(232, 115, 42, 0.4)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(232, 115, 42, 0.25)';
+                                }}
+                            >
+                                Book Now
+                            </Link>
+                            <button
+                                onClick={() => { signOut(); navigate('/'); }}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    background: 'var(--bg-glass)',
+                                    border: '1px solid var(--border)',
+                                    color: 'var(--text-primary)',
+                                    fontWeight: '600',
+                                    fontSize: '0.8125rem',
+                                    padding: '10px 20px',
+                                    borderRadius: '999px',
+                                    cursor: 'pointer',
+                                    transition: 'border-color 0.25s',
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(232, 115, 42, 0.3)'}
+                                onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+                            >
+                                <LogOut size={14} /> Logout
+                            </button>
+                        </>
+                    ) : (
+                        <Link to="/auth/login" style={{
+                            textDecoration: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            background: 'var(--brand-gradient)',
+                            color: 'var(--accent-ink)',
+                            fontWeight: '700',
+                            fontSize: '0.8125rem',
+                            padding: '10px 22px',
+                            borderRadius: '999px',
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            boxShadow: '0 4px 15px rgba(232, 115, 42, 0.25)',
+                        }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                e.currentTarget.style.boxShadow = '0 6px 20px rgba(232, 115, 42, 0.4)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 15px rgba(232, 115, 42, 0.25)';
+                            }}
+                        >
+                            <LogIn size={14} /> Login
+                        </Link>
+                    )}
+                </div>
             </nav>
         </div>
     );
