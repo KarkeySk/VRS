@@ -216,11 +216,11 @@ export default function BookingsPage({ onNavigate }) {
         booking,
       })
 
-      await applicationService.updateStatus(app.id, 'approved')
       if (shouldEmail) {
         await sendBookingApprovalEmail(booking)
         await recordApprovalEmailSent(booking.id)
       }
+      await applicationService.updateStatus(app.id, 'approved')
       await loadRows()
     } catch (err) {
       setError(err.message || 'Failed to approve request')
