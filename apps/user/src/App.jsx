@@ -17,8 +17,6 @@ import VehicleDetail from './pages/user/VehicleDetail'
 import InquiryPage from './pages/user/InquiryPage'
 import BookingApply from './pages/user/BookingApply'
 import BookingConfirm from './pages/user/BookingConfirm'
-import PaymentPage from './pages/user/PaymentPage'
-import PaymentSuccess from './pages/user/PaymentSuccess'
 import BookingsPage from './pages/user/BookingsPage'
 import ProfilePage from './pages/user/ProfilePage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -110,8 +108,6 @@ function AnimatedRoutes() {
                         <Route path="/inquiry/:id" element={<InquiryPage />} />
                         <Route path="/apply/:inquiryId" element={<BookingApply />} />
                         <Route path="/booking/confirm/:applicationId" element={<BookingConfirm />} />
-                        <Route path="/payment/:applicationId" element={<PaymentPage />} />
-                        <Route path="/payment/success" element={<PaymentSuccess />} />
                         <Route path="/bookings" element={<BookingsPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
                     </Route>

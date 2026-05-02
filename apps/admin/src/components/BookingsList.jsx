@@ -2,39 +2,17 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import BookingCard from "@/components/BookingCard";
 
-/*
-  BookingsList notes:
-  - Accepts upcoming and past arrays.
-  - Tabs switch between the lists.
-  - Status filter narrows the result.
-  - onManageBooking is called per card.
-  - Empty state is handled.
-  - No external data fetching.
-  - Keeps filters local to the component.
-  - Expects normalized booking objects.
-  - Designed for dashboard embedding.
-  - No side effects beyond state.
-*/
-
 export default function BookingsList({
-  // List of upcoming booking items.
   upcomingBookings = [],
-  // List of past booking items.
   pastBookings = [],
-  // Callback when a card is opened.
   onManageBooking = () => {},
 }) {
-  // Active tab selection.
   const [activeTab, setActiveTab] = useState("upcoming");
-  // Filter used for status dropdown.
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Apply tab + status filtering to the booking lists.
   const bookings = (activeTab === "upcoming" ? upcomingBookings : pastBookings)
     .filter((booking) => statusFilter === "all" || booking.status === statusFilter);
 
-  // Derived list is used for the card render below.
-  // Render tabbed booking list.
   return (
     <div>
       {/* Tabs + Filter */}

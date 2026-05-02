@@ -17,7 +17,6 @@ import StatsCard from "@/components/StatsCard";
 import TrackingChart from "@/components/TrackingChart";
 import WeatherPanel from "@/components/WeatherPanel";
 
-// Visual themes for fleet categories.
 const VEHICLE_THEME = {
   bike: {
     id: "bike",
@@ -43,7 +42,6 @@ const VEHICLE_THEME = {
 };
 
 function mapStatus(status) {
-  // Normalize backend status into UI buckets.
   if (status === "active" || status === "confirmed") return "ACTIVE";
   if (status === "pending") return "PARTIAL";
   if (status === "cancelled") return "OVERDUE";
@@ -51,7 +49,6 @@ function mapStatus(status) {
 }
 
 function formatDateRange(start, end) {
-  // Format date range for cards.
   if (!start || !end) return "Date not set";
   const startDate = new Date(start).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   const endDate = new Date(end).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -59,7 +56,6 @@ function formatDateRange(start, end) {
 }
 
 function classifyVehicleTheme(vehicle) {
-  // Map vehicle text to a theme bucket.
   const haystack = `${vehicle?.type ?? ""} ${vehicle?.name ?? ""} ${vehicle?.category ?? ""}`.toLowerCase();
   if (haystack.includes("bike") || haystack.includes("motor")) return "bike";
   if (
@@ -73,7 +69,6 @@ function classifyVehicleTheme(vehicle) {
 }
 
 function extractDriveType(notes) {
-  // Pull drive type from notes JSON.
   if (!notes) return "SELF-DRIVE";
   if (typeof notes !== "string") return "SELF-DRIVE";
 
@@ -88,7 +83,6 @@ function extractDriveType(notes) {
 }
 
 function extractExtras(notes) {
-  // Summarize route or notes for display.
   if (!notes || typeof notes !== "string") return "Standard package";
 
   try {
@@ -102,21 +96,16 @@ function extractExtras(notes) {
 }
 
 export default function DashboardPage({ onNavigate = () => {} }) {
-  // Primary dataset for cards and panels.
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]);
-  // Fallback image for bookings without photos.
   const [bookingFallbackImage, setBookingFallbackImage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  // Selected booking for the modal.
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [flashMessage, setFlashMessage] = useState("");
-  // Active theme filter.
   const [activeTheme, setActiveTheme] = useState("all");
 
-  // Fetch bookings, vehicles, and UI assets.
   const load = async () => {
     setIsLoading(true);
     setError("");
@@ -140,7 +129,6 @@ export default function DashboardPage({ onNavigate = () => {} }) {
   };
 
   useEffect(() => {
-    // Initial data load.
     load();
   }, []);
 
@@ -149,7 +137,6 @@ export default function DashboardPage({ onNavigate = () => {} }) {
   const availableVehicles = vehicles.filter((v) => v.is_available).length;
   const capacityPercent = vehicles.length ? Math.round((activeCount / vehicles.length) * 100) : 0;
 
-  // Aggregate availability stats per theme.
   const fleetThemeStats = useMemo(() => {
     const stats = {
       bike: { total: 0, available: 0 },
@@ -166,7 +153,6 @@ export default function DashboardPage({ onNavigate = () => {} }) {
     return stats;
   }, [vehicles]);
 
-  // Split bookings into themed buckets.
   const bookingsByTheme = useMemo(() => {
     const grouped = { bike: [], car: [], jeep: [] };
 
@@ -178,15 +164,12 @@ export default function DashboardPage({ onNavigate = () => {} }) {
     return grouped;
   }, [bookings]);
 
-  // Select bookings for the active theme.
   const themedBookings = useMemo(() => {
     if (activeTheme === "all") return bookings;
     return bookingsByTheme[activeTheme] ?? [];
   }, [activeTheme, bookings, bookingsByTheme]);
 
-  // Shape raw bookings into the card/list UI model.
   const mapped = useMemo(
-    // Shape raw bookings into the card/list UI model.
     () => themedBookings.map((booking) => ({
       id: booking.id,
       vehicle: booking.vehicles?.name || "Unknown Vehicle",
@@ -206,7 +189,6 @@ export default function DashboardPage({ onNavigate = () => {} }) {
 
   const activeThemeLabel = activeTheme === "all" ? "All Vehicle Types" : VEHICLE_THEME[activeTheme].label;
 
-  // Update booking status from the modal.
   const handleStatusChange = async (status) => {
     if (!selectedBooking?.id) return;
     setIsSaving(true);
@@ -222,7 +204,6 @@ export default function DashboardPage({ onNavigate = () => {} }) {
     }
   };
 
-  // Delete the selected booking from the modal.
   const handleDelete = async () => {
     if (!selectedBooking?.id) return;
     const ok = window.confirm("Delete this booking permanently?");

@@ -3,31 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { authService } from '@bhatbhati/shared/services/authService.js'
 
 export default function AdminLogin() {
-  // Form state for credentials.
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  // UI states for feedback.
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  // Router navigation after login.
   const navigate = useNavigate()
 
   const handleLogin = async (e) => {
-    // Authenticate and redirect to the admin dashboard.
     e.preventDefault()
     setError('')
-    // Lock the form while we authenticate.
     setIsLoading(true)
     try {
-      // Perform sign-in with the auth service.
       await authService.signIn(email, password)
-      // Route to the dashboard on success.
       navigate('/dashboard')
     } catch (err) {
-      // Show a message on failure.
       setError(err.message || 'Failed to login')
     } finally {
-      // Re-enable the form.
       setIsLoading(false)
     }
   }

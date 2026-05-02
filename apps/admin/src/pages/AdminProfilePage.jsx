@@ -22,23 +22,18 @@ import {
 } from 'lucide-react'
 
 export default function AdminProfilePage({ onNavigate }) {
-  // Router navigation for sign-out and redirects.
   const navigate = useNavigate()
-  // Ref to trigger file selection.
   const avatarInputRef = useRef(null)
 
-  // Toggle visibility for password fields.
   const [showCurrentPw, setShowCurrentPw] = useState(false)
   const [showNewPw, setShowNewPw] = useState(false)
   const [showConfirmPw, setShowConfirmPw] = useState(false)
 
-  // Notification preference toggles.
   const [notifEmail, setNotifEmail] = useState(true)
   const [notifSms, setNotifSms] = useState(false)
   const [notifPush, setNotifPush] = useState(true)
   const [twoFactor, setTwoFactor] = useState(true)
 
-  // Profile fields shown in the form.
   const [profile, setProfile] = useState({
     fullName: 'Admin User',
     displayName: 'Admin',
@@ -49,20 +44,17 @@ export default function AdminProfilePage({ onNavigate }) {
     avatarUrl: '',
   })
 
-  // Password form state.
   const [passwords, setPasswords] = useState({
     current: '',
     next: '',
     confirm: '',
   })
 
-  // Simulated session list for UI.
   const [sessions, setSessions] = useState([
     { id: 'current', device: 'Windows PC — Chrome', location: 'Kathmandu, Nepal', time: 'Current session', icon: Monitor, current: true },
     { id: 'mobile', device: 'iPhone 15 Pro — Safari', location: 'Pokhara, Nepal', time: '2 hours ago', icon: Smartphone, current: false },
   ])
 
-  // UI state for messages and loading.
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -71,7 +63,6 @@ export default function AdminProfilePage({ onNavigate }) {
   const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
-    // Hydrate profile from auth + profile services.
     const load = async () => {
       setLoading(true)
       setError('')
@@ -103,13 +94,11 @@ export default function AdminProfilePage({ onNavigate }) {
     load()
   }, [navigate])
 
-  // Update a single profile field locally.
   const updateProfileField = (key, value) => {
     setProfile((prev) => ({ ...prev, [key]: value }))
   }
 
   const saveProfile = async () => {
-    // Persist profile changes.
     setSaving(true)
     setError('')
     setMessage('')
@@ -134,7 +123,6 @@ export default function AdminProfilePage({ onNavigate }) {
     }
   }
 
-  // Update password via auth service.
   const updatePassword = async () => {
     setPasswordSaving(true)
     setError('')
@@ -165,7 +153,6 @@ export default function AdminProfilePage({ onNavigate }) {
     }
   }
 
-  // Upload and save the profile avatar.
   const handleAvatarUpload = async (file) => {
     if (!file) return
     setError('')
@@ -182,7 +169,6 @@ export default function AdminProfilePage({ onNavigate }) {
     }
   }
 
-  // Sign the user out and return to login.
   const handleSignOut = async () => {
     try {
       setSigningOut(true)
@@ -195,7 +181,6 @@ export default function AdminProfilePage({ onNavigate }) {
     }
   }
 
-  // Remove a session from the local list.
   const revokeSession = (sessionId) => {
     setSessions((prev) => prev.filter((s) => s.id !== sessionId))
     setMessage('Session revoked from this device list.')
