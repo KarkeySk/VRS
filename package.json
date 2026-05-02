@@ -8,6 +8,10 @@
     "dev:admin": "pnpm --filter @bhatbhati/admin dev",
     "build:user": "pnpm --filter @bhatbhati/user build",
     "build:admin": "pnpm --filter @bhatbhati/admin build",
-    "dev": "pnpm --parallel --filter './apps/*' dev"
+    "dev": "pnpm --parallel --filter './apps/*' dev",
+    "capture:wireframes": "node scripts/capture-wireframes.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.59.1"
   }
 }

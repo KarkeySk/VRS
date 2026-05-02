@@ -2,6 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { FileText, Filter, ExternalLink, CreditCard, DollarSign, Clock, AlertTriangle } from 'lucide-react'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
+import {
+  getBookingEmailDetails,
+  recordApprovalEmailSent,
+  sendBookingApprovalEmail,
+  shouldSendApprovalEmail,
+} from '@bhatbhati/shared/services/emailService.js'
 
 // Badge styles per compliance status.
 const statusStyles = {
@@ -81,10 +87,14 @@ export default function CompliancePage() {
   const updateStatus = async (id, status) => {
     setBusyId(id)
     try {
+      let approvalEmailBooking = null
+      let currentStatus = ''
+
       // On approval, create a booking if one does not exist yet.
       if (status === 'approved') {
         const target = applications.find((app) => app.id === id)
         if (target) {
+          currentStatus = target.status
           const existing = await bookingService.findMatchingTrip({
             userId: target.user_id,
             vehicleId: target.vehicle_id,
@@ -92,8 +102,10 @@ export default function CompliancePage() {
             endDate: target.end_date,
           })
 
-          if (!existing) {
-            await bookingService.create({
+          approvalEmailBooking = existing
+
+          if (!approvalEmailBooking) {
+            const createdBooking = await bookingService.create({
               user_id: target.user_id,
               vehicle_id: target.vehicle_id,
               start_date: target.start_date,
@@ -107,10 +119,21 @@ export default function CompliancePage() {
                 drive_type: target.drive_type,
               }),
             })
+            approvalEmailBooking = await getBookingEmailDetails(createdBooking.id)
           }
         }
       }
 
+      const shouldEmail = shouldSendApprovalEmail({
+        currentStatus,
+        nextStatus: status,
+        booking: approvalEmailBooking,
+      })
+
+      if (shouldEmail) {
+        await sendBookingApprovalEmail(approvalEmailBooking)
+        await recordApprovalEmailSent(approvalEmailBooking.id)
+      }
       await applicationService.updateStatus(id, status)
       await loadApplications()
     } catch (err) {
