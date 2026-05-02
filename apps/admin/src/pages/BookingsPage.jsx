@@ -85,6 +85,7 @@ export default function BookingsPage({ onNavigate }) {
           customerName: profileName(b.profiles) || notesCustomer.fullName || notesCustomer.name || 'Unknown User',
           customerPhone: b.profiles?.phone || notesCustomer.phone || '',
           customerEmail: b.profiles?.email || notesCustomer.email || '',
+          emailSent: Boolean(b.email_sent),
           raw: b,
         }
       })
@@ -477,6 +478,9 @@ export default function BookingsPage({ onNavigate }) {
                     <span className="px-2 py-1 text-xs rounded bg-brand-orange/20 text-brand-orange uppercase">
                       {row.status}
                     </span>
+                    {row.kind === 'booking' && row.emailSent && (
+                      <p className="mt-1 text-[11px] text-status-green">Confirmation email sent</p>
+                    )}
                   </td>
                   <td>
                     {row.kind === 'booking' ? (
