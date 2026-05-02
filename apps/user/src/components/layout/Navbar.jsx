@@ -3,6 +3,7 @@ import { LogIn, LogOut, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import logo from '../../assets/logo.png';
+import NotificationBell from '../common/NotificationBell';
 
 export default function Navbar() {
     const location = useLocation();
@@ -95,25 +96,9 @@ export default function Navbar() {
                 </div>
 
                 {/* RIGHT SIDE — TOGGLES + BOOK NOW */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <button
-                        onClick={toggleTheme}
-                        title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '38px',
-                            height: '38px',
-                            background: 'var(--bg-glass)',
-                            border: '1px solid var(--border)',
-                            color: 'var(--text-primary)',
-                            borderRadius: '999px',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        {isDark ? <Sun size={15} /> : <Moon size={15} />}
-                    </button>
+<div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+
+                    {user && <NotificationBell />}
 
                     {user ? (
                         <>
