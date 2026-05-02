@@ -4,6 +4,12 @@ import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 import { authService } from '@bhatbhati/shared/services/authService.js'
+import {
+  getBookingEmailDetails,
+  recordApprovalEmailSent,
+  sendBookingApprovalEmail,
+  shouldSendApprovalEmail,
+} from '@bhatbhati/shared/services/emailService.js'
 import { notificationService } from '@bhatbhati/shared/services/notificationService.js'
 
 // Dropdown choices for status filtering.
@@ -95,6 +101,7 @@ export default function BookingsPage({ onNavigate }) {
           customerName: profileName(b.profiles) || notesCustomer.fullName || notesCustomer.name || 'Unknown User',
           customerPhone: b.profiles?.phone || notesCustomer.phone || '',
           customerEmail: b.profiles?.email || notesCustomer.email || '',
+          emailSent: Boolean(b.email_sent),
           raw: b,
         }
       })
@@ -197,8 +204,10 @@ export default function BookingsPage({ onNavigate }) {
         endDate: app.end_date,
       })
 
-      if (!existing) {
-        await bookingService.create({
+      let booking = existing
+
+      if (!booking) {
+        const createdBooking = await bookingService.create({
           user_id: app.user_id,
           vehicle_id: app.vehicle_id,
           start_date: app.start_date,
@@ -214,8 +223,19 @@ export default function BookingsPage({ onNavigate }) {
             emergency_contact: app.questionnaire?.emergency_contact || null,
           }),
         })
+        booking = await getBookingEmailDetails(createdBooking.id)
       }
 
+      const shouldEmail = shouldSendApprovalEmail({
+        currentStatus: app.status,
+        nextStatus: 'approved',
+        booking,
+      })
+
+      if (shouldEmail) {
+        await sendBookingApprovalEmail(booking)
+        await recordApprovalEmailSent(booking.id)
+      }
       await applicationService.updateStatus(app.id, 'approved')
 
       // Send notification to user
@@ -507,6 +527,9 @@ export default function BookingsPage({ onNavigate }) {
                     <span className="px-2 py-1 text-xs rounded bg-brand-orange/20 text-brand-orange uppercase">
                       {row.status}
                     </span>
+                    {row.kind === 'booking' && row.emailSent && (
+                      <p className="mt-1 text-[11px] text-status-green">Confirmation email sent</p>
+                    )}
                   </td>
                   <td>
                     {row.kind === 'booking' ? (
