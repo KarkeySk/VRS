@@ -94,11 +94,11 @@ export default function CompliancePage() {
         booking: approvalEmailBooking,
       })
 
-      await applicationService.updateStatus(id, status)
       if (shouldEmail) {
         await sendBookingApprovalEmail(approvalEmailBooking)
         await recordApprovalEmailSent(approvalEmailBooking.id)
       }
+      await applicationService.updateStatus(id, status)
       await loadApplications()
     } catch (err) {
       setError(err.message || 'Failed to update status')
