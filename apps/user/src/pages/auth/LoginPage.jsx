@@ -31,6 +31,25 @@ const fleetSlides = [
   },
 ];
 
+const verificationStorageKeys = [
+  'pending_email_verification',
+  'pendingEmailVerification',
+  'email_verification_required',
+  'verification_email_sent',
+];
+
+function clearVerificationState() {
+  verificationStorageKeys.forEach((key) => {
+    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
+  });
+}
+
+function isUnverifiedEmailError(message) {
+  const lowerMessage = message.toLowerCase();
+  return lowerMessage.includes('email not confirmed') || lowerMessage.includes('email not verified');
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,20 +69,22 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [nextSlide]);
 
+  useEffect(() => {
+    clearVerificationState();
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
     try {
       await signIn(email, password);
-      localStorage.removeItem('pending_email_verification');
-      sessionStorage.removeItem('pending_email_verification');
+      clearVerificationState();
       navigate('/dashboard');
     } catch (err) {
       const message = err.message || 'Failed to login';
-      const lowerMessage = message.toLowerCase();
       setError(
-        lowerMessage.includes('email not confirmed') || lowerMessage.includes('email not verified')
+        isUnverifiedEmailError(message)
           ? 'Please verify your email before signing in'
           : message
       );
