@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
@@ -36,9 +36,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState('');
+  const location = useLocation();
+  const [notice, setNotice] = useState(location.state?.notice || '');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signIn } = useAuth();
+  const { signIn, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
@@ -53,14 +56,29 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setNotice('');
     setIsLoading(true);
     try {
       await signIn(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Failed to login');
+      setError(resolveLoginError(err.message));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setError('');
+    setNotice('');
+    setIsResending(true);
+    try {
+      await resendVerificationEmail(email);
+      setNotice('Confirmation email sent. Please check your inbox.');
+    } catch (err) {
+      setError(err.message || 'Failed to resend verification email');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -109,6 +127,7 @@ export default function LoginPage() {
           </div>
 
           {error && <div className="auth-alert">{error}</div>}
+          {notice && <div className="auth-switch">{notice}</div>}
 
           <form onSubmit={handleLogin} className="auth-form">
             <label htmlFor="login-email">Email Address</label>
@@ -146,6 +165,17 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {isEmailConfirmationError(error) && (
+            <button
+              type="button"
+              className="auth-submit"
+              disabled={isResending || !email}
+              onClick={handleResendVerification}
+            >
+              {isResending ? 'Sending...' : 'Resend confirmation email'} <ArrowRight size={16} />
+            </button>
+          )}
+
           <p className="auth-switch">
             New here? <Link to="/auth/register">Create an account</Link>
           </p>
@@ -153,4 +183,17 @@ export default function LoginPage() {
       </main>
     </div>
   );
+}
+
+function resolveLoginError(message = '') {
+  if (message.includes('Edge Function returned a non-2xx status code')) {
+    return 'Confirmation email could not be sent. Check Supabase email settings, then try again.';
+  }
+
+  return message || 'Failed to login';
+}
+
+function isEmailConfirmationError(message = '') {
+  const normalizedMessage = message.toLowerCase();
+  return normalizedMessage.includes('verify your email') || normalizedMessage.includes('email not confirmed');
 }

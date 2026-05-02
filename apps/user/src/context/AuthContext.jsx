@@ -49,6 +49,7 @@ export function AuthProvider({ children }) {
         signIn: authService.signIn,
         signUp: authService.signUp,
         signOut: authService.signOut,
+        resendVerificationEmail: authService.resendVerificationEmail,
     }
 
     return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>

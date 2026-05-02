@@ -1,11 +1,36 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Search, Truck, ToggleLeft, Trash2, PencilLine } from 'lucide-react'
+import { Search, Truck, ToggleLeft, Trash2, PencilLine, Upload } from 'lucide-react'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 
 // Styles for availability badges.
 const availabilityStyles = {
   true: 'bg-status-green/20 text-status-green',
   false: 'bg-status-red/20 text-status-red',
+}
+
+const categories = [
+  { id: 'bike', title: 'Motorbike', desc: 'Road and tour' },
+  { id: 'suv', title: 'SUV', desc: 'High road support' },
+  { id: 'jeep', title: 'Jeep', desc: 'Mountain trip' },
+  { id: 'pickup', title: 'Pickup', desc: 'Cargo and load' },
+  { id: 'car', title: 'Car', desc: 'City and transfer' },
+]
+
+const makeOptions = ['Royal Enfield', 'Honda', 'Yamaha', 'KTM', 'Suzuki', 'Bajaj', 'Toyota', 'Mahindra']
+const modelOptions = ['Himalayan 450', 'CRF 250L', 'XPulse 200', 'Duke 250', 'FZ-S', 'Scorpio', 'Hilux', 'Land Cruiser']
+const yearOptions = ['2026', '2025', '2024', '2023', '2022', '2021']
+const subtitleOptions = ['High road support', 'Road and tour', 'Mountain trip', 'City and transfer']
+
+function getSpecValue(specs, label) {
+  if (!Array.isArray(specs)) return ''
+  return specs.find((s) => String(s?.label || '').toLowerCase() === String(label).toLowerCase())?.value || ''
+}
+
+function splitName(name) {
+  const raw = String(name || '').trim()
+  if (!raw) return { make: '', model: '' }
+  const [make, ...rest] = raw.split(/\s+/)
+  return { make: make || '', model: rest.join(' ') }
 }
 
 export default function FleetPage() {
@@ -18,16 +43,23 @@ export default function FleetPage() {
   const [error, setError] = useState('')
   // Guard to disable row actions.
   const [busyId, setBusyId] = useState('')
-  // Inline edit state.
+
   const [editVehicleId, setEditVehicleId] = useState('')
   const [isSavingEdit, setIsSavingEdit] = useState(false)
+  const [editImageFile, setEditImageFile] = useState(null)
   const [editForm, setEditForm] = useState({
-    name: '',
+    make: '',
+    model: '',
+    year: '',
     subtitle: '',
-    type: '',
-    price_per_day: '',
-    image: '',
-    is_available: true,
+    category: 'bike',
+    engine: '',
+    pricePerDay: '',
+    notes: '',
+    bluebookExpiry: '',
+    insuranceExpiry: '',
+    imageUrl: '',
+    isAvailable: true,
   })
 
   // Fetch vehicles for admin view.
@@ -95,28 +127,42 @@ export default function FleetPage() {
 
   // Copy the selected vehicle into local edit state.
   const openEdit = (vehicle) => {
-    // Copy the selected vehicle into local edit state.
+    const { make, model } = splitName(vehicle.name)
     setEditVehicleId(vehicle.id)
+    setEditImageFile(null)
     setEditForm({
-      name: vehicle.name || '',
+      make,
+      model,
+      year: getSpecValue(vehicle.technical_specs, 'Year'),
       subtitle: vehicle.subtitle || '',
-      type: vehicle.type || '',
-      price_per_day: String(vehicle.price_per_day ?? ''),
-      image: vehicle.image || '',
-      is_available: Boolean(vehicle.is_available),
+      category: vehicle.category || vehicle.type || 'bike',
+      engine: vehicle.engine || '',
+      pricePerDay: String(vehicle.price_per_day ?? ''),
+      notes: vehicle.notes || '',
+      bluebookExpiry: getSpecValue(vehicle.technical_specs, 'Bluebook Expiry'),
+      insuranceExpiry: getSpecValue(vehicle.technical_specs, 'Insurance Expiry'),
+      imageUrl: vehicle.image || '',
+      isAvailable: Boolean(vehicle.is_available),
     })
   }
 
   // Reset the inline edit form.
   const cancelEdit = () => {
     setEditVehicleId('')
+    setEditImageFile(null)
     setEditForm({
-      name: '',
+      make: '',
+      model: '',
+      year: '',
       subtitle: '',
-      type: '',
-      price_per_day: '',
-      image: '',
-      is_available: true,
+      category: 'bike',
+      engine: '',
+      pricePerDay: '',
+      notes: '',
+      bluebookExpiry: '',
+      insuranceExpiry: '',
+      imageUrl: '',
+      isAvailable: true,
     })
   }
 
@@ -124,22 +170,38 @@ export default function FleetPage() {
   const saveEdit = async (e) => {
     e.preventDefault()
     if (!editVehicleId) return
-    if (!editForm.name.trim()) {
-      setError('Vehicle name is required.')
+
+    const fleetName = `${editForm.make} ${editForm.model}`.trim()
+    if (!fleetName) {
+      setError('Vehicle make and model are required.')
       return
     }
 
     setIsSavingEdit(true)
     setError('')
     try {
+      let imageUrl = editForm.imageUrl.trim()
+      if (editImageFile) {
+        imageUrl = await vehicleService.uploadImage(editImageFile, editForm.category)
+      }
+
       await vehicleService.update(editVehicleId, {
-        name: editForm.name.trim(),
-        subtitle: editForm.subtitle.trim() || null,
-        type: editForm.type.trim() || null,
-        price_per_day: Number(editForm.price_per_day || 0),
-        image: editForm.image.trim() || null,
-        is_available: Boolean(editForm.is_available),
+        name: fleetName,
+        subtitle: editForm.subtitle.trim() || `${editForm.category.toUpperCase()} Fleet`,
+        type: editForm.category,
+        category: editForm.category,
+        engine: editForm.engine.trim() || null,
+        price_per_day: Number(editForm.pricePerDay || 0),
+        image: imageUrl || null,
+        notes: editForm.notes.trim() || null,
+        is_available: Boolean(editForm.isAvailable),
+        technical_specs: [
+          { label: 'Year', value: editForm.year || '-' },
+          { label: 'Bluebook Expiry', value: editForm.bluebookExpiry || '-' },
+          { label: 'Insurance Expiry', value: editForm.insuranceExpiry || '-' },
+        ],
       })
+
       cancelEdit()
       await loadVehicles()
     } catch (err) {
@@ -185,78 +247,104 @@ export default function FleetPage() {
           </div>
         </div>
 
-      {error && (
-        <div className="mb-4 rounded-md border border-status-red/30 bg-status-red/10 px-3 py-2 text-xs text-status-red">
-          {error}
-        </div>
-      )}
-
-      {editVehicleId && (
-        <form onSubmit={saveEdit} className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-5 mb-5">
-          <p className="text-xs text-txt-secondary mb-3">Edit vehicle details</p>
-          <div className="grid grid-cols-3 gap-3 mb-3">
-            <input
-              type="text"
-              value={editForm.name}
-              onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
-              placeholder="Vehicle name"
-              className="bg-dark-deeper border border-dark-border rounded-md px-3 py-2 text-sm"
-              required
-            />
-            <input
-              type="text"
-              value={editForm.subtitle}
-              onChange={(e) => setEditForm((p) => ({ ...p, subtitle: e.target.value }))}
-              placeholder="Subtitle"
-              className="bg-dark-deeper border border-dark-border rounded-md px-3 py-2 text-sm"
-            />
-            <input
-              type="text"
-              value={editForm.type}
-              onChange={(e) => setEditForm((p) => ({ ...p, type: e.target.value }))}
-              placeholder="Type (bike/suv/jeep)"
-              className="bg-dark-deeper border border-dark-border rounded-md px-3 py-2 text-sm uppercase"
-            />
+        {error && (
+          <div className="mb-4 rounded-md border border-status-red/30 bg-status-red/10 px-3 py-2 text-xs text-status-red">
+            {error}
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <input
-              type="number"
-              min="0"
-              value={editForm.price_per_day}
-              onChange={(e) => setEditForm((p) => ({ ...p, price_per_day: e.target.value }))}
-              placeholder="Price per day (NPR)"
-              className="bg-dark-deeper border border-dark-border rounded-md px-3 py-2 text-sm"
-            />
-            <input
-              type="text"
-              value={editForm.image}
-              onChange={(e) => setEditForm((p) => ({ ...p, image: e.target.value }))}
-              placeholder="Image URL"
-              className="bg-dark-deeper border border-dark-border rounded-md px-3 py-2 text-sm"
-            />
-            <div className="flex items-center gap-2">
-              <label className="text-xs text-txt-secondary">Available</label>
+        )}
+
+        {editVehicleId && (
+          <form onSubmit={saveEdit} className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-5 mb-5">
+            <p className="text-xs text-txt-secondary mb-3">Edit vehicle (full form)</p>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Vehicle Make</label>
+                <input list="edit-vehicle-make-options" value={editForm.make} onChange={(e) => setEditForm((p) => ({ ...p, make: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Model</label>
+                <input list="edit-vehicle-model-options" value={editForm.model} onChange={(e) => setEditForm((p) => ({ ...p, model: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Year</label>
+                <input list="edit-vehicle-year-options" value={editForm.year} onChange={(e) => setEditForm((p) => ({ ...p, year: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Subtitle</label>
+                <input list="edit-vehicle-subtitle-options" value={editForm.subtitle} onChange={(e) => setEditForm((p) => ({ ...p, subtitle: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+            </div>
+
+            <datalist id="edit-vehicle-make-options">{makeOptions.map((opt) => <option key={opt} value={opt} />)}</datalist>
+            <datalist id="edit-vehicle-model-options">{modelOptions.map((opt) => <option key={opt} value={opt} />)}</datalist>
+            <datalist id="edit-vehicle-year-options">{yearOptions.map((opt) => <option key={opt} value={opt} />)}</datalist>
+            <datalist id="edit-vehicle-subtitle-options">{subtitleOptions.map((opt) => <option key={opt} value={opt} />)}</datalist>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Vehicle Category</label>
+                <select value={editForm.category} onChange={(e) => setEditForm((p) => ({ ...p, category: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm">
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.title} - {cat.desc}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Engine</label>
+                <input value={editForm.engine} onChange={(e) => setEditForm((p) => ({ ...p, engine: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Daily Rental (NPR)</label>
+                <input value={editForm.pricePerDay} onChange={(e) => setEditForm((p) => ({ ...p, pricePerDay: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+              <div className="flex items-end gap-2">
+                <input id="fleet-edit-available" type="checkbox" checked={editForm.isAvailable} onChange={(e) => setEditForm((p) => ({ ...p, isAvailable: e.target.checked }))} />
+                <label htmlFor="fleet-edit-available" className="text-xs text-txt-secondary">Mark as available</label>
+              </div>
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Bluebook Expiry</label>
+                <input type="date" value={editForm.bluebookExpiry} onChange={(e) => setEditForm((p) => ({ ...p, bluebookExpiry: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-txt-secondary mb-1.5 block">Insurance Expiry</label>
+                <input type="date" value={editForm.insuranceExpiry} onChange={(e) => setEditForm((p) => ({ ...p, insuranceExpiry: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="text-xs text-txt-secondary mb-1.5 block">Vehicle Image</label>
+              <label className="w-full min-h-24 border-2 border-dashed border-dark-border rounded-xl flex items-center justify-center cursor-pointer hover:border-brand-orange transition-colors px-4 py-4">
+                <div className="flex items-center gap-2 text-xs text-txt-secondary">
+                  <Upload className="w-4 h-4" />
+                  {editImageFile ? editImageFile.name : 'Click to upload new image'}
+                </div>
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => setEditImageFile(e.target.files?.[0] ?? null)} />
+              </label>
               <input
-                type="checkbox"
-                checked={editForm.is_available}
-                onChange={(e) => setEditForm((p) => ({ ...p, is_available: e.target.checked }))}
+                type="text"
+                value={editForm.imageUrl}
+                onChange={(e) => setEditForm((p) => ({ ...p, imageUrl: e.target.value }))}
+                placeholder="Or paste image URL"
+                className="w-full mt-2 bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm"
               />
             </div>
-          </div>
-          <div className="flex items-center justify-end gap-2 mt-4">
-            <button
-              type="button"
-              onClick={cancelEdit}
-              className="px-4 py-2 text-sm rounded-md border border-dark-border text-txt-secondary hover:text-txt-primary"
-            >
-              Cancel
-            </button>
-            <button type="submit" disabled={isSavingEdit} className="btn-action px-5 py-2 text-sm disabled:opacity-60">
-              {isSavingEdit ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
-      )}
+
+            <div className="mb-4">
+              <label className="text-xs text-txt-secondary mb-1.5 block">Notes</label>
+              <textarea value={editForm.notes} onChange={(e) => setEditForm((p) => ({ ...p, notes: e.target.value }))} rows={3} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm resize-none" />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 mt-4">
+              <button type="button" onClick={cancelEdit} className="px-4 py-2 text-sm rounded-md border border-dark-border text-txt-secondary hover:text-txt-primary">
+                Cancel
+              </button>
+              <button type="submit" disabled={isSavingEdit} className="btn-action px-5 py-2 text-sm disabled:opacity-60">
+                {isSavingEdit ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        )}
 
         {isLoading ? (
           <p className="text-sm text-txt-secondary">Loading vehicles...</p>

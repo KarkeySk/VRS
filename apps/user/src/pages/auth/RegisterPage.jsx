@@ -33,9 +33,11 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [terrain, setTerrain] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signUp } = useAuth();
+  const { signUp, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
@@ -50,14 +52,31 @@ export default function RegisterPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setNotice('');
     setIsLoading(true);
     try {
       await signUp(email, password, { full_name: fullname, terrain_preference: terrain });
-      navigate('/auth/login');
+      navigate('/auth/login', {
+        state: { notice: 'Account created. Please check your inbox to confirm your email before signing in.' },
+      });
     } catch (err) {
-      setError(err.message || 'Failed to register');
+      setError(resolveRegisterError(err.message));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setError('');
+    setNotice('');
+    setIsResending(true);
+    try {
+      await resendVerificationEmail(email);
+      setNotice('Confirmation email sent. Please check your inbox.');
+    } catch (err) {
+      setError(err.message || 'Failed to resend verification email');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -95,6 +114,7 @@ export default function RegisterPage() {
           </div>
 
           {error && <div className="auth-alert">{error}</div>}
+          {notice && <div className="auth-switch">{notice}</div>}
 
           <form onSubmit={handleRegister} className="auth-form">
             <label htmlFor="register-fullname">Full Name</label>
@@ -146,6 +166,17 @@ export default function RegisterPage() {
             </button>
           </form>
 
+          {error && email && error !== 'Failed to register' && (
+            <button
+              type="button"
+              className="auth-submit"
+              disabled={isResending}
+              onClick={handleResendVerification}
+            >
+              {isResending ? 'Sending...' : 'Resend confirmation email'} <ArrowRight size={16} />
+            </button>
+          )}
+
           <p className="auth-switch">
             Already have an account? <Link to="/auth/login">Sign in</Link>
           </p>
@@ -153,4 +184,12 @@ export default function RegisterPage() {
       </main>
     </div>
   );
+}
+
+function resolveRegisterError(message = '') {
+  if (message.includes('Edge Function returned a non-2xx status code')) {
+    return 'Account created, but the confirmation email could not be sent. Use the resend button after checking Supabase email settings.';
+  }
+
+  return message || 'Failed to register';
 }
