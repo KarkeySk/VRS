@@ -60,6 +60,18 @@ export function shouldSendApprovalEmail({ currentStatus, nextStatus, booking }) 
     )
 }
 
+export async function getBookingEmailDetails(bookingId) {
+    if (!supabase) throw new Error('Supabase is not configured')
+
+    const { data, error } = await supabase
+        .from('bookings')
+        .select('*, vehicles(*), profiles(*)')
+        .eq('id', bookingId)
+        .single()
+    if (error) throw error
+    return data
+}
+
 export async function recordApprovalEmailSent(bookingId) {
     if (!supabase) throw new Error('Supabase is not configured')
 
