@@ -33,17 +33,6 @@ export const bookingService = {
         return data
     },
 
-    /** Get a single booking with customer and vehicle details */
-    getByIdWithDetails: async (id) => {
-        const { data, error } = await supabase
-            .from('bookings')
-            .select('*, vehicles(*), profiles(*)')
-            .eq('id', id)
-            .single()
-        if (error) throw error
-        return data
-    },
-
     /** Cancel a booking */
     cancel: async (id) => {
         const { data, error } = await supabase
@@ -90,7 +79,7 @@ export const bookingService = {
     findMatchingTrip: async ({ userId, vehicleId, startDate, endDate }) => {
         const { data, error } = await supabase
             .from('bookings')
-            .select('*, vehicles(*), profiles(*)')
+            .select('id, status')
             .eq('user_id', userId)
             .eq('vehicle_id', vehicleId)
             .eq('start_date', startDate)
@@ -98,34 +87,6 @@ export const bookingService = {
             .limit(1)
             .maybeSingle()
         if (error) throw error
-        return data
-    },
-
-    /** Determine whether an approval transition should trigger an email */
-    shouldSendApprovalEmail: ({ currentStatus, nextStatus, booking }) => (
-        currentStatus !== 'approved'
-        && nextStatus === 'approved'
-        && booking?.email_sent === false
-    ),
-
-    /** Mark a successful approval email send and write an audit log */
-    recordApprovalEmailSent: async (bookingId) => {
-        const { data, error } = await supabase
-            .from('bookings')
-            .update({ email_sent: true })
-            .eq('id', bookingId)
-            .eq('email_sent', false)
-            .select()
-            .maybeSingle()
-        if (error) throw error
-
-        if (!data) return null
-
-        const { error: logError } = await supabase
-            .from('email_logs')
-            .insert([{ booking_id: bookingId, status: 'sent' }])
-        if (logError) throw logError
-
         return data
     },
 }
