@@ -1,7 +1,24 @@
+/*
+  HeroBanner notes:
+  - imageUrl drives the background image.
+  - upcomingCount and returnedCount are KPI numbers.
+  - activeCount is shown in the summary text.
+  - Fallback gradient is used when imageUrl is empty.
+  - Purely presentational.
+  - No side effects or state.
+  - Use in the dashboard header.
+  - Counts default to 0 for safety.
+  - Keeps layout responsive.
+  - Text assumes fleet context.
+*/
 export default function HeroBanner({ imageUrl = "", upcomingCount = 0, returnedCount = 0, activeCount = 0 }) {
+  // Top banner summarizing active fleet stats.
+  // imageUrl controls the hero background.
+  // upcomingCount and returnedCount show quick KPIs.
   return (
     <div className="relative rounded-xl overflow-hidden mb-6" style={{ minHeight: 180 }}>
       {/* Background Image */}
+      {/* Fallback gradient is used when no image is provided. */}
       {imageUrl ? (
         <img
           src={imageUrl}

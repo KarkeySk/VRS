@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js';
-import { Car, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { Car, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight, CreditCard } from 'lucide-react';
 
 const statusConfig = {
     submitted:      { label: 'Submitted', color: '#3b82f6', Icon: Clock },
@@ -101,6 +101,32 @@ export default function BookingsPage() {
                                             }}>
                                                 Cancel
                                             </button>
+                                        )}
+
+                                        {/* Pay Now button for approved bookings */}
+                                        {app.status === 'approved' && app.payment_status !== 'completed' && (
+                                            <Link to={`/payment/${app.id}`} style={{
+                                                textDecoration: 'none',
+                                                background: 'linear-gradient(135deg, #60bb46, #4da836)',
+                                                color: '#fff', padding: '8px 20px', borderRadius: '10px',
+                                                fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', gap: '6px',
+                                                boxShadow: '0 4px 12px rgba(96,187,70,0.3)',
+                                            }}>
+                                                <CreditCard size={14} /> Pay Now
+                                            </Link>
+                                        )}
+
+                                        {/* Payment completed badge */}
+                                        {app.payment_status === 'completed' && (
+                                            <span style={{
+                                                background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)',
+                                                color: '#34d399', padding: '6px 12px', borderRadius: '8px',
+                                                fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase',
+                                                letterSpacing: '0.5px',
+                                            }}>
+                                                ✓ Paid
+                                            </span>
                                         )}
                                     </div>
                                 </div>

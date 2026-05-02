@@ -10,7 +10,9 @@ import {
   sendBookingApprovalEmail,
   shouldSendApprovalEmail,
 } from '@bhatbhati/shared/services/emailService.js'
+import { notificationService } from '@bhatbhati/shared/services/notificationService.js'
 
+// Dropdown choices for status filtering.
 const statusOptions = [
   'all',
   'submitted',
@@ -25,6 +27,7 @@ const statusOptions = [
 ]
 
 function parseJson(value) {
+  // Safe parse for notes payloads.
   if (!value || typeof value !== 'string') return null
   try {
     return JSON.parse(value)
@@ -34,6 +37,7 @@ function parseJson(value) {
 }
 
 function profileName(profile) {
+  // Normalize a profile into a display name.
   if (!profile) return ''
   if (profile.full_name) return profile.full_name
   const composed = [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim()
@@ -41,13 +45,18 @@ function profileName(profile) {
 }
 
 function shortId(id) {
+  // Shorten UUID-like ids for display.
   return typeof id === 'string' ? id.slice(0, 8) : ''
 }
 
 export default function BookingsPage({ onNavigate }) {
+  // Primary data table rows.
   const [rows, setRows] = useState([])
+  // Used to populate the quick booking dropdown.
   const [vehicles, setVehicles] = useState([])
+  // Admin user id for quick booking creation.
   const [adminUserId, setAdminUserId] = useState('')
+  // Search + filter state.
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [isLoading, setIsLoading] = useState(true)
@@ -65,10 +74,12 @@ export default function BookingsPage({ onNavigate }) {
     totalPrice: '',
   })
 
+  // Load bookings + applications into a merged list.
   const loadRows = async () => {
     setIsLoading(true)
     setError('')
     try {
+      // Merge booking + application rows into a single timeline.
       const [bookings, applications] = await Promise.all([
         bookingService.getAll(),
         applicationService.getAll(),
@@ -126,10 +137,12 @@ export default function BookingsPage({ onNavigate }) {
   }
 
   useEffect(() => {
+    // Initial data fetch.
     loadRows()
   }, [])
 
   useEffect(() => {
+    // Load admin metadata and vehicle list.
     const loadMeta = async () => {
       try {
         const [user, vehiclesData] = await Promise.all([
@@ -145,6 +158,7 @@ export default function BookingsPage({ onNavigate }) {
     loadMeta()
   }, [])
 
+  // Apply search + status filter to rows.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return rows.filter((row) => {
@@ -164,6 +178,7 @@ export default function BookingsPage({ onNavigate }) {
     })
   }, [rows, query, status])
 
+  // Update booking status in-place.
   const setBookingStatus = async (bookingId, nextStatus) => {
     const key = `booking:${bookingId}`
     setBusyKey(key)
@@ -177,6 +192,7 @@ export default function BookingsPage({ onNavigate }) {
     }
   }
 
+  // Approve application and create a booking if needed.
   const approveApplication = async (app) => {
     const key = `application:${app.id}`
     setBusyKey(key)
@@ -221,6 +237,16 @@ export default function BookingsPage({ onNavigate }) {
         await recordApprovalEmailSent(booking.id)
       }
       await applicationService.updateStatus(app.id, 'approved')
+
+      // Send notification to user
+      await notificationService.create({
+        userId: app.user_id,
+        type: 'booking_approved',
+        title: 'Booking Approved!',
+        message: `Your booking for ${app.vehicles?.name || 'a vehicle'} has been approved. Pay now to confirm your reservation.`,
+        applicationId: app.id,
+      }).catch((err) => console.warn('Notification failed:', err))
+
       await loadRows()
     } catch (err) {
       setError(err.message || 'Failed to approve request')
@@ -229,11 +255,27 @@ export default function BookingsPage({ onNavigate }) {
     }
   }
 
+  // Update application status only.
   const setApplicationStatus = async (applicationId, nextStatus) => {
     const key = `application:${applicationId}`
     setBusyKey(key)
     try {
       await applicationService.updateStatus(applicationId, nextStatus)
+
+      // Send notification on rejection
+      if (nextStatus === 'rejected') {
+        const row = rows.find((r) => r.id === applicationId)
+        if (row) {
+          await notificationService.create({
+            userId: row.raw.user_id,
+            type: 'booking_rejected',
+            title: 'Booking Rejected',
+            message: `Your booking for ${row.vehicleName || 'a vehicle'} was not approved. Contact us for details.`,
+            applicationId: applicationId,
+          }).catch((err) => console.warn('Notification failed:', err))
+        }
+      }
+
       await loadRows()
     } catch (err) {
       setError(err.message || 'Failed to update request status')
@@ -242,6 +284,7 @@ export default function BookingsPage({ onNavigate }) {
     }
   }
 
+  // Delete a booking after confirmation.
   const handleDelete = async (bookingId) => {
     const ok = window.confirm('Delete this booking permanently?')
     if (!ok) return
@@ -258,6 +301,7 @@ export default function BookingsPage({ onNavigate }) {
     }
   }
 
+  // Quick-create a booking from the admin form.
   const createQuickBooking = async (e) => {
     e.preventDefault()
     setError('')
