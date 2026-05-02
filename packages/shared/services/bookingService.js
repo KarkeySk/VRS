@@ -107,4 +107,25 @@ export const bookingService = {
         && nextStatus === 'approved'
         && booking?.email_sent === false
     ),
+
+    /** Mark a successful approval email send and write an audit log */
+    recordApprovalEmailSent: async (bookingId) => {
+        const { data, error } = await supabase
+            .from('bookings')
+            .update({ email_sent: true })
+            .eq('id', bookingId)
+            .eq('email_sent', false)
+            .select()
+            .maybeSingle()
+        if (error) throw error
+
+        if (!data) return null
+
+        const { error: logError } = await supabase
+            .from('email_logs')
+            .insert([{ booking_id: bookingId, status: 'sent' }])
+        if (logError) throw logError
+
+        return data
+    },
 }
