@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Map, User, Cog, Edit, AlertTriangle } from 'lucide-react'
 
+// localStorage key for admin settings.
 const SETTINGS_KEY = 'bhatbhati_admin_settings_v1'
 
+// Defaults used for first load and reset.
 const defaultSettings = {
   thresholdMeters: '3500',
   steepness: '15',
@@ -12,6 +14,7 @@ const defaultSettings = {
 }
 
 function readSavedSettings() {
+  // Persist settings locally for demo purposes.
   const raw = localStorage.getItem(SETTINGS_KEY)
   if (!raw) return defaultSettings
   try {
@@ -23,19 +26,24 @@ function readSavedSettings() {
 }
 
 export default function SettingsPage() {
+  // Settings form state.
   const [settings, setSettings] = useState(defaultSettings)
+  // Inline feedback states.
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
+    // Load saved settings on mount.
     setSettings(readSavedSettings())
   }, [])
 
+  // Update a single setting key.
   const update = (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
   }
 
   const save = () => {
+    // Validate numeric settings before saving.
     const threshold = Number(settings.thresholdMeters)
     const steepness = Number(settings.steepness)
 
@@ -50,18 +58,21 @@ export default function SettingsPage() {
       return
     }
 
+    // Persist the settings in localStorage.
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
     setError('')
     setMessage('Saved.')
   }
 
   const discard = () => {
+    // Reset to the last saved values.
     setSettings(readSavedSettings())
     setError('')
     setMessage('Changes reverted.')
   }
 
   const manualPurge = () => {
+    // Confirm destructive action with the user.
     const ok = window.confirm('Run manual cleanup now? This cannot be undone.')
     if (!ok) return
     setError('')

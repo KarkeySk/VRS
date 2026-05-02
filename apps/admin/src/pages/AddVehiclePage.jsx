@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { FileText, Image, Palette, Settings, Upload } from 'lucide-react'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 
+// Category list shown in the selector.
 const categories = [
   { id: 'bike', title: 'Motorbike', desc: 'Road and tour' },
   { id: 'suv', title: 'SUV', desc: 'High road support' },
@@ -10,11 +11,13 @@ const categories = [
   { id: 'car', title: 'Car', desc: 'City and transfer' },
 ]
 
+// Datalist options to speed up entry.
 const makeOptions = ['Royal Enfield', 'Honda', 'Yamaha', 'KTM', 'Suzuki', 'Bajaj', 'Toyota', 'Mahindra']
 const modelOptions = ['Himalayan 450', 'CRF 250L', 'XPulse 200', 'Duke 250', 'FZ-S', 'Scorpio', 'Hilux', 'Land Cruiser']
 const yearOptions = ['2026', '2025', '2024', '2023', '2022', '2021']
 const subtitleOptions = ['High road support', 'Road and tour', 'Mountain trip', 'City and transfer']
 
+// Base form shape for reset.
 const initialForm = {
   make: '',
   model: '',
@@ -28,26 +31,34 @@ const initialForm = {
 }
 
 export default function AddVehiclePage({ onNavigate }) {
+  // Local form state for inputs.
   const [form, setForm] = useState(initialForm)
+  // Selected category used for submission + preview.
   const [selectedCategory, setSelectedCategory] = useState('bike')
+  // File selected for upload.
   const [imageFile, setImageFile] = useState(null)
+  // Submission guard for the button.
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
   const fleetName = useMemo(() => {
+    // Keep display name in sync with make + model.
     return `${form.make} ${form.model}`.trim()
   }, [form.make, form.model])
 
+  // Generic field handler for text inputs.
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
   const handleSubmit = async (e) => {
+    // Stop default form submission.
     e.preventDefault()
     setError('')
     setSuccess('')
 
+    // Require a basic vehicle name.
     if (!fleetName) {
       setError('Vehicle make and model are required')
       return
@@ -55,11 +66,13 @@ export default function AddVehiclePage({ onNavigate }) {
 
     setIsSubmitting(true)
     try {
+      // Upload image first if provided.
       let imageUrl = ''
       if (imageFile) {
         imageUrl = await vehicleService.uploadImage(imageFile, selectedCategory)
       }
 
+      // Persist the vehicle record.
       await vehicleService.create({
         name: fleetName,
         subtitle: form.subtitle || `${selectedCategory.toUpperCase()} Fleet`,
@@ -78,13 +91,16 @@ export default function AddVehiclePage({ onNavigate }) {
         addons: [],
       })
 
+      // Reset the form and preview state.
       setSuccess('Vehicle created successfully')
       setForm(initialForm)
       setImageFile(null)
+      // Navigate back to the fleet list.
       setTimeout(() => onNavigate('fleet'), 500)
     } catch (err) {
       setError(err.message || 'Failed to create vehicle')
     } finally {
+      // Re-enable the submit button.
       setIsSubmitting(false)
     }
   }

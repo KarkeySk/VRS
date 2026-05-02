@@ -3,38 +3,48 @@ import { Cloud, MapPin } from "lucide-react";
 import { weatherService } from "@bhatbhati/shared/services/weatherService.js";
 
 export default function WeatherPanel() {
+  // Weather payload from the API.
   const [weather, setWeather] = useState(null);
+  // Loading flag for UI placeholders.
   const [loading, setLoading] = useState(true);
+  // Error message for the footer.
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Guard to avoid state updates after unmount.
     let isMounted = true;
 
     const loadWeather = async () => {
       try {
+        // Fetch the latest weather snapshot.
         const data = await weatherService.getCurrent();
         if (!isMounted) return;
         setWeather(data);
         setError("");
       } catch (err) {
+        // Swallow errors and show a gentle message.
         console.error("Failed to load weather:", err);
         if (!isMounted) return;
         setError("Live weather unavailable");
       } finally {
+        // Stop the loading state once a response lands.
         if (isMounted) setLoading(false);
       }
     };
 
     loadWeather();
+    // Poll every minute for a fresh snapshot.
     const interval = setInterval(loadWeather, 60_000);
 
     return () => {
+      // Cleanup interval and guard flag.
       isMounted = false;
       clearInterval(interval);
     };
   }, []);
 
   const updatedLabel = useMemo(() => {
+    // Human-readable label for the last update time.
     if (!weather?.updatedAt) return "";
     const date = new Date(weather.updatedAt);
     if (Number.isNaN(date.getTime())) return "";
