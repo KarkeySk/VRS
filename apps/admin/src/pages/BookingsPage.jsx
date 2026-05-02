@@ -181,8 +181,10 @@ export default function BookingsPage({ onNavigate }) {
         endDate: app.end_date,
       })
 
-      if (!existing) {
-        await bookingService.create({
+      let booking = existing
+
+      if (!booking) {
+        const createdBooking = await bookingService.create({
           user_id: app.user_id,
           vehicle_id: app.vehicle_id,
           start_date: app.start_date,
@@ -198,9 +200,22 @@ export default function BookingsPage({ onNavigate }) {
             emergency_contact: app.questionnaire?.emergency_contact || null,
           }),
         })
+        booking = await bookingService.getByIdWithDetails(createdBooking.id)
       }
 
+      const shouldSendApprovalEmail = bookingService.shouldSendApprovalEmail({
+        currentStatus: app.status,
+        nextStatus: 'approved',
+        booking,
+      })
+
       await applicationService.updateStatus(app.id, 'approved')
+      if (shouldSendApprovalEmail) {
+        console.info('Booking approval email trigger detected', {
+          bookingId: booking.id,
+          applicationId: app.id,
+        })
+      }
       await loadRows()
     } catch (err) {
       setError(err.message || 'Failed to approve request')
