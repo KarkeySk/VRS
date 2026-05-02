@@ -7,7 +7,10 @@ export const authService = {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: metadata },
+            options: {
+                data: metadata,
+                emailRedirectTo: getEmailRedirectUrl(),
+            },
         })
         if (error) throw error
         return data
@@ -26,6 +29,24 @@ export const authService = {
         if (!supabase) return
         const { error } = await supabase.auth.signOut()
         if (error) throw error
+    },
+
+    /** Resend verification email for an existing account */
+    resendVerificationEmail: async (email) => {
+        if (!email) throw new Error('Email address is required')
+        if (!supabase) throw new Error('Verification service is not configured')
+
+        const { error } = await supabase.auth.resend({
+            type: 'signup',
+            email,
+            options: {
+                emailRedirectTo: getEmailRedirectUrl(),
+            },
+        })
+
+        if (error) throw error
+
+        return { message: 'Verification email sent' }
     },
 
     /** Update current user password */
@@ -69,4 +90,9 @@ export const authService = {
         if (error) return false
         return data?.role === 'admin'
     },
+}
+
+function getEmailRedirectUrl() {
+    if (typeof window === 'undefined') return undefined
+    return `${window.location.origin}/auth/confirmed`
 }
