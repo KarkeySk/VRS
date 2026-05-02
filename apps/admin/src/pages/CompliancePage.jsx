@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { FileText, Filter, ExternalLink } from 'lucide-react'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
-import { sendBookingApprovalEmail } from '@bhatbhati/shared/services/emailService.js'
 
 const statusStyles = {
   submitted: 'bg-status-yellow/20 text-status-yellow',
@@ -47,13 +46,9 @@ export default function CompliancePage() {
   const updateStatus = async (id, status) => {
     setBusyId(id)
     try {
-      let approvalEmailBooking = null
-      let currentStatus = ''
-
       if (status === 'approved') {
         const target = applications.find((app) => app.id === id)
         if (target) {
-          currentStatus = target.status
           const existing = await bookingService.findMatchingTrip({
             userId: target.user_id,
             vehicleId: target.vehicle_id,
@@ -61,10 +56,8 @@ export default function CompliancePage() {
             endDate: target.end_date,
           })
 
-          approvalEmailBooking = existing
-
-          if (!approvalEmailBooking) {
-            const createdBooking = await bookingService.create({
+          if (!existing) {
+            await bookingService.create({
               user_id: target.user_id,
               vehicle_id: target.vehicle_id,
               start_date: target.start_date,
@@ -78,22 +71,11 @@ export default function CompliancePage() {
                 drive_type: target.drive_type,
               }),
             })
-            approvalEmailBooking = await bookingService.getByIdWithDetails(createdBooking.id)
           }
         }
       }
 
-      const shouldSendApprovalEmail = bookingService.shouldSendApprovalEmail({
-        currentStatus,
-        nextStatus: status,
-        booking: approvalEmailBooking,
-      })
-
       await applicationService.updateStatus(id, status)
-      if (shouldSendApprovalEmail) {
-        await sendBookingApprovalEmail(approvalEmailBooking)
-        await bookingService.recordApprovalEmailSent(approvalEmailBooking.id)
-      }
       await loadApplications()
     } catch (err) {
       setError(err.message || 'Failed to update status')
