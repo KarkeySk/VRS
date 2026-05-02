@@ -5,6 +5,7 @@ import { applicationService } from '@bhatbhati/shared/services/applicationServic
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 import { authService } from '@bhatbhati/shared/services/authService.js'
 import {
+  getBookingEmailDetails,
   recordApprovalEmailSent,
   sendBookingApprovalEmail,
   shouldSendApprovalEmail,
@@ -206,7 +207,7 @@ export default function BookingsPage({ onNavigate }) {
             emergency_contact: app.questionnaire?.emergency_contact || null,
           }),
         })
-        booking = await bookingService.getByIdWithDetails(createdBooking.id)
+        booking = await getBookingEmailDetails(createdBooking.id)
       }
 
       const shouldEmail = shouldSendApprovalEmail({

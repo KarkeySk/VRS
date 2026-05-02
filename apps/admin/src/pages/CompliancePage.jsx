@@ -3,6 +3,7 @@ import { FileText, Filter, ExternalLink } from 'lucide-react'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 import {
+  getBookingEmailDetails,
   recordApprovalEmailSent,
   sendBookingApprovalEmail,
   shouldSendApprovalEmail,
@@ -82,7 +83,7 @@ export default function CompliancePage() {
                 drive_type: target.drive_type,
               }),
             })
-            approvalEmailBooking = await bookingService.getByIdWithDetails(createdBooking.id)
+            approvalEmailBooking = await getBookingEmailDetails(createdBooking.id)
           }
         }
       }
