@@ -51,3 +51,33 @@ export async function sendBookingApprovalEmail(booking, user = null) {
     if (error) throw error
     return data
 }
+
+export function shouldSendApprovalEmail({ currentStatus, nextStatus, booking }) {
+    return (
+        currentStatus !== 'approved'
+        && nextStatus === 'approved'
+        && booking?.email_sent === false
+    )
+}
+
+export async function recordApprovalEmailSent(bookingId) {
+    if (!supabase) throw new Error('Supabase is not configured')
+
+    const { data, error } = await supabase
+        .from('bookings')
+        .update({ email_sent: true })
+        .eq('id', bookingId)
+        .eq('email_sent', false)
+        .select()
+        .maybeSingle()
+    if (error) throw error
+
+    if (!data) return null
+
+    const { error: logError } = await supabase
+        .from('email_logs')
+        .insert([{ booking_id: bookingId, status: 'sent' }])
+    if (logError) throw logError
+
+    return data
+}
