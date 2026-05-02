@@ -4,6 +4,7 @@ import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 import { authService } from '@bhatbhati/shared/services/authService.js'
+import { sendBookingApprovalEmail } from '@bhatbhati/shared/services/emailService.js'
 
 const statusOptions = [
   'all',
@@ -211,10 +212,8 @@ export default function BookingsPage({ onNavigate }) {
 
       await applicationService.updateStatus(app.id, 'approved')
       if (shouldSendApprovalEmail) {
-        console.info('Booking approval email trigger detected', {
-          bookingId: booking.id,
-          applicationId: app.id,
-        })
+        await sendBookingApprovalEmail(booking)
+        await bookingService.recordApprovalEmailSent(booking.id)
       }
       await loadRows()
     } catch (err) {

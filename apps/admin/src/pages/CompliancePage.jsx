@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { FileText, Filter, ExternalLink } from 'lucide-react'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
+import { sendBookingApprovalEmail } from '@bhatbhati/shared/services/emailService.js'
 
 const statusStyles = {
   submitted: 'bg-status-yellow/20 text-status-yellow',
@@ -90,10 +91,8 @@ export default function CompliancePage() {
 
       await applicationService.updateStatus(id, status)
       if (shouldSendApprovalEmail) {
-        console.info('Booking approval email trigger detected', {
-          bookingId: approvalEmailBooking.id,
-          applicationId: id,
-        })
+        await sendBookingApprovalEmail(approvalEmailBooking)
+        await bookingService.recordApprovalEmailSent(approvalEmailBooking.id)
       }
       await loadApplications()
     } catch (err) {
