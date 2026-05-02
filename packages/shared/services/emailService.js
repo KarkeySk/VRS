@@ -14,6 +14,26 @@ function parseNotes(notes) {
     }
 }
 
+async function edgeFunctionErrorMessage(error) {
+    const fallback = error?.message || 'Failed to send booking approval email'
+    const response = error?.context
+
+    if (!response?.clone) return fallback
+
+    const clone = response.clone()
+    try {
+        const body = await clone.json()
+        return body?.error || body?.message || fallback
+    } catch {
+        try {
+            const text = await response.clone().text()
+            return text || fallback
+        } catch {
+            return fallback
+        }
+    }
+}
+
 export async function sendBookingApprovalEmail(booking, user = null) {
     if (!supabase) throw new Error('Supabase is not configured')
     if (!booking?.id) throw new Error('Booking is required')
@@ -48,14 +68,14 @@ export async function sendBookingApprovalEmail(booking, user = null) {
         },
     })
 
-    if (error) throw error
+    if (error) throw new Error(await edgeFunctionErrorMessage(error))
+    if (data?.error) throw new Error(data.error)
     return data
 }
 
 export function shouldSendApprovalEmail({ currentStatus, nextStatus, booking }) {
     return (
-        currentStatus !== 'approved'
-        && nextStatus === 'approved'
+        nextStatus === 'approved'
         && booking?.email_sent === false
     )
 }
