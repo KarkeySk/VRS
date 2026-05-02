@@ -56,9 +56,17 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signIn(email, password);
+      localStorage.removeItem('pending_email_verification');
+      sessionStorage.removeItem('pending_email_verification');
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Failed to login');
+      const message = err.message || 'Failed to login';
+      const lowerMessage = message.toLowerCase();
+      setError(
+        lowerMessage.includes('email not confirmed') || lowerMessage.includes('email not verified')
+          ? 'Please verify your email before signing in'
+          : message
+      );
     } finally {
       setIsLoading(false);
     }
