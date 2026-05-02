@@ -33,6 +33,17 @@ export const bookingService = {
         return data
     },
 
+    /** Get a single booking with customer and vehicle details */
+    getByIdWithDetails: async (id) => {
+        const { data, error } = await supabase
+            .from('bookings')
+            .select('*, vehicles(*), profiles(*)')
+            .eq('id', id)
+            .single()
+        if (error) throw error
+        return data
+    },
+
     /** Cancel a booking */
     cancel: async (id) => {
         const { data, error } = await supabase
@@ -79,7 +90,7 @@ export const bookingService = {
     findMatchingTrip: async ({ userId, vehicleId, startDate, endDate }) => {
         const { data, error } = await supabase
             .from('bookings')
-            .select('id, status')
+            .select('*, vehicles(*), profiles(*)')
             .eq('user_id', userId)
             .eq('vehicle_id', vehicleId)
             .eq('start_date', startDate)
@@ -89,4 +100,11 @@ export const bookingService = {
         if (error) throw error
         return data
     },
+
+    /** Determine whether an approval transition should trigger an email */
+    shouldSendApprovalEmail: ({ currentStatus, nextStatus, booking }) => (
+        currentStatus !== 'approved'
+        && nextStatus === 'approved'
+        && booking?.email_sent === false
+    ),
 }
