@@ -1,5 +1,6 @@
 import { CalendarDays } from "lucide-react";
 
+// Status style map used by the booking chip.
 const STATUS_STYLES = {
   ACTIVE:    { dot: "bg-status-green",  text: "text-status-green" },
   PARTIAL:   { dot: "bg-status-yellow", text: "text-status-yellow" },
@@ -7,15 +8,33 @@ const STATUS_STYLES = {
   COMPLETED: { dot: "bg-status-green",  text: "text-status-green" },
 };
 
+// Type label styling for the booking tag.
 const TYPE_STYLES = {
   "SELF-DRIVE":  { bg: "bg-[rgba(100,150,200,0.2)]", text: "text-[#64d4ff]" },
   "WITH DRIVER": { bg: "bg-[rgba(139,92,246,0.2)]",  text: "text-[#a78bfa]" },
 };
 
+/*
+  BookingCard notes:
+  - booking includes vehicle, dates, status, price.
+  - onManage is fired when the CTA is clicked.
+  - Uses fallback styles for unknown status/type.
+  - Purely presentational.
+  - Image area can be empty.
+  - Expects preformatted price and dates.
+  - Works inside lists or grids.
+  - No local state.
+  - Status dot uses theme colors.
+  - CTA text is short and consistent.
+*/
 export default function BookingCard({ booking, onManage = () => {} }) {
+  // Normalize status to a known style.
+  // Map unknown statuses/types to sensible defaults.
   const status = STATUS_STYLES[booking.status] || STATUS_STYLES.PARTIAL;
+  // Normalize booking type for the pill.
   const type = TYPE_STYLES[booking.type] || TYPE_STYLES["SELF-DRIVE"];
 
+  // Render a compact booking summary card.
   return (
     <div className="booking-card flex gap-4 p-4 bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-lg transition-all duration-200">
       {/* Vehicle image */}
