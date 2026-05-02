@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ArrowRight } from 'lucide-react';
+import WeatherWidget from '../../components/common/WeatherWidget';
+import BookingCalendar from '../../components/common/BookingCalendar';
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -157,6 +159,12 @@ export default function Dashboard() {
                     }}>
                         Pick Road Type <ArrowRight size={16} />
                     </Link>
+                </div>
+
+                {/* Weather + Calendar Row */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '60px' }}>
+                    <WeatherWidget />
+                    <BookingCalendar />
                 </div>
             </div>
         </div>
