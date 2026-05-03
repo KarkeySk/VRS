@@ -4,6 +4,11 @@ import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 import { authService } from '@bhatbhati/shared/services/authService.js'
+import {
+  getBookingEmailDetails,
+  sendApprovalEmailOnce,
+  shouldSendApprovalEmail,
+} from '@bhatbhati/shared/services/emailService.js'
 
 const statusOptions = [
   'all',
@@ -159,10 +164,30 @@ export default function BookingsPage({ onNavigate }) {
 
   const setBookingStatus = async (bookingId, nextStatus) => {
     const key = `booking:${bookingId}`
+    const currentRow = rows.find((row) => row.key === key)
     setBusyKey(key)
     try {
       await bookingService.update(bookingId, { status: nextStatus })
+      const booking = await getBookingEmailDetails(bookingId)
+      const shouldEmail = shouldSendApprovalEmail({
+        currentStatus: currentRow?.status,
+        nextStatus,
+        booking,
+      })
+
+      let emailWarning = ''
+      if (shouldEmail) {
+        try {
+          await sendApprovalEmailOnce(booking)
+        } catch (err) {
+          emailWarning = err.message || 'Confirmation email was not sent'
+        }
+      }
+
       await loadRows()
+      if (emailWarning) {
+        setError(`Booking updated, but confirmation email was not sent: ${emailWarning}`)
+      }
     } catch (err) {
       setError(err.message || 'Failed to update booking status')
     } finally {
@@ -181,8 +206,15 @@ export default function BookingsPage({ onNavigate }) {
         endDate: app.end_date,
       })
 
-      if (!existing) {
-        await bookingService.create({
+      let booking = null
+
+      if (existing) {
+        if (existing.status !== 'confirmed') {
+          await bookingService.update(existing.id, { status: 'confirmed' })
+        }
+        booking = await getBookingEmailDetails(existing.id)
+      } else {
+        const createdBooking = await bookingService.create({
           user_id: app.user_id,
           vehicle_id: app.vehicle_id,
           start_date: app.start_date,
@@ -198,10 +230,29 @@ export default function BookingsPage({ onNavigate }) {
             emergency_contact: app.questionnaire?.emergency_contact || null,
           }),
         })
+        booking = await getBookingEmailDetails(createdBooking.id)
       }
 
-      await applicationService.updateStatus(app.id, 'approved')
+      const updatedApplication = await applicationService.updateStatus(app.id, 'approved')
+      const shouldEmail = shouldSendApprovalEmail({
+        currentStatus: app.status,
+        nextStatus: updatedApplication.status,
+        booking,
+      })
+
+      let emailWarning = ''
+      if (shouldEmail) {
+        try {
+          await sendApprovalEmailOnce(booking)
+        } catch (err) {
+          emailWarning = err.message || 'Confirmation email was not sent'
+        }
+      }
+
       await loadRows()
+      if (emailWarning) {
+        setError(`Request approved, but confirmation email was not sent: ${emailWarning}`)
+      }
     } catch (err) {
       setError(err.message || 'Failed to approve request')
     } finally {
