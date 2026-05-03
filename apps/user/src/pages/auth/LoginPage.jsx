@@ -50,6 +50,10 @@ function isUnverifiedEmailError(message) {
   return lowerMessage.includes('email not confirmed') || lowerMessage.includes('email not verified');
 }
 
+function hasVerifiedEmail(user) {
+  return Boolean(user?.email_confirmed_at || user?.confirmed_at);
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -57,7 +61,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signIn } = useAuth();
+  const { signIn, signOut } = useAuth();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
@@ -78,7 +82,12 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
     try {
-      await signIn(email, password);
+      const data = await signIn(email, password);
+      if (!hasVerifiedEmail(data?.user)) {
+        await signOut();
+        setError('Please verify your email before signing in');
+        return;
+      }
       clearVerificationState();
       navigate('/dashboard');
     } catch (err) {
