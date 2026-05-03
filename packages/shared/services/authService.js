@@ -1,5 +1,10 @@
 import { supabase } from '../lib/supabase'
 
+function getEmailRedirectTo() {
+    if (typeof window === 'undefined') return undefined
+    return `${window.location.origin}/auth/login`
+}
+
 export const authService = {
     /** Sign up a new user */
     signUp: async (email, password, metadata = {}) => {
@@ -7,7 +12,22 @@ export const authService = {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: metadata },
+            options: {
+                data: metadata,
+                emailRedirectTo: getEmailRedirectTo(),
+            },
+        })
+        if (error) throw error
+        return data
+    },
+
+    /** Resend signup verification email */
+    resendVerificationEmail: async (email) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.resend({
+            type: 'signup',
+            email,
+            options: { emailRedirectTo: getEmailRedirectTo() },
         })
         if (error) throw error
         return data
