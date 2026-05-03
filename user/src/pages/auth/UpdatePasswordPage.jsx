@@ -39,7 +39,9 @@ export default function UpdatePasswordPage() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { updatePassword } = useAuth();
+  const [sessionReady, setSessionReady] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const { updatePassword, session } = useAuth();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
@@ -51,11 +53,31 @@ export default function UpdatePasswordPage() {
     return () => clearInterval(interval);
   }, [nextSlide]);
 
+  // Wait for the recovery session to be established from the URL token
+  useEffect(() => {
+    if (session) {
+      setSessionReady(true);
+      setCheckingSession(false);
+      return;
+    }
+
+    // Give Supabase time to process the recovery token from the URL hash
+    const timeout = setTimeout(() => {
+      setCheckingSession(false);
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [session]);
+
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
     
+    if (!session) {
+      return setError('No active session. Please use the password reset link from your email.');
+    }
+
     if (password !== confirmPassword) {
       return setError('Passwords do not match');
     }
@@ -67,7 +89,7 @@ export default function UpdatePasswordPage() {
     setIsLoading(true);
     try {
       await updatePassword(password);
-      setSuccessMessage('Password updated successfully. You can now log in with your new password.');
+      setSuccessMessage('Password updated successfully! Redirecting to login...');
       setTimeout(() => {
         navigate('/auth/login');
       }, 3000);
@@ -125,7 +147,22 @@ export default function UpdatePasswordPage() {
           {error && <div className="auth-alert">{error}</div>}
           {successMessage && <div className="auth-alert" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}>{successMessage}</div>}
 
-          {!successMessage && (
+          {checkingSession ? (
+            <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+              <div style={{ width: '36px', height: '36px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 16px' }}></div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>Verifying your reset link...</p>
+              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+          ) : !sessionReady && !successMessage ? (
+            <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>
+                No active recovery session found. This can happen if the reset link has expired or was already used.
+              </p>
+              <Link to="/auth/forgot-password" className="auth-submit" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', padding: '12px 24px', fontSize: '0.9rem' }}>
+                Request a New Reset Link <ArrowRight size={16} />
+              </Link>
+            </div>
+          ) : !successMessage && (
             <form onSubmit={handleUpdatePassword} className="auth-form">
               <label htmlFor="new-password">New Password</label>
               <div className="auth-password-wrap">
