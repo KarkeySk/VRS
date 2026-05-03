@@ -1,15 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { paymentService } from '@bhatbhati/shared/services/paymentService.js';
-import { notificationService } from '@bhatbhati/shared/services/notificationService.js';
-import { decodeEsewaResponse } from '@bhatbhati/shared/utils/esewaConfig.js';
-import { applicationService } from '@bhatbhati/shared/services/applicationService.js';
-import { useAuth } from '../../context/AuthContext';
 import { CheckCircle, XCircle, Loader, ArrowRight } from 'lucide-react';
 
 export default function PaymentSuccess() {
     const [searchParams] = useSearchParams();
-    const { user } = useAuth();
     const [status, setStatus] = useState('verifying');
     const [message, setMessage] = useState('Verifying your payment...');
     const appId = searchParams.get('applicationId');
@@ -25,42 +20,21 @@ export default function PaymentSuccess() {
                 return;
             }
             try {
-                const decoded = decodeEsewaResponse(data);
-                if (!decoded || decoded.status !== 'COMPLETE') {
-                    setStatus('error');
-                    setMessage('Payment was not completed.');
-                    if (appId) await paymentService.markFailed(appId).catch(() => {});
+                const response = await paymentService.verifyEsewaPayment({ applicationId: appId, data });
+                if (response.status === 'success') {
+                    setStatus('success');
+                    setMessage('Payment verified successfully!');
                     return;
                 }
-                const appData = await applicationService.getById(appId);
-                if (!appData) { setStatus('error'); setMessage('Booking not found.'); return; }
-
-                const paidAmount = Number(decoded.total_amount);
-                const expectedAmount = Number(appData.total_price);
-                if (Math.abs(paidAmount - expectedAmount) > 1) {
-                    setStatus('error');
-                    setMessage(`Amount mismatch. Expected NPR ${expectedAmount}, got NPR ${paidAmount}.`);
-                    await paymentService.markFailed(appId).catch(() => {});
-                    return;
-                }
-                await paymentService.markPaid(appId, decoded.transaction_uuid, decoded.ref_id || null);
-                if (user?.id) {
-                    await notificationService.create({
-                        userId: user.id, type: 'payment_success',
-                        title: 'Payment Successful!',
-                        message: `Payment of NPR ${expectedAmount.toLocaleString()} confirmed.`,
-                        applicationId: appId,
-                    }).catch(() => {});
-                }
-                setStatus('success');
-                setMessage('Payment verified successfully!');
+                setStatus('error');
+                setMessage(response.message || 'Payment was not completed.');
             } catch (err) {
                 setStatus('error');
                 setMessage(err.message || 'Verification failed. Contact support.');
             }
         };
         verify();
-    }, [searchParams, user?.id, appId]);
+    }, [searchParams, appId]);
 
     const iconWrap = (bg, border) => ({
         width: '80px', height: '80px', borderRadius: '50%',

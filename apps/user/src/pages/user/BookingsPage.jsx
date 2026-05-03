@@ -86,7 +86,9 @@ export default function BookingsPage() {
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div style={{ color: '#e8732a', fontSize: '1.2rem', fontWeight: '800' }}>${app.total_price}</div>
+                                            <div style={{ color: '#e8732a', fontSize: '1.2rem', fontWeight: '800' }}>
+                                                NPR {Number(app.total_price || 0).toLocaleString()}
+                                            </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
                                                 <StatusIcon size={14} color={status.color} />
                                                 <span style={{ color: status.color, fontSize: '0.75rem', fontWeight: '600' }}>{status.label}</span>

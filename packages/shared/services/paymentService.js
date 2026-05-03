@@ -1,6 +1,35 @@
 import { supabase } from '../lib/supabase'
 
 export const paymentService = {
+    prepareEsewaPayment: async ({ applicationId, successUrl, failureUrl }) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.functions.invoke('esewa-payment', {
+            body: {
+                action: 'prepare',
+                applicationId,
+                successUrl,
+                failureUrl,
+            },
+        })
+        if (error) throw error
+        if (data?.error) throw new Error(data.error)
+        return data
+    },
+
+    verifyEsewaPayment: async ({ applicationId, data }) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data: response, error } = await supabase.functions.invoke('esewa-payment', {
+            body: {
+                action: 'verify',
+                applicationId,
+                data,
+            },
+        })
+        if (error) throw error
+        if (response?.error) throw new Error(response.error)
+        return response
+    },
+
     /**
      * Check if an eSewa transaction UUID has already been used
      * Prevents fraud via transaction reuse
