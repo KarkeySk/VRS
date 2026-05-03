@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { FileText, Filter, ExternalLink } from 'lucide-react'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
+import {
+  getBookingEmailDetails,
+  sendApprovalEmailOnce,
+  shouldSendApprovalEmail,
+} from '@bhatbhati/shared/services/emailService.js'
 
 const statusStyles = {
   submitted: 'bg-status-yellow/20 text-status-yellow',
@@ -49,6 +54,7 @@ export default function CompliancePage() {
       if (status === 'approved') {
         const target = applications.find((app) => app.id === id)
         if (target) {
+          let booking = null
           const existing = await bookingService.findMatchingTrip({
             userId: target.user_id,
             vehicleId: target.vehicle_id,
@@ -56,8 +62,13 @@ export default function CompliancePage() {
             endDate: target.end_date,
           })
 
-          if (!existing) {
-            await bookingService.create({
+          if (existing) {
+            if (existing.status !== 'confirmed') {
+              await bookingService.update(existing.id, { status: 'confirmed' })
+            }
+            booking = await getBookingEmailDetails(existing.id)
+          } else {
+            const createdBooking = await bookingService.create({
               user_id: target.user_id,
               vehicle_id: target.vehicle_id,
               start_date: target.start_date,
@@ -71,7 +82,30 @@ export default function CompliancePage() {
                 drive_type: target.drive_type,
               }),
             })
+            booking = await getBookingEmailDetails(createdBooking.id)
           }
+
+          const updatedApplication = await applicationService.updateStatus(id, status)
+          const shouldEmail = shouldSendApprovalEmail({
+            currentStatus: target.status,
+            nextStatus: updatedApplication.status,
+            booking,
+          })
+
+          let emailWarning = ''
+          if (shouldEmail) {
+            try {
+              await sendApprovalEmailOnce(booking)
+            } catch (err) {
+              emailWarning = err.message || 'Unknown email error'
+            }
+          }
+
+          await loadApplications()
+          if (emailWarning) {
+            setError(`Request approved, but confirmation email was not sent: ${emailWarning}`)
+          }
+          return
         }
       }
 
