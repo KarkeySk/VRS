@@ -4,12 +4,12 @@ Last updated: 2026-04-28
 
 ## 1) Project Overview
 
-This is a pnpm monorepo for a vehicle rental web application with two frontends and shared Supabase-powered services:
+This is an npm workspaces monorepo for a vehicle rental web application with two frontends and shared Supabase-powered services:
 
-- User app (customer-facing): `apps/user`
-- Admin app (operations-facing): `apps/admin`
+- User app (customer-facing): `user`
+- Admin app (operations-facing): `admin`
 - Shared services and Supabase client: `packages/shared`
-- Database schema, policies, storage rules, and seed data: `supabase`
+- Database schema, policies, storage rules, and seed data: `backend`
 - Utility script for page capture/wireframe output: `scripts/capture-wireframes.mjs`
 
 ## 2) Current Architecture
@@ -135,9 +135,9 @@ This is a pnpm monorepo for a vehicle rental web application with two frontends 
 At the time of review, local workspace showed uncommitted/untracked work including:
 
 - Modified:
-  - `apps/admin/src/pages/FleetPage.jsx`
+  - `admin/src/pages/FleetPage.jsx`
   - `package.json`
-  - `pnpm-lock.yaml`
+  - `package-lock.json`
 - Untracked/new:
   - `scripts/capture-wireframes.mjs`
   - `artifacts/` capture outputs
@@ -215,24 +215,23 @@ Use this as final go-live gate:
 ## 8) Key File Map (Reference)
 
 - Root scripts/workspace:
-  - `package.json`
-  - `pnpm-workspace.yaml`
+  - `package.json` (npm workspaces)
   - `scripts/capture-wireframes.mjs`
 - User app:
-  - `apps/user/src/App.jsx`
-  - `apps/user/src/context/AuthContext.jsx`
-  - `apps/user/src/pages/user/*`
+  - `user/src/App.jsx`
+  - `user/src/context/AuthContext.jsx`
+  - `user/src/pages/user/*`
 - Admin app:
-  - `apps/admin/src/App.jsx`
-  - `apps/admin/src/pages/dashboard/Dashboard.jsx`
-  - `apps/admin/src/pages/*`
+  - `admin/src/App.jsx`
+  - `admin/src/pages/dashboard/Dashboard.jsx`
+  - `admin/src/pages/*`
 - Shared services:
   - `packages/shared/lib/supabase.js`
   - `packages/shared/services/*.js`
-- Database:
-  - `supabase/migrations/*.sql`
-  - `supabase/seed/*.sql`
-  - `supabase/README.md`
+- Backend (Supabase):
+  - `backend/migrations/*.sql`
+  - `backend/seed/*.sql`
+  - `backend/README.md`
 
 ---
 
