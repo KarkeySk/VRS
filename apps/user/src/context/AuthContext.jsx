@@ -3,20 +3,37 @@ import { authService } from '@bhatbhati/shared/services/authService.js'
 
 const AuthContext = createContext(null)
 
+function hasVerifiedEmail(user) {
+    return Boolean(user?.email_confirmed_at || user?.confirmed_at)
+}
+
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
     const [session, setSession] = useState(null)
     const [loading, setLoading] = useState(true)
+
+    const applySession = (nextSession) => {
+        const nextUser = nextSession?.user ?? null
+        if (nextUser && !hasVerifiedEmail(nextUser)) {
+            setSession(null)
+            setUser(null)
+            authService.signOut().catch((err) => {
+                console.warn('Unverified auth session cleanup failed:', err.message)
+            })
+            return false
+        }
+
+        setSession(nextSession)
+        setUser(nextUser)
+        return true
+    }
 
     useEffect(() => {
         let listener = null
 
         // Grab initial session
         authService.getSession()
-            .then((s) => {
-                setSession(s)
-                setUser(s?.user ?? null)
-            })
+            .then((s) => applySession(s))
             .catch((err) => {
                 console.warn('Auth session check failed (Supabase may not be configured):', err.message)
             })
@@ -27,8 +44,7 @@ export function AuthProvider({ children }) {
         // Listen for auth changes
         try {
             const result = authService.onAuthStateChange((_event, s) => {
-                setSession(s)
-                setUser(s?.user ?? null)
+                applySession(s)
             })
             listener = result?.data?.listener
         } catch (err) {
@@ -42,10 +58,16 @@ export function AuthProvider({ children }) {
         }
     }, [])
 
-    const signIn = async (email, password) => {
+    const signIn = async (email, password, options = {}) => {
         const data = await authService.signIn(email, password)
-        setSession(data.session)
-        setUser(data.user)
+        if (options.requireVerifiedEmail && !hasVerifiedEmail(data.user)) {
+            await authService.signOut()
+            setSession(null)
+            setUser(null)
+            throw new Error('Please verify your email before signing in')
+        }
+
+        applySession(data.session)
         return data
     }
 

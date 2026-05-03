@@ -54,10 +54,6 @@ function isUnverifiedEmailError(message) {
   return lowerMessage.includes('email not confirmed') || lowerMessage.includes('email not verified');
 }
 
-function hasVerifiedEmail(user) {
-  return Boolean(user?.email_confirmed_at || user?.confirmed_at);
-}
-
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -65,8 +61,9 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [needsVerification, setNeedsVerification] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { resendVerificationEmail, signIn, signOut } = useAuth();
+  const { resendVerificationEmail, signIn } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -83,31 +80,33 @@ export default function LoginPage() {
     const message = location.state?.message;
     const pendingEmail = location.state?.email || getPendingVerificationEmail();
     if (message) setNotice(message);
-    if (pendingEmail) setEmail(pendingEmail);
+    if (pendingEmail) {
+      setEmail(pendingEmail);
+      setNeedsVerification(true);
+    }
   }, [location.state]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setNotice('');
+    setNeedsVerification(false);
     setIsLoading(true);
     try {
       const normalizedEmail = email.trim().toLowerCase();
-      const data = await signIn(normalizedEmail, password);
-      if (!hasVerifiedEmail(data?.user)) {
-        await signOut();
-        sessionStorage.setItem('pending_email_verification', normalizedEmail);
-        setError('Please verify your email before signing in');
-        return;
-      }
+      await signIn(normalizedEmail, password, { requireVerifiedEmail: true });
       clearVerificationState();
       navigate('/dashboard');
     } catch (err) {
       const message = err.message || 'Failed to login';
-      setError(
-        isUnverifiedEmailError(message)
-          ? 'Please verify your email before signing in'
-          : message
-      );
+      if (isUnverifiedEmailError(message)) {
+        const normalizedEmail = email.trim().toLowerCase();
+        sessionStorage.setItem('pending_email_verification', normalizedEmail);
+        setNeedsVerification(true);
+        setError('Please verify your email before signing in');
+      } else {
+        setError(message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -126,6 +125,7 @@ export default function LoginPage() {
     try {
       await resendVerificationEmail(targetEmail);
       sessionStorage.setItem('pending_email_verification', targetEmail);
+      setNeedsVerification(true);
       setNotice('Verification email sent. Check your inbox before signing in.');
     } catch (err) {
       setError(err.message || 'Failed to resend verification email');
@@ -217,15 +217,17 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <button
-            type="button"
-            className="auth-submit"
-            disabled={isLoading}
-            onClick={handleResendVerification}
-            style={{ marginTop: '12px' }}
-          >
-            Resend verification email
-          </button>
+          {needsVerification && (
+            <button
+              type="button"
+              className="auth-submit"
+              disabled={isLoading}
+              onClick={handleResendVerification}
+              style={{ marginTop: '12px' }}
+            >
+              Resend verification email
+            </button>
+          )}
 
           <p className="auth-switch">
             New here? <Link to="/auth/register">Create an account</Link>
