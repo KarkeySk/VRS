@@ -35,7 +35,7 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signUp } = useAuth();
+  const { signUp, signOut } = useAuth();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
@@ -52,8 +52,16 @@ export default function RegisterPage() {
     setError('');
     setIsLoading(true);
     try {
-      await signUp(email, password, { full_name: fullname, terrain_preference: terrain });
-      navigate('/auth/login');
+      const normalizedEmail = email.trim().toLowerCase();
+      await signUp(normalizedEmail, password, { full_name: fullname, terrain_preference: terrain });
+      await signOut();
+      sessionStorage.setItem('pending_email_verification', normalizedEmail);
+      navigate('/auth/login', {
+        state: {
+          message: 'Check your email and verify your account before signing in.',
+          email: normalizedEmail,
+        },
+      });
     } catch (err) {
       setError(err.message || 'Failed to register');
     } finally {

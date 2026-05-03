@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
@@ -45,6 +45,10 @@ function clearVerificationState() {
   });
 }
 
+function getPendingVerificationEmail() {
+  return sessionStorage.getItem('pending_email_verification') || '';
+}
+
 function isUnverifiedEmailError(message) {
   const lowerMessage = message.toLowerCase();
   return lowerMessage.includes('email not confirmed') || lowerMessage.includes('email not verified');
@@ -60,8 +64,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signIn, signOut } = useAuth();
+  const { resendVerificationEmail, signIn, signOut } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
@@ -74,17 +80,22 @@ export default function LoginPage() {
   }, [nextSlide]);
 
   useEffect(() => {
-    clearVerificationState();
-  }, []);
+    const message = location.state?.message;
+    const pendingEmail = location.state?.email || getPendingVerificationEmail();
+    if (message) setNotice(message);
+    if (pendingEmail) setEmail(pendingEmail);
+  }, [location.state]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
     try {
-      const data = await signIn(email, password);
+      const normalizedEmail = email.trim().toLowerCase();
+      const data = await signIn(normalizedEmail, password);
       if (!hasVerifiedEmail(data?.user)) {
         await signOut();
+        sessionStorage.setItem('pending_email_verification', normalizedEmail);
         setError('Please verify your email before signing in');
         return;
       }
@@ -97,6 +108,27 @@ export default function LoginPage() {
           ? 'Please verify your email before signing in'
           : message
       );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const targetEmail = email.trim().toLowerCase() || getPendingVerificationEmail();
+    if (!targetEmail) {
+      setError('Enter your email address first.');
+      return;
+    }
+
+    setError('');
+    setNotice('');
+    setIsLoading(true);
+    try {
+      await resendVerificationEmail(targetEmail);
+      sessionStorage.setItem('pending_email_verification', targetEmail);
+      setNotice('Verification email sent. Check your inbox before signing in.');
+    } catch (err) {
+      setError(err.message || 'Failed to resend verification email');
     } finally {
       setIsLoading(false);
     }
@@ -146,6 +178,7 @@ export default function LoginPage() {
             <p>Sign in to continue.</p>
           </div>
 
+          {notice && <div className="auth-alert">{notice}</div>}
           {error && <div className="auth-alert">{error}</div>}
 
           <form onSubmit={handleLogin} className="auth-form">
@@ -183,6 +216,16 @@ export default function LoginPage() {
               {isLoading ? 'Signing in...' : 'Sign In'} <ArrowRight size={16} />
             </button>
           </form>
+
+          <button
+            type="button"
+            className="auth-submit"
+            disabled={isLoading}
+            onClick={handleResendVerification}
+            style={{ marginTop: '12px' }}
+          >
+            Resend verification email
+          </button>
 
           <p className="auth-switch">
             New here? <Link to="/auth/register">Create an account</Link>

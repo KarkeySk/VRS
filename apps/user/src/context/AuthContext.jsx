@@ -48,6 +48,7 @@ export function AuthProvider({ children }) {
         loading,
         signIn: authService.signIn,
         signUp: authService.signUp,
+        resendVerificationEmail: authService.resendVerificationEmail,
         signOut: authService.signOut,
     }
 
