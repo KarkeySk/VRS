@@ -74,10 +74,26 @@ export async function sendBookingApprovalEmail(booking, user = null) {
 }
 
 export function shouldSendApprovalEmail({ currentStatus, nextStatus, booking }) {
+    const normalizedCurrentStatus = String(currentStatus || '').toLowerCase()
+    const normalizedNextStatus = String(nextStatus || '').toLowerCase()
+    const isApprovalStatus = ['approved', 'confirmed'].includes(normalizedNextStatus)
+
     return (
-        nextStatus === 'approved'
-        && booking?.email_sent === false
+        isApprovalStatus
+        && Boolean(booking?.id)
+        && normalizedCurrentStatus !== normalizedNextStatus
+        && booking?.email_sent !== true
     )
+}
+
+export async function sendApprovalEmailOnce(booking) {
+    if (!booking?.id || booking.email_sent === true) {
+        return { status: 'skipped' }
+    }
+
+    await sendBookingApprovalEmail(booking)
+    const recorded = await recordApprovalEmailSent(booking.id)
+    return recorded ? { status: 'sent' } : { status: 'skipped' }
 }
 
 export async function getBookingEmailDetails(bookingId) {

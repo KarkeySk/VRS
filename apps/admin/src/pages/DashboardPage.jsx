@@ -9,6 +9,11 @@ import {
   X,
 } from "lucide-react";
 import { bookingService } from "@bhatbhati/shared/services/bookingService.js";
+import {
+  getBookingEmailDetails,
+  sendApprovalEmailOnce,
+  shouldSendApprovalEmail,
+} from "@bhatbhati/shared/services/emailService.js";
 import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
 import { uiAssetService } from "@bhatbhati/shared/services/uiAssetService.js";
 import BookingsList from "@/components/BookingsList";
@@ -196,6 +201,7 @@ export default function DashboardPage({ onNavigate = () => {} }) {
       dates: formatDateRange(booking.start_date, booking.end_date),
       extras: extractExtras(booking.notes),
       status: mapStatus(booking.status),
+      rawStatus: booking.status,
       price: `NPR ${Number(booking.total_price || 0).toLocaleString()}`,
     })),
     [themedBookings, bookingFallbackImage],
@@ -211,8 +217,28 @@ export default function DashboardPage({ onNavigate = () => {} }) {
     if (!selectedBooking?.id) return;
     setIsSaving(true);
     try {
-      await bookingService.update(selectedBooking.id, { status: status.toLowerCase() });
+      const nextStatus = status.toLowerCase();
+      await bookingService.update(selectedBooking.id, { status: nextStatus });
+      const booking = await getBookingEmailDetails(selectedBooking.id);
+      const shouldEmail = shouldSendApprovalEmail({
+        currentStatus: selectedBooking.rawStatus,
+        nextStatus,
+        booking,
+      });
+
+      let emailWarning = "";
+      if (shouldEmail) {
+        try {
+          await sendApprovalEmailOnce(booking);
+        } catch (err) {
+          emailWarning = err.message || "Confirmation email was not sent";
+        }
+      }
+
       setFlashMessage(`Booking updated to ${status}.`);
+      if (emailWarning) {
+        setError(`Booking updated, but confirmation email was not sent: ${emailWarning}`);
+      }
       setSelectedBooking(null);
       await load();
     } catch (err) {
