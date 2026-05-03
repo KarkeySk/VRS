@@ -87,6 +87,7 @@ export default function PaymentPage() {
         const params = new URLSearchParams(window.location.search);
         if (params.get('failed') === 'true') {
             setError('Payment was cancelled or failed. Please try again.');
+            window.history.replaceState({}, '', window.location.pathname);
         }
     }, []);
 
