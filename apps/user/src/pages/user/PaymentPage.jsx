@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js';
-import { buildEsewaPayload, generateTransactionUuid, getEsewaConfig } from '@bhatbhati/shared/utils/esewaConfig.js';
+import { paymentService } from '@bhatbhati/shared/services/paymentService.js';
 import { ArrowLeft, Shield, CreditCard, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function PaymentPage() {
@@ -45,18 +45,15 @@ export default function PaymentPage() {
         if (!app || processing) return;
         setProcessing(true);
 
-        try {
-            const transactionUuid = generateTransactionUuid();
-            const config = getEsewaConfig();
-
+        const launchPayment = async () => {
+            try {
             // Build success URL with application context
             const baseUrl = window.location.origin;
             const successUrl = `${baseUrl}/payment/success?method=esewa&applicationId=${applicationId}`;
             const failureUrl = `${baseUrl}/payment/${applicationId}?failed=true`;
 
-            const payload = buildEsewaPayload({
-                amount: Number(app.total_price),
-                transactionUuid,
+            const { paymentUrl, payload } = await paymentService.prepareEsewaPayment({
+                applicationId,
                 successUrl,
                 failureUrl,
             });
@@ -64,7 +61,7 @@ export default function PaymentPage() {
             // Create hidden form and submit to eSewa
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = config.paymentUrl;
+            form.action = paymentUrl;
 
             Object.entries(payload).forEach(([key, value]) => {
                 const input = document.createElement('input');
@@ -76,10 +73,13 @@ export default function PaymentPage() {
 
             document.body.appendChild(form);
             form.submit();
-        } catch (err) {
-            setError(err.message || 'Failed to initiate payment');
-            setProcessing(false);
-        }
+            } catch (err) {
+                setError(err.message || 'Failed to initiate payment');
+                setProcessing(false);
+            }
+        };
+
+        launchPayment();
     };
 
     // Check for failed payment redirect

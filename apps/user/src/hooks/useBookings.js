@@ -10,7 +10,11 @@ export function useMyBookings() {
     const [error, setError] = useState(null)
 
     useEffect(() => {
-        if (!user) return
+        if (!user) {
+            setBookings([])
+            setLoading(false)
+            return
+        }
         let mounted = true;
         const load = async () => {
             setLoading(true)
