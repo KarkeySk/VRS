@@ -4,8 +4,7 @@ import { applicationService } from '@bhatbhati/shared/services/applicationServic
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 import {
   getBookingEmailDetails,
-  recordApprovalEmailSent,
-  sendBookingApprovalEmail,
+  sendApprovalEmailOnce,
   shouldSendApprovalEmail,
 } from '@bhatbhati/shared/services/emailService.js'
 
@@ -104,7 +103,12 @@ export default function CompliancePage() {
 
           approvalEmailBooking = existing
 
-          if (!approvalEmailBooking) {
+          if (approvalEmailBooking) {
+            if (approvalEmailBooking.status !== 'confirmed') {
+              await bookingService.update(approvalEmailBooking.id, { status: 'confirmed' })
+            }
+            approvalEmailBooking = await getBookingEmailDetails(approvalEmailBooking.id)
+          } else {
             const createdBooking = await bookingService.create({
               user_id: target.user_id,
               vehicle_id: target.vehicle_id,
@@ -124,18 +128,26 @@ export default function CompliancePage() {
         }
       }
 
+      const updatedApplication = await applicationService.updateStatus(id, status)
+
       const shouldEmail = shouldSendApprovalEmail({
         currentStatus,
-        nextStatus: status,
+        nextStatus: updatedApplication.status,
         booking: approvalEmailBooking,
       })
 
+      let emailWarning = ''
       if (shouldEmail) {
-        await sendBookingApprovalEmail(approvalEmailBooking)
-        await recordApprovalEmailSent(approvalEmailBooking.id)
+        try {
+          await sendApprovalEmailOnce(approvalEmailBooking)
+        } catch (err) {
+          emailWarning = err.message || 'Confirmation email was not sent'
+        }
       }
-      await applicationService.updateStatus(id, status)
       await loadApplications()
+      if (emailWarning) {
+        setError(`Request approved, but confirmation email was not sent: ${emailWarning}`)
+      }
     } catch (err) {
       setError(err.message || 'Failed to update status')
     } finally {
