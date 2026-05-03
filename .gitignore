@@ -5,6 +5,6 @@ dist/
 build/
 **/build/
 .env
-supabase/.temp/
-supabase/supabase/.temp/
+backend/.temp/
+backend/supabase/.temp/
 .githooks

@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@bhatbhati/shared": "file:../../packages/shared",
+    "@bhatbhati/shared": "file:../packages/shared",
     "@supabase/supabase-js": "^2.49.4",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
