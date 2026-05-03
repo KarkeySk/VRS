@@ -1,3 +1,5 @@
+import nodemailer from 'npm:nodemailer@6.9.16'
+
 type BookingPayload = {
   id: string
   start_date: string
@@ -39,6 +41,12 @@ function escapeHtml(value: string) {
 function formatPrice(value: number | string | null | undefined) {
   const price = Number(value || 0)
   return `NPR ${price.toLocaleString()}`
+}
+
+function requiredEnv(name: string) {
+  const value = Deno.env.get(name)
+  if (!value) throw new Error(`${name} is not configured`)
+  return value
 }
 
 function buildEmail({ booking, user, vehicle }: Required<RequestPayload>) {
@@ -88,12 +96,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const resendApiKey = Deno.env.get('RESEND_API_KEY')
-    const fromEmail = Deno.env.get('BOOKING_EMAIL_FROM') || 'Bhatbhati <onboarding@resend.dev>'
-
-    if (!resendApiKey) {
-      throw new Error('RESEND_API_KEY is not configured')
-    }
+    const smtpHost = requiredEnv('SMTP_HOST')
+    const smtpPort = Number(requiredEnv('SMTP_PORT'))
+    const smtpUser = requiredEnv('SMTP_USER')
+    const smtpPass = requiredEnv('SMTP_PASS')
+    const smtpAdminEmail = Deno.env.get('SMTP_ADMIN_EMAIL') || smtpUser
+    const smtpSenderName = Deno.env.get('SMTP_SENDER_NAME') || 'BHATBHATIFY'
 
     const { booking, user, vehicle } = await req.json() as RequestPayload
 
@@ -110,28 +118,26 @@ Deno.serve(async (req) => {
     }
 
     const email = buildEmail({ booking, user, vehicle })
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json',
+
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
       },
-      body: JSON.stringify({
-        from: fromEmail,
-        to: [user.email],
-        subject: email.subject,
-        html: email.html,
-        text: email.text,
-      }),
     })
 
-    const result = await response.json()
+    const result = await transporter.sendMail({
+      from: `"${smtpSenderName}" <${smtpAdminEmail}>`,
+      to: user.email,
+      subject: email.subject,
+      html: email.html,
+      text: email.text,
+    })
 
-    if (!response.ok) {
-      throw new Error(result?.message || 'Failed to send booking approval email')
-    }
-
-    return new Response(JSON.stringify({ status: 'sent', id: result.id }), {
+    return new Response(JSON.stringify({ status: 'sent', id: result.messageId }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
