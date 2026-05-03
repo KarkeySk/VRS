@@ -42,14 +42,27 @@ export function AuthProvider({ children }) {
         }
     }, [])
 
+    const signIn = async (email, password) => {
+        const data = await authService.signIn(email, password)
+        setSession(data.session)
+        setUser(data.user)
+        return data
+    }
+
+    const signOut = async () => {
+        setSession(null)
+        setUser(null)
+        await authService.signOut()
+    }
+
     const value = {
         user,
         session,
         loading,
-        signIn: authService.signIn,
+        signIn,
         signUp: authService.signUp,
         resendVerificationEmail: authService.resendVerificationEmail,
-        signOut: authService.signOut,
+        signOut,
     }
 
     return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>
