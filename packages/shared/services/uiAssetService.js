@@ -18,7 +18,7 @@ function warnMissingUiAssetsTable() {
   if (hasWarnedMissingUiAssetsTable) return
   hasWarnedMissingUiAssetsTable = true
   console.warn(
-    "Table 'public.ui_assets' is missing. Run supabase/migrations/008_create_ui_assets.sql and supabase/seed/003_admin_ui_assets.sql."
+    "Table 'public.ui_assets' is missing. Run backend/migrations/008_create_ui_assets.sql and backend/seed/003_admin_ui_assets.sql."
   )
 }
 
