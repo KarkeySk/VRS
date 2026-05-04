@@ -37,8 +37,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [step, setStep] = useState('login'); // 'login' | 'mfa'
+  const [mfaCode, setMfaCode] = useState('');
+  const [factorId, setFactorId] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signIn } = useAuth();
+  const { signIn, getMfaLevel, listMfaFactors, challengeAndVerifyMfa } = useAuth();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
@@ -56,11 +59,36 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signIn(email, password);
+      // Check if MFA is required
+      const mfaLevel = await getMfaLevel();
+      if (mfaLevel?.nextLevel === 'aal2' && mfaLevel?.currentLevel !== 'aal2') {
+          const factorsData = await listMfaFactors();
+          const totpFactor = factorsData?.totp?.[0];
+          if (totpFactor) {
+              setFactorId(totpFactor.id);
+              setStep('mfa');
+              return; // Wait for MFA verification
+          }
+      }
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Failed to login');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVerifyMfa = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+    try {
+        await challengeAndVerifyMfa(factorId, mfaCode);
+        navigate('/dashboard');
+    } catch (err) {
+        setError(err.message || 'Invalid 2FA code');
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -104,13 +132,14 @@ export default function LoginPage() {
       <main className="auth-main">
         <div className="auth-card">
           <div className="auth-header">
-            <h1>Welcome back</h1>
-            <p>Sign in to continue.</p>
+            <h1>{step === 'login' ? 'Welcome back' : 'Two-Factor Authentication'}</h1>
+            <p>{step === 'login' ? 'Sign in to continue.' : 'Enter the 6-digit code from your authenticator app.'}</p>
           </div>
 
           {error && <div className="auth-alert">{error}</div>}
 
-          <form onSubmit={handleLogin} className="auth-form">
+          {step === 'login' ? (
+            <form onSubmit={handleLogin} className="auth-form">
             <label htmlFor="login-email">Email Address</label>
             <input
               id="login-email"
@@ -141,14 +170,64 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <button type="submit" className="auth-submit" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign In'} <ArrowRight size={16} />
-            </button>
-          </form>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', marginTop: '-0.5rem' }}>
+              <Link to="/auth/forgot-password" style={{ fontSize: '0.875rem', color: 'var(--accent)', fontWeight: '600', textDecoration: 'none' }}>
+                Forgot Password?
+              </Link>
+            </div>
 
-          <p className="auth-switch">
-            New here? <Link to="/auth/register">Create an account</Link>
-          </p>
+              <button type="submit" className="auth-submit" disabled={isLoading}>
+                {isLoading ? 'Signing in...' : 'Sign In'} <ArrowRight size={16} />
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyMfa} className="auth-form">
+              <label htmlFor="mfa-code">6-Digit Code</label>
+              <div className="auth-password-wrap">
+                <input
+                  id="mfa-code"
+                  type="text"
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value)}
+                  placeholder="123456"
+                  maxLength={6}
+                  required
+                  autoFocus
+                />
+              </div>
+
+              <button type="submit" className="auth-submit" disabled={isLoading}>
+                {isLoading ? 'Verifying...' : 'Verify'} <ArrowRight size={16} />
+              </button>
+              
+              <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('login');
+                    setError('');
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--accent)',
+                    fontWeight: '600',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+
+          {step === 'login' && (
+            <p className="auth-switch">
+              New here? <Link to="/auth/register">Create an account</Link>
+            </p>
+          )}
         </div>
       </main>
     </div>
