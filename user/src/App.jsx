@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import Navbar from './components/layout/Navbar'
+import ChatBot from '../../AI-chatboc/ChatBot.jsx'
 
 // Pages
 import HomePage from './pages/HomePage'
@@ -29,6 +30,7 @@ function App() {
                 <ThemeProvider>
                     <Navbar />
                     <AnimatedRoutes />
+                    <ChatBot />
                 </ThemeProvider>
             </AuthProvider>
         </BrowserRouter>
