@@ -28,12 +28,73 @@ export const authService = {
         if (error) throw error
     },
 
-    /** Update current user password */
+    /** Request password reset email (SCRUM-69: Create reset request endpoint) */
+    resetPasswordForEmail: async (email, redirectTo) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: redirectTo,
+        })
+        if (error) throw error
+        return data
+    },
+
+    /** Update current user password (SCRUM-72: Reset password API) */
     updatePassword: async (newPassword) => {
         if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase.auth.updateUser({ password: newPassword })
         if (error) throw error
         return data.user
+    },
+
+    /** Verify OTP for password recovery (SCRUM-70: Generate/verify token) */
+    verifyOtp: async (email, token) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.verifyOtp({
+            email,
+            token,
+            type: 'recovery',
+        })
+        if (error) throw error
+        return data
+    },
+
+    /** 2FA / MFA Methods */
+    enrollMfa: async () => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+        if (error) throw error
+        return data
+    },
+
+    challengeAndVerifyMfa: async (factorId, code) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.mfa.challengeAndVerify({
+            factorId,
+            code,
+        })
+        if (error) throw error
+        return data
+    },
+
+    unenrollMfa: async (factorId) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.mfa.unenroll({ factorId })
+        if (error) throw error
+        return data
+    },
+
+    listMfaFactors: async () => {
+        if (!supabase) return null
+        const { data, error } = await supabase.auth.mfa.listFactors()
+        if (error) throw error
+        return data
+    },
+
+    getMfaLevel: async () => {
+        if (!supabase) return null
+        const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+        if (error) throw error
+        return data
     },
 
     /** Get current session */

@@ -49,6 +49,14 @@ export function AuthProvider({ children }) {
         signIn: authService.signIn,
         signUp: authService.signUp,
         signOut: authService.signOut,
+        resetPasswordForEmail: authService.resetPasswordForEmail,
+        updatePassword: authService.updatePassword,
+        verifyOtp: authService.verifyOtp,
+        enrollMfa: authService.enrollMfa,
+        challengeAndVerifyMfa: authService.challengeAndVerifyMfa,
+        unenrollMfa: authService.unenrollMfa,
+        listMfaFactors: authService.listMfaFactors,
+        getMfaLevel: authService.getMfaLevel,
     }
 
     return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>
