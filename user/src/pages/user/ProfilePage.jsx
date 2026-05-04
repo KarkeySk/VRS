@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { profileService } from '@bhatbhati/shared/services/profileService.js'
+import { Shield, ShieldCheck, ShieldOff, Loader2 } from 'lucide-react'
 
 const terrainOptions = [
     { value: 'mountains', label: 'High Mountain Roads' },
@@ -10,7 +11,7 @@ const terrainOptions = [
 ]
 
 export default function ProfilePage() {
-    const { user } = useAuth()
+    const { user, enrollMfa, challengeAndVerifyMfa, unenrollMfa, listMfaFactors } = useAuth()
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [uploading, setUploading] = useState(false)
@@ -22,6 +23,18 @@ export default function ProfilePage() {
         phone: '',
         terrain_preference: '',
     })
+
+    // 2FA State
+    const [mfaFactors, setMfaFactors] = useState([])
+    const [mfaLoading, setMfaLoading] = useState(true)
+    const [mfaEnrolling, setMfaEnrolling] = useState(false)
+    const [mfaQrCode, setMfaQrCode] = useState(null)
+    const [mfaSecret, setMfaSecret] = useState('')
+    const [mfaFactorId, setMfaFactorId] = useState(null)
+    const [mfaVerifyCode, setMfaVerifyCode] = useState('')
+    const [mfaError, setMfaError] = useState('')
+    const [mfaSuccess, setMfaSuccess] = useState('')
+    const [mfaDisabling, setMfaDisabling] = useState(false)
 
     useEffect(() => {
         let isMounted = true
@@ -52,6 +65,25 @@ export default function ProfilePage() {
             isMounted = false
         }
     }, [user?.id, user?.user_metadata?.full_name, user?.user_metadata?.terrain_preference])
+
+    // Load MFA factors
+    useEffect(() => {
+        let mounted = true
+        const loadMfa = async () => {
+            try {
+                const data = await listMfaFactors()
+                if (!mounted) return
+                const verified = data?.totp?.filter(f => f.status === 'verified') || []
+                setMfaFactors(verified)
+            } catch {
+                // MFA not available or error
+            } finally {
+                if (mounted) setMfaLoading(false)
+            }
+        }
+        loadMfa()
+        return () => { mounted = false }
+    }, [listMfaFactors])
 
     const initials = useMemo(() => {
         const name = form.full_name || user?.email || 'U'
@@ -106,6 +138,69 @@ export default function ProfilePage() {
             setUploading(false)
             e.target.value = ''
         }
+    }
+
+    // 2FA Handlers
+    const handleEnrollMfa = async () => {
+        setMfaError('')
+        setMfaSuccess('')
+        setMfaEnrolling(true)
+        try {
+            const data = await enrollMfa()
+            setMfaQrCode(data.totp.qr_code)
+            setMfaSecret(data.totp.secret)
+            setMfaFactorId(data.id)
+        } catch (err) {
+            setMfaError(err.message || 'Failed to start 2FA enrollment')
+            setMfaEnrolling(false)
+        }
+    }
+
+    const handleVerifyMfaEnrollment = async (e) => {
+        e.preventDefault()
+        setMfaError('')
+        if (mfaVerifyCode.length !== 6) {
+            setMfaError('Please enter a valid 6-digit code')
+            return
+        }
+        try {
+            await challengeAndVerifyMfa(mfaFactorId, mfaVerifyCode)
+            setMfaSuccess('Two-Factor Authentication enabled successfully!')
+            setMfaQrCode(null)
+            setMfaSecret('')
+            setMfaVerifyCode('')
+            setMfaEnrolling(false)
+            // Refresh factors
+            const data = await listMfaFactors()
+            const verified = data?.totp?.filter(f => f.status === 'verified') || []
+            setMfaFactors(verified)
+        } catch (err) {
+            setMfaError(err.message || 'Invalid verification code. Please try again.')
+        }
+    }
+
+    const handleDisableMfa = async (factorId) => {
+        setMfaError('')
+        setMfaSuccess('')
+        setMfaDisabling(true)
+        try {
+            await unenrollMfa(factorId)
+            setMfaSuccess('Two-Factor Authentication has been disabled.')
+            setMfaFactors(prev => prev.filter(f => f.id !== factorId))
+        } catch (err) {
+            setMfaError(err.message || 'Failed to disable 2FA')
+        } finally {
+            setMfaDisabling(false)
+        }
+    }
+
+    const handleCancelEnrollment = () => {
+        setMfaQrCode(null)
+        setMfaSecret('')
+        setMfaVerifyCode('')
+        setMfaFactorId(null)
+        setMfaEnrolling(false)
+        setMfaError('')
     }
 
     if (loading) {
@@ -300,6 +395,258 @@ export default function ProfilePage() {
                         </form>
                     </section>
                 </div>
+
+                {/* 2FA Security Section */}
+                <section style={{
+                    marginTop: '24px',
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '20px',
+                    padding: '24px',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                        <Shield size={22} style={{ color: 'var(--accent, #e8732a)' }} />
+                        <h3 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Two-Factor Authentication</h3>
+                    </div>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '20px', lineHeight: '1.5' }}>
+                        Add an extra layer of security to your account. When enabled, you will need to enter a 6-digit code from your authenticator app each time you sign in.
+                    </p>
+
+                    {mfaError && (
+                        <div style={{
+                            marginBottom: '14px',
+                            background: 'rgba(239,68,68,0.08)',
+                            border: '1px solid rgba(239,68,68,0.25)',
+                            borderRadius: '12px',
+                            padding: '10px 14px',
+                            color: '#ef4444',
+                            fontSize: '0.85rem',
+                        }}>
+                            {mfaError}
+                        </div>
+                    )}
+
+                    {mfaSuccess && (
+                        <div style={{
+                            marginBottom: '14px',
+                            background: 'rgba(34,197,94,0.08)',
+                            border: '1px solid rgba(34,197,94,0.25)',
+                            borderRadius: '12px',
+                            padding: '10px 14px',
+                            color: '#22c55e',
+                            fontSize: '0.85rem',
+                        }}>
+                            {mfaSuccess}
+                        </div>
+                    )}
+
+                    {mfaLoading ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                            <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                            Loading security settings...
+                            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                        </div>
+                    ) : mfaFactors.length > 0 ? (
+                        /* 2FA is ENABLED */
+                        <div>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '14px 16px',
+                                background: 'rgba(34,197,94,0.06)',
+                                border: '1px solid rgba(34,197,94,0.2)',
+                                borderRadius: '14px',
+                                marginBottom: '14px',
+                            }}>
+                                <ShieldCheck size={20} style={{ color: '#22c55e', flexShrink: 0 }} />
+                                <div style={{ flex: 1 }}>
+                                    <p style={{ color: '#22c55e', fontWeight: '700', fontSize: '0.9rem', margin: 0 }}>2FA is Active</p>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: '2px 0 0' }}>Your account is protected with TOTP authentication.</p>
+                                </div>
+                            </div>
+                            {mfaFactors.map(factor => (
+                                <div key={factor.id} style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '10px 14px',
+                                    background: 'var(--bg-glass)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border)',
+                                }}>
+                                    <div>
+                                        <p style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '0.85rem', margin: 0 }}>Authenticator App</p>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: '2px 0 0' }}>
+                                            Added {factor.created_at ? new Date(factor.created_at).toLocaleDateString() : 'recently'}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleDisableMfa(factor.id)}
+                                        disabled={mfaDisabling}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            border: '1px solid rgba(239,68,68,0.3)',
+                                            borderRadius: '999px',
+                                            padding: '8px 16px',
+                                            fontSize: '0.78rem',
+                                            fontWeight: '700',
+                                            color: '#ef4444',
+                                            background: 'rgba(239,68,68,0.06)',
+                                            cursor: mfaDisabling ? 'not-allowed' : 'pointer',
+                                            opacity: mfaDisabling ? 0.6 : 1,
+                                        }}
+                                    >
+                                        <ShieldOff size={14} />
+                                        {mfaDisabling ? 'Disabling...' : 'Disable 2FA'}
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    ) : mfaQrCode ? (
+                        /* QR Code enrollment step */
+                        <div>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '16px',
+                                padding: '20px',
+                                background: 'var(--bg-glass)',
+                                borderRadius: '16px',
+                                border: '1px solid var(--border)',
+                            }}>
+                                <p style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '0.9rem', margin: 0, textAlign: 'center' }}>
+                                    Scan this QR code with your authenticator app
+                                </p>
+                                <div style={{
+                                    background: '#fff',
+                                    padding: '12px',
+                                    borderRadius: '12px',
+                                }}>
+                                    <img src={mfaQrCode} alt="2FA QR Code" style={{ width: '180px', height: '180px', display: 'block' }} />
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', margin: '0 0 6px' }}>Or enter this secret manually:</p>
+                                    <code style={{
+                                        background: 'rgba(255,255,255,0.06)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px',
+                                        padding: '6px 12px',
+                                        fontSize: '0.75rem',
+                                        color: 'var(--accent, #e8732a)',
+                                        fontFamily: 'monospace',
+                                        letterSpacing: '2px',
+                                        wordBreak: 'break-all',
+                                    }}>
+                                        {mfaSecret}
+                                    </code>
+                                </div>
+
+                                <form onSubmit={handleVerifyMfaEnrollment} style={{ width: '100%', maxWidth: '280px' }}>
+                                    <label style={{ display: 'block', color: '#999', fontSize: '0.7rem', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                                        Enter 6-digit verification code
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={mfaVerifyCode}
+                                        onChange={(e) => setMfaVerifyCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                        placeholder="000000"
+                                        maxLength={6}
+                                        style={{
+                                            ...inputStyle,
+                                            textAlign: 'center',
+                                            fontSize: '1.2rem',
+                                            letterSpacing: '8px',
+                                            fontWeight: '700',
+                                        }}
+                                        autoFocus
+                                    />
+                                    <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
+                                        <button
+                                            type="button"
+                                            onClick={handleCancelEnrollment}
+                                            style={{
+                                                flex: 1,
+                                                border: '1px solid var(--border)',
+                                                borderRadius: '999px',
+                                                padding: '10px',
+                                                fontSize: '0.82rem',
+                                                fontWeight: '700',
+                                                color: 'var(--text-secondary)',
+                                                background: 'transparent',
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={mfaVerifyCode.length !== 6}
+                                            style={{
+                                                flex: 1,
+                                                border: 'none',
+                                                borderRadius: '999px',
+                                                padding: '10px',
+                                                fontSize: '0.82rem',
+                                                fontWeight: '700',
+                                                color: 'var(--accent-ink)',
+                                                background: 'var(--brand-gradient)',
+                                                cursor: mfaVerifyCode.length !== 6 ? 'not-allowed' : 'pointer',
+                                                opacity: mfaVerifyCode.length !== 6 ? 0.5 : 1,
+                                            }}
+                                        >
+                                            Verify & Enable
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    ) : (
+                        /* 2FA is DISABLED — show enable button */
+                        <div>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '14px 16px',
+                                background: 'rgba(239,68,68,0.04)',
+                                border: '1px solid rgba(239,68,68,0.15)',
+                                borderRadius: '14px',
+                                marginBottom: '16px',
+                            }}>
+                                <ShieldOff size={20} style={{ color: '#ef4444', flexShrink: 0 }} />
+                                <div>
+                                    <p style={{ color: '#ef4444', fontWeight: '700', fontSize: '0.9rem', margin: 0 }}>2FA is Not Active</p>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: '2px 0 0' }}>We recommend enabling 2FA for enhanced security.</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleEnrollMfa}
+                                disabled={mfaEnrolling}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    border: 'none',
+                                    borderRadius: '999px',
+                                    padding: '11px 22px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '700',
+                                    color: 'var(--accent-ink)',
+                                    background: 'var(--brand-gradient)',
+                                    cursor: mfaEnrolling ? 'not-allowed' : 'pointer',
+                                    opacity: mfaEnrolling ? 0.7 : 1,
+                                }}
+                            >
+                                <ShieldCheck size={16} />
+                                {mfaEnrolling ? 'Setting up...' : 'Enable Two-Factor Authentication'}
+                            </button>
+                        </div>
+                    )}
+                </section>
             </div>
         </div>
     )
