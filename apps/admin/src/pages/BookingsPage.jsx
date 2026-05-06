@@ -4,6 +4,7 @@ import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 import { authService } from '@bhatbhati/shared/services/authService.js'
+import { emailService } from '@bhatbhati/shared/services/emailService.js'
 
 const statusOptions = [
   'all',
@@ -161,7 +162,20 @@ export default function BookingsPage({ onNavigate }) {
     const key = `booking:${bookingId}`
     setBusyKey(key)
     try {
-      await bookingService.update(bookingId, { status: nextStatus })
+      const row = rows.find((item) => item.kind === 'booking' && item.id === bookingId)
+      const shouldSendConfirmationEmail = nextStatus === 'confirmed' && row?.status !== 'confirmed'
+      const booking = await bookingService.update(bookingId, { status: nextStatus })
+
+      if (shouldSendConfirmationEmail && row?.customerEmail) {
+        await emailService.sendBookingConfirmationEmail({
+          userEmail: row?.customerEmail,
+          bookingId,
+          startDate: booking?.start_date || row?.startDate,
+          endDate: booking?.end_date || row?.endDate,
+          message: `Your booking for ${row?.vehicleName || 'your selected vehicle'} has been confirmed.`,
+        })
+      }
+
       await loadRows()
     } catch (err) {
       setError(err.message || 'Failed to update booking status')
@@ -181,8 +195,10 @@ export default function BookingsPage({ onNavigate }) {
         endDate: app.end_date,
       })
 
+      let bookingId = existing?.id || app.id
+
       if (!existing) {
-        await bookingService.create({
+        const booking = await bookingService.create({
           user_id: app.user_id,
           vehicle_id: app.vehicle_id,
           start_date: app.start_date,
@@ -198,9 +214,22 @@ export default function BookingsPage({ onNavigate }) {
             emergency_contact: app.questionnaire?.emergency_contact || null,
           }),
         })
+        bookingId = booking?.id || bookingId
       }
 
       await applicationService.updateStatus(app.id, 'approved')
+
+      const customerEmail = app.profiles?.email || app.questionnaire?.customer?.email || ''
+      if (app.status !== 'approved' && customerEmail) {
+        await emailService.sendBookingConfirmationEmail({
+          userEmail: customerEmail,
+          bookingId,
+          startDate: app.start_date,
+          endDate: app.end_date,
+          message: `Your booking request for ${app.vehicles?.name || 'your selected vehicle'} has been confirmed.`,
+        })
+      }
+
       await loadRows()
     } catch (err) {
       setError(err.message || 'Failed to approve request')
@@ -261,7 +290,7 @@ export default function BookingsPage({ onNavigate }) {
 
     setIsCreating(true)
     try {
-      await bookingService.create({
+      const booking = await bookingService.create({
         user_id: adminUserId,
         vehicle_id: quickForm.vehicleId,
         start_date: quickForm.startDate,
@@ -278,6 +307,17 @@ export default function BookingsPage({ onNavigate }) {
           },
         }),
       })
+
+      if (quickForm.customerEmail.trim()) {
+        const vehicle = vehicles.find((item) => item.id === quickForm.vehicleId)
+        await emailService.sendBookingConfirmationEmail({
+          userEmail: quickForm.customerEmail.trim().toLowerCase(),
+          bookingId: booking?.id,
+          startDate: quickForm.startDate,
+          endDate: quickForm.endDate,
+          message: `Your booking for ${vehicle?.name || 'your selected vehicle'} has been confirmed.`,
+        })
+      }
 
       setQuickForm({
         customerName: '',
