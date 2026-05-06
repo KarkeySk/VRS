@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
 
@@ -37,8 +37,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [verificationRequired, setVerificationRequired] = useState(false);
+  const [resendStatus, setResendStatus] = useState('');
+  const [resendError, setResendError] = useState('');
+  const [isResending, setIsResending] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signIn } = useAuth();
+  const { signIn, resendConfirmation } = useAuth();
   const navigate = useNavigate();
 
   const nextSlide = useCallback(() => {
@@ -53,14 +57,40 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setVerificationRequired(false);
+    setResendStatus('');
+    setResendError('');
     setIsLoading(true);
     try {
       await signIn(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Failed to login');
+      const message = err.message || 'Failed to login';
+      const isUnverified = err.code === 'email_not_confirmed' || /email not confirmed|verify your email/i.test(message);
+
+      if (isUnverified) {
+        setVerificationRequired(true);
+        setError('Please verify your email once before signing in.');
+      } else {
+        setError(message);
+      }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendStatus('');
+    setResendError('');
+    setIsResending(true);
+
+    try {
+      await resendConfirmation(email.trim());
+      setResendStatus('Verification email sent. Open the link once, then sign in normally.');
+    } catch (err) {
+      setResendError(err.message || 'Could not send verification email.');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -108,7 +138,14 @@ export default function LoginPage() {
             <p>Sign in to continue.</p>
           </div>
 
-          {error && <div className="auth-alert">{error}</div>}
+          {error && (
+            <div className={verificationRequired ? 'auth-alert auth-alert-warning' : 'auth-alert'}>
+              {verificationRequired && <Mail size={16} />}
+              {error}
+            </div>
+          )}
+          {resendStatus && <div className="auth-alert auth-alert-success">{resendStatus}</div>}
+          {resendError && <div className="auth-alert">{resendError}</div>}
 
           <form onSubmit={handleLogin} className="auth-form">
             <label htmlFor="login-email">Email Address</label>
@@ -145,6 +182,17 @@ export default function LoginPage() {
               {isLoading ? 'Signing in...' : 'Sign In'} <ArrowRight size={16} />
             </button>
           </form>
+
+          {verificationRequired && (
+            <button
+              type="button"
+              className="auth-secondary-action"
+              onClick={handleResendVerification}
+              disabled={isResending || !email.trim()}
+            >
+              {isResending ? 'Sending...' : 'Send verification email'} <Mail size={16} />
+            </button>
+          )}
 
           <p className="auth-switch">
             New here? <Link to="/auth/register">Create an account</Link>
