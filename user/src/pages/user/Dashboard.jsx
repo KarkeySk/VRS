@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ArrowRight } from 'lucide-react';
-import WeatherWidget from '../../components/common/WeatherWidget';
-import BookingCalendar from '../../components/common/BookingCalendar';
+import WeatherPanel from '../../components/common/WeatherPanel';
+import CalendarPanel from '../../components/common/CalendarPanel';
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -163,8 +163,8 @@ export default function Dashboard() {
 
                 {/* Weather + Calendar Row */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '60px' }}>
-                    <WeatherWidget />
-                    <BookingCalendar />
+                    <WeatherPanel />
+                    <CalendarPanel />
                 </div>
             </div>
         </div>
