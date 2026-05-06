@@ -7,13 +7,13 @@ const formatDateTime = ({ startDate, endDate, dateTime }) => {
 }
 
 export const emailService = {
-    buildBookingApprovalMessage: ({ userEmail, bookingId, startDate, endDate, dateTime, message }) => {
+    buildBookingApprovalMessage: ({ userEmail, bookingId, startDate, endDate, dateTime, subject, message }) => {
         if (!userEmail) throw new Error('Booking approval email requires a user email')
         if (!bookingId) throw new Error('Booking approval email requires a booking id')
 
         return {
             to: userEmail,
-            subject: 'Booking approved',
+            subject: subject || 'Booking approved',
             bookingId,
             dateTime: formatDateTime({ startDate, endDate, dateTime }),
             message: message || 'Your booking has been approved.',
@@ -30,5 +30,13 @@ export const emailService = {
 
         if (error) throw error
         return data
+    },
+
+    sendBookingConfirmationEmail: async (details) => {
+        return emailService.sendBookingApprovalEmail({
+            ...details,
+            subject: 'Booking confirmed',
+            message: details.message || 'Your booking has been confirmed.',
+        })
     },
 }

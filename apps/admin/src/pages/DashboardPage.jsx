@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { bookingService } from "@bhatbhati/shared/services/bookingService.js";
+import { emailService } from "@bhatbhati/shared/services/emailService.js";
 import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
 import { uiAssetService } from "@bhatbhati/shared/services/uiAssetService.js";
 import BookingsList from "@/components/BookingsList";
@@ -179,6 +180,10 @@ export default function DashboardPage({ onNavigate = () => {} }) {
       dates: formatDateRange(booking.start_date, booking.end_date),
       extras: extractExtras(booking.notes),
       status: mapStatus(booking.status),
+      rawStatus: booking.status,
+      customerEmail: booking.profiles?.email || parseJson(booking.notes)?.customer?.email || "",
+      startDate: booking.start_date,
+      endDate: booking.end_date,
       price: `NPR ${Number(booking.total_price || 0).toLocaleString()}`,
     })),
     [themedBookings, bookingFallbackImage],
@@ -193,7 +198,20 @@ export default function DashboardPage({ onNavigate = () => {} }) {
     if (!selectedBooking?.id) return;
     setIsSaving(true);
     try {
-      await bookingService.update(selectedBooking.id, { status: status.toLowerCase() });
+      const nextStatus = status.toLowerCase();
+      const shouldSendConfirmationEmail = nextStatus === "confirmed" && selectedBooking.rawStatus !== "confirmed";
+      const booking = await bookingService.update(selectedBooking.id, { status: nextStatus });
+
+      if (shouldSendConfirmationEmail && selectedBooking.customerEmail) {
+        await emailService.sendBookingConfirmationEmail({
+          userEmail: selectedBooking.customerEmail,
+          bookingId: selectedBooking.id,
+          startDate: booking?.start_date || selectedBooking.startDate,
+          endDate: booking?.end_date || selectedBooking.endDate,
+          message: `Your booking for ${selectedBooking.vehicle || "your selected vehicle"} has been confirmed.`,
+        });
+      }
+
       setFlashMessage(`Booking updated to ${status}.`);
       setSelectedBooking(null);
       await load();
