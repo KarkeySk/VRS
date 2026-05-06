@@ -3,11 +3,21 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "user",
+    "admin",
+    "packages/*"
+  ],
   "scripts": {
-    "dev:user": "pnpm --filter @bhatbhati/user dev",
-    "dev:admin": "pnpm --filter @bhatbhati/admin dev",
-    "build:user": "pnpm --filter @bhatbhati/user build",
-    "build:admin": "pnpm --filter @bhatbhati/admin build",
-    "dev": "pnpm --parallel --filter './apps/*' dev"
+    "dev:user": "npm run dev --workspace @bhatbhati/user",
+    "dev:admin": "npm run dev --workspace @bhatbhati/admin",
+    "build:user": "npm run build --workspace @bhatbhati/user",
+    "build:admin": "npm run build --workspace @bhatbhati/admin",
+    "dev": "concurrently -n user,admin -c blue,magenta \"npm:dev:user\" \"npm:dev:admin\"",
+    "capture:wireframes": "node scripts/capture-wireframes.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "playwright": "^1.59.1"
   }
 }
