@@ -47,6 +47,8 @@ export default function CompliancePage() {
   const updateStatus = async (id, status) => {
     setBusyId(id)
     try {
+      let approvalEmailDetails = null
+
       if (status === 'approved') {
         const target = applications.find((app) => app.id === id)
         if (target) {
@@ -57,8 +59,10 @@ export default function CompliancePage() {
             endDate: target.end_date,
           })
 
+          let bookingId = existing?.id || target.id
+
           if (!existing) {
-            await bookingService.create({
+            const booking = await bookingService.create({
               user_id: target.user_id,
               vehicle_id: target.vehicle_id,
               start_date: target.start_date,
@@ -72,18 +76,23 @@ export default function CompliancePage() {
                 drive_type: target.drive_type,
               }),
             })
+            bookingId = booking?.id || bookingId
+          }
+
+          approvalEmailDetails = {
+            userEmail: target.profiles?.email,
+            bookingId,
+            startDate: target.start_date,
+            endDate: target.end_date,
+            message: `Your booking request for ${target.vehicles?.name || 'your selected vehicle'} has been approved.`,
           }
         }
       }
 
       await applicationService.updateStatus(id, status)
 
-      if (status === 'approved') {
-        const target = applications.find((app) => app.id === id)
-        await emailService.sendBookingApprovalEmail({
-          userEmail: target?.profiles?.email,
-          bookingId: id,
-        })
+      if (approvalEmailDetails) {
+        await emailService.sendBookingApprovalEmail(approvalEmailDetails)
       }
 
       await loadApplications()
