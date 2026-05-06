@@ -1,4 +1,4 @@
-# Setup Instructions for AI Chatbot
+# Setup Instructions for AI Chatbot with Google Gemini
 
 ## Step 1: Get Google Gemini API Key
 
@@ -8,19 +8,30 @@
 
 ## Step 2: Configure Environment Variables
 
-1. Copy `.env.example` to `.env` in the user folder:
-   ```bash
-   cp .env.example .env
-   ```
+The chatbot requires the `VITE_GOOGLE_GEMINI_API_KEY` environment variable to be set.
 
-2. Add your API key to `.env`:
-   ```
-   VITE_GOOGLE_GEMINI_API_KEY=your_actual_api_key_here
-   ```
+### Option A: Using .env file in root (Recommended)
+
+Edit the `.env` file in the root VRS folder and add/update:
+```
+VITE_GOOGLE_GEMINI_API_KEY=your_actual_api_key_here
+```
+
+### Option B: Using .env file in AI-chatbot folder
+
+Copy `.env.example` to `.env` in this folder:
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` and add your API key:
+```
+VITE_GOOGLE_GEMINI_API_KEY=your_actual_api_key_here
+```
 
 ## Step 3: Install Dependencies
 
-Run in the user folder:
+The chatbot dependencies are already included in package.json. Run in the user folder:
 ```bash
 npm install
 ```
@@ -38,16 +49,36 @@ npm run dev
 The chatbot will appear as a floating button in the bottom-right corner of every page. Click it to start chatting!
 
 ### Features:
-- 💬 Real-time conversation
+- 💬 Real-time conversation with Google Gemini
 - 🔄 Reset chat history anytime
 - 📱 Works on all devices
-- ⚡ Quick responses
+- ⚡ Quick, intelligent responses
+
+## Architecture
+
+- Uses Google Gemini Pro model for AI responses
+- Maintains conversation history for context-aware responses
+- Lightweight and responsive UI
+- No local dependencies required
 
 ## Troubleshooting
 
 **"API key not found" error:**
 - Make sure your `.env` file has `VITE_GOOGLE_GEMINI_API_KEY` set correctly
-- Restart the dev server after adding the key
+- Ensure the API key from Google Gemini is valid and not expired
+- Restart the dev server after adding/updating the key
+- Check that the .env file is in the correct location (root VRS folder or AI-chatbot folder)
+
+**"Failed to get response" error:**
+- Verify your internet connection is working
+- Check that the Gemini API key is valid
+- Ensure your Google account hasn't exceeded API rate limits
+- Check the browser console for more detailed error messages
+
+**Component not showing up:**
+- Make sure the ChatBot component is imported in your main App.jsx
+- Verify that the chat button appears in the bottom-right corner
+- Check the browser console for any JavaScript errors
 
 **Chatbot not appearing:**
 - Check browser console for errors
