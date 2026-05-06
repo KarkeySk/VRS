@@ -1,6 +1,18 @@
 import { supabase } from '../lib/supabase'
 
+const trimTrailingSlash = (value) => value?.trim().replace(/\/+$/, '')
+
 const getEmailRedirectTo = () => {
+    const explicitRedirectUrl = import.meta.env.VITE_AUTH_REDIRECT_URL?.trim()
+    if (explicitRedirectUrl) return explicitRedirectUrl
+
+    const configuredAppUrl = trimTrailingSlash(
+        import.meta.env.VITE_USER_APP_URL ||
+        import.meta.env.VITE_APP_URL ||
+        import.meta.env.VITE_PUBLIC_SITE_URL
+    )
+    if (configuredAppUrl) return `${configuredAppUrl}/auth/verify`
+
     if (typeof window !== 'undefined' && window.location?.origin) {
         return `${window.location.origin}/auth/verify`
     }

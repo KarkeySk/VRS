@@ -40,8 +40,27 @@ where id = '<user-uuid-from-auth.users>';
 ## Auth settings
 
 In Supabase dashboard > Authentication > Providers > Email:
-- Toggle **Confirm Email** OFF for development
-- Keep it ON for production (configure SMTP first)
+- Keep **Confirm Email** ON when email verification is required.
+
+In Supabase dashboard > Authentication > URL Configuration:
+- Set **Site URL** to your deployed user app origin, for example:
+  `https://your-deployed-user-app.com`
+- Add these **Redirect URLs**:
+  - `http://localhost:5173/auth/verify`
+  - `https://your-deployed-user-app.com/auth/verify`
+
+In the frontend environment, set the deployed user app URL so verification
+emails do not point to localhost:
+
+```env
+VITE_USER_APP_URL=https://your-deployed-user-app.com
+```
+
+If your verification page ever uses a different path, set the full callback URL:
+
+```env
+VITE_AUTH_REDIRECT_URL=https://your-deployed-user-app.com/auth/verify
+```
 
 ## Booking confirmation email function
 
