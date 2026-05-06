@@ -30,15 +30,14 @@ export function AuthProvider({ children }) {
                 setSession(s)
                 setUser(s?.user ?? null)
             })
-            listener = result?.data?.listener
+            listener = result?.data?.subscription ?? result?.data?.listener
         } catch (err) {
             console.warn('Auth listener setup failed:', err.message)
         }
 
         return () => {
-            if (listener?.subscription) {
-                listener.subscription.unsubscribe()
-            }
+            listener?.unsubscribe?.()
+            listener?.subscription?.unsubscribe?.()
         }
     }, [])
 
@@ -48,6 +47,7 @@ export function AuthProvider({ children }) {
         loading,
         signIn: authService.signIn,
         signUp: authService.signUp,
+        resendConfirmation: authService.resendConfirmation,
         signOut: authService.signOut,
     }
 
