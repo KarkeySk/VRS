@@ -184,6 +184,31 @@ export default function BookingsPage({ onNavigate }) {
     }
   }
 
+  const resendBookingConfirmation = async (row) => {
+    const key = `booking:${row.id}:resend`
+    setBusyKey(key)
+    setError('')
+    try {
+      if (!row.customerEmail) {
+        throw new Error('This booking has no customer email.')
+      }
+
+      await emailService.sendBookingConfirmationEmail({
+        userEmail: row.customerEmail,
+        bookingId: row.id,
+        startDate: row.startDate,
+        endDate: row.endDate,
+        message: `Your booking for ${row.vehicleName || 'your selected vehicle'} has been confirmed.`,
+      })
+
+      await loadRows()
+    } catch (err) {
+      setError(err.message || 'Failed to resend confirmation email')
+    } finally {
+      setBusyKey('')
+    }
+  }
+
   const approveApplication = async (app) => {
     const key = `application:${app.id}`
     setBusyKey(key)
@@ -516,6 +541,16 @@ export default function BookingsPage({ onNavigate }) {
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           {row.status === 'confirmed' ? 'Activate' : 'Confirm'}
                         </button>
+                        {row.status === 'confirmed' && (
+                          <button
+                            type="button"
+                            disabled={busyKey === `${row.key}:resend` || !row.customerEmail}
+                            onClick={() => resendBookingConfirmation(row)}
+                            className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
+                          >
+                            Resend Email
+                          </button>
+                        )}
                         <button
                           type="button"
                           disabled={busyKey === row.key}
