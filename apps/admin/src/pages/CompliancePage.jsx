@@ -81,8 +81,9 @@ export default function CompliancePage() {
           }
 
           if (shouldSendApprovalEmail) {
+            const customerEmail = target.profiles?.email || target.questionnaire?.customer?.email || ''
             approvalEmailDetails = {
-              userEmail: target.profiles?.email,
+              userEmail: customerEmail,
               bookingId,
               startDate: target.start_date,
               endDate: target.end_date,
@@ -94,7 +95,7 @@ export default function CompliancePage() {
 
       await applicationService.updateStatus(id, status)
 
-      if (approvalEmailDetails) {
+      if (approvalEmailDetails?.userEmail) {
         await emailService.sendBookingApprovalEmail(approvalEmailDetails)
       }
 
