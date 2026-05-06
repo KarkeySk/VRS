@@ -122,6 +122,28 @@
   font-weight: 500;
 }
 
+.provider-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+
+.provider-badge.online {
+  background: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+}
+
+.provider-badge.offline {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+}
+
 .chat-header-actions {
   display: flex;
   gap: 8px;
@@ -236,6 +258,38 @@
   margin: 0;
   margin-top: 4px;
   font-weight: 500;
+}
+
+/* ===== MESSAGE CONTENT FORMATTING ===== */
+.chat-message-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-bullet-line {
+  display: flex;
+  gap: 6px;
+  padding: 1px 0;
+}
+
+.chat-bullet {
+  flex-shrink: 0;
+  opacity: 0.7;
+  font-weight: 600;
+}
+
+.chat-line-break {
+  height: 6px;
+}
+
+.chat-message-content strong {
+  font-weight: 700;
+  color: inherit;
+}
+
+.chat-message-content em {
+  font-style: italic;
+  opacity: 0.9;
 }
 
 /* ===== LOADING STATE ===== */
