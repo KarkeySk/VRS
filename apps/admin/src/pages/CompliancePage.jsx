@@ -48,9 +48,10 @@ export default function CompliancePage() {
     setBusyId(id)
     try {
       let approvalEmailDetails = null
+      const target = applications.find((app) => app.id === id)
+      const shouldSendApprovalEmail = status === 'approved' && target?.status !== 'approved'
 
       if (status === 'approved') {
-        const target = applications.find((app) => app.id === id)
         if (target) {
           const existing = await bookingService.findMatchingTrip({
             userId: target.user_id,
@@ -79,12 +80,14 @@ export default function CompliancePage() {
             bookingId = booking?.id || bookingId
           }
 
-          approvalEmailDetails = {
-            userEmail: target.profiles?.email,
-            bookingId,
-            startDate: target.start_date,
-            endDate: target.end_date,
-            message: `Your booking request for ${target.vehicles?.name || 'your selected vehicle'} has been approved.`,
+          if (shouldSendApprovalEmail) {
+            approvalEmailDetails = {
+              userEmail: target.profiles?.email,
+              bookingId,
+              startDate: target.start_date,
+              endDate: target.end_date,
+              message: `Your booking request for ${target.vehicles?.name || 'your selected vehicle'} has been approved.`,
+            }
           }
         }
       }
