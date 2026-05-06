@@ -36,7 +36,7 @@ export const authService = {
         if (error) throw error
         if (!isEmailVerified(data.user)) {
             await supabase.auth.signOut()
-            throw new Error('Please verify your email before signing in.')
+            throw new Error('Email verification is required before signing in.')
         }
         return data
     },

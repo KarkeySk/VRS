@@ -18,7 +18,7 @@ const verificationStates = {
   needsLink: {
     Icon: Mail,
     title: 'Check your email',
-    message: 'Open the verification link we sent to finish creating your account.',
+    message: 'Email verification is required before you can sign in.',
   },
   error: {
     Icon: XCircle,
@@ -145,7 +145,7 @@ export default function VerifyEmailPage() {
           </div>
           <p className="auth-visual-kicker">Email Verification</p>
           <h2>One quick check before the road opens.</h2>
-          <p>Verify your email so bookings, documents, and trip updates stay tied to the right account.</p>
+          <p>Email verification is required before sign-in so bookings, documents, and trip updates stay tied to the right account.</p>
         </div>
       </aside>
 
