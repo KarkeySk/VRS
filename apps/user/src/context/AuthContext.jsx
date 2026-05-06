@@ -27,18 +27,18 @@ export function AuthProvider({ children }) {
         // Listen for auth changes
         try {
             const result = authService.onAuthStateChange((_event, s) => {
-                setSession(s)
-                setUser(s?.user ?? null)
+                const isVerified = Boolean(s?.user?.email_confirmed_at || s?.user?.confirmed_at)
+                setSession(isVerified ? s : null)
+                setUser(isVerified ? s?.user ?? null : null)
             })
-            listener = result?.data?.listener
+            listener = result?.data?.subscription ?? result?.data?.listener
         } catch (err) {
             console.warn('Auth listener setup failed:', err.message)
         }
 
         return () => {
-            if (listener?.subscription) {
-                listener.subscription.unsubscribe()
-            }
+            listener?.unsubscribe?.()
+            listener?.subscription?.unsubscribe?.()
         }
     }, [])
 
@@ -48,10 +48,11 @@ export function AuthProvider({ children }) {
         loading,
         signIn: authService.signIn,
         signUp: authService.signUp,
+        resendConfirmation: authService.resendConfirmation,
         signOut: authService.signOut,
     }
 
-    return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 /** Hook to consume auth context */
