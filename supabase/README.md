@@ -42,3 +42,32 @@ where id = '<user-uuid-from-auth.users>';
 In Supabase dashboard > Authentication > Providers > Email:
 - Toggle **Confirm Email** OFF for development
 - Keep it ON for production (configure SMTP first)
+
+## Booking confirmation email function
+
+The admin app sends booking confirmation emails through the Supabase Edge
+Function at `functions/send-booking-approval-email`. This is application email,
+not Supabase Auth email.
+
+Deploy it for each Supabase project used by the app:
+
+```bash
+npx supabase link --project-ref <project-ref>
+npx supabase secrets set SMTP_HOST=smtp.gmail.com
+npx supabase secrets set SMTP_PORT=587
+npx supabase secrets set SMTP_USER=<gmail-address>
+npx supabase secrets set SMTP_PASSWORD=<google-app-password>
+npx supabase secrets set BOOKING_EMAIL_FROM="Bhatbhate <gmail-address>"
+npx supabase functions deploy send-booking-approval-email
+```
+
+For production hosting, also set the frontend environment variables to the same
+Supabase project:
+
+```env
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-or-publishable-key>
+```
+
+If those production env vars point to a different Supabase project, deploy the
+function and secrets to that project too.
