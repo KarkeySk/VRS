@@ -42,3 +42,9 @@ where id = '<user-uuid-from-auth.users>';
 In Supabase dashboard > Authentication > Providers > Email:
 - Toggle **Confirm Email** OFF for development
 - Keep it ON for production (configure SMTP first)
+
+When **Confirm Email** is ON, set the Supabase site URL / allowed redirect URLs
+to include the user app origin and callback path:
+
+- Local: `http://localhost:5173/auth/verify`
+- Production: `https://your-domain.com/auth/verify`
