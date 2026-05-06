@@ -762,6 +762,10 @@ ol {
   color: #7a8697;
 }
 
+:root[data-theme='light'] .auth-secondary-action {
+  background: rgba(255, 255, 255, 0.62);
+}
+
 @media (max-width: 1024px) {
   .auth-shell {
     grid-template-columns: 1fr;

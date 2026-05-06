@@ -9,6 +9,7 @@ import {
   recordApprovalEmailSent,
   sendBookingApprovalEmail,
   shouldSendApprovalEmail,
+  emailService,
 } from '@bhatbhati/shared/services/emailService.js'
 import { notificationService } from '@bhatbhati/shared/services/notificationService.js'
 
@@ -183,10 +184,51 @@ export default function BookingsPage({ onNavigate }) {
     const key = `booking:${bookingId}`
     setBusyKey(key)
     try {
-      await bookingService.update(bookingId, { status: nextStatus })
+      const row = rows.find((item) => item.kind === 'booking' && item.id === bookingId)
+      const shouldSendConfirmationEmail = nextStatus === 'confirmed' && row?.status !== 'confirmed' && !row?.emailSent
+      const booking = await bookingService.update(bookingId, { status: nextStatus })
+
+      if (shouldSendConfirmationEmail && row?.customerEmail) {
+        await emailService.sendBookingApprovalEmail({
+          userEmail: row?.customerEmail,
+          bookingId,
+          startDate: booking?.start_date || row?.startDate,
+          endDate: booking?.end_date || row?.endDate,
+          subject: 'Booking confirmed',
+          message: `Your booking for ${row?.vehicleName || 'your selected vehicle'} has been confirmed.`,
+        })
+        await recordApprovalEmailSent(bookingId)
+      }
+
       await loadRows()
     } catch (err) {
       setError(err.message || 'Failed to update booking status')
+    } finally {
+      setBusyKey('')
+    }
+  }
+
+  const resendBookingConfirmation = async (row) => {
+    const key = `booking:${row.id}:resend`
+    setBusyKey(key)
+    setError('')
+    try {
+      if (!row.customerEmail) {
+        throw new Error('This booking has no customer email.')
+      }
+
+      await emailService.sendBookingApprovalEmail({
+        userEmail: row.customerEmail,
+        bookingId: row.id,
+        startDate: row.startDate,
+        endDate: row.endDate,
+        subject: 'Booking confirmed',
+        message: `Your booking for ${row.vehicleName || 'your selected vehicle'} has been confirmed.`,
+      })
+
+      await loadRows()
+    } catch (err) {
+      setError(err.message || 'Failed to resend confirmation email')
     } finally {
       setBusyKey('')
     }
@@ -224,6 +266,8 @@ export default function BookingsPage({ onNavigate }) {
           }),
         })
         booking = await getBookingEmailDetails(createdBooking.id)
+      } else {
+        booking = await getBookingEmailDetails(existing.id)
       }
 
       const shouldEmail = shouldSendApprovalEmail({
@@ -325,7 +369,7 @@ export default function BookingsPage({ onNavigate }) {
 
     setIsCreating(true)
     try {
-      await bookingService.create({
+      const booking = await bookingService.create({
         user_id: adminUserId,
         vehicle_id: quickForm.vehicleId,
         start_date: quickForm.startDate,
@@ -342,6 +386,19 @@ export default function BookingsPage({ onNavigate }) {
           },
         }),
       })
+
+      if (quickForm.customerEmail.trim()) {
+        const vehicle = vehicles.find((item) => item.id === quickForm.vehicleId)
+        await emailService.sendBookingApprovalEmail({
+          userEmail: quickForm.customerEmail.trim().toLowerCase(),
+          bookingId: booking?.id,
+          startDate: quickForm.startDate,
+          endDate: quickForm.endDate,
+          subject: 'Booking confirmed',
+          message: `Your booking for ${vehicle?.name || 'your selected vehicle'} has been confirmed.`,
+        })
+        await recordApprovalEmailSent(booking?.id)
+      }
 
       setQuickForm({
         customerName: '',
@@ -543,6 +600,16 @@ export default function BookingsPage({ onNavigate }) {
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           {row.status === 'confirmed' ? 'Activate' : 'Confirm'}
                         </button>
+                        {row.status === 'confirmed' && (
+                          <button
+                            type="button"
+                            disabled={busyKey === `${row.key}:resend` || !row.customerEmail}
+                            onClick={() => resendBookingConfirmation(row)}
+                            className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
+                          >
+                            Resend Email
+                          </button>
+                        )}
                         <button
                           type="button"
                           disabled={busyKey === row.key}

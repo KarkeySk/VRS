@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { authService } from '@bhatbhati/shared/services/authService.js'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
+import { emailService } from '@bhatbhati/shared/services/emailService.js'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
 
 // Preset routes shown in the UI.
@@ -149,7 +150,7 @@ export default function NewBookingPage({ onNavigate }) {
 
     setIsSubmitting(true)
     try {
-      await bookingService.create({
+      const booking = await bookingService.create({
         user_id: user.id,
         vehicle_id: selectedVehicle,
         start_date: form.pickupDate,
@@ -175,6 +176,17 @@ export default function NewBookingPage({ onNavigate }) {
           notes: form.notes,
         }),
       })
+
+      if (form.email.trim()) {
+        await emailService.sendBookingApprovalEmail({
+          userEmail: form.email.trim().toLowerCase(),
+          bookingId: booking?.id,
+          startDate: form.pickupDate,
+          endDate: form.returnDate,
+          subject: 'Booking confirmed',
+          message: `Your booking for ${selectedVehicleDetails?.name || 'your selected vehicle'} has been confirmed.`,
+        })
+      }
 
       setSuccess('Booking created successfully.')
       setForm(initialForm)
