@@ -70,7 +70,7 @@ export default function LoginPage() {
 
       if (isUnverified) {
         setVerificationRequired(true);
-        setError('Please verify your email once before signing in.');
+        setError('Email verification is required before you can sign in.');
       } else {
         setError(message);
       }
@@ -86,7 +86,7 @@ export default function LoginPage() {
 
     try {
       await resendConfirmation(email.trim());
-      setResendStatus('Verification email sent. Open the link once, then sign in normally.');
+      setResendStatus('Verification email sent. Open the link first; sign-in stays blocked until verification is complete.');
     } catch (err) {
       setResendError(err.message || 'Could not send verification email.');
     } finally {
