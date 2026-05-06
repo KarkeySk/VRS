@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
 
@@ -34,6 +34,7 @@ export default function RegisterPage() {
   const [terrain, setTerrain] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
   const { signUp } = useAuth();
   const navigate = useNavigate();
@@ -50,10 +51,15 @@ export default function RegisterPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setIsLoading(true);
     try {
-      await signUp(email, password, { full_name: fullname, terrain_preference: terrain });
-      navigate('/auth/login');
+      const data = await signUp(email, password, { full_name: fullname, terrain_preference: terrain });
+      if (data?.session) {
+        navigate('/dashboard');
+        return;
+      }
+      setSuccess('Account created. Verify your email once, then sign in normally.');
     } catch (err) {
       setError(err.message || 'Failed to register');
     } finally {
@@ -95,6 +101,11 @@ export default function RegisterPage() {
           </div>
 
           {error && <div className="auth-alert">{error}</div>}
+          {success && (
+            <div className="auth-alert auth-alert-success">
+              <Mail size={16} /> {success}
+            </div>
+          )}
 
           <form onSubmit={handleRegister} className="auth-form">
             <label htmlFor="register-fullname">Full Name</label>
@@ -104,6 +115,7 @@ export default function RegisterPage() {
               value={fullname}
               onChange={(e) => setFullname(e.target.value)}
               placeholder="John Everest"
+              disabled={Boolean(success)}
               required
             />
 
@@ -114,6 +126,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com"
+              disabled={Boolean(success)}
               required
             />
 
@@ -124,6 +137,7 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Create a secure password"
+              disabled={Boolean(success)}
               required
             />
 
@@ -132,6 +146,7 @@ export default function RegisterPage() {
               id="register-terrain"
               value={terrain}
               onChange={(e) => setTerrain(e.target.value)}
+              disabled={Boolean(success)}
               required
             >
               <option value="" disabled>Select road type...</option>
@@ -141,8 +156,8 @@ export default function RegisterPage() {
               <option value="highway">Highways</option>
             </select>
 
-            <button type="submit" className="auth-submit" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Create Account'} <ArrowRight size={16} />
+            <button type="submit" className="auth-submit" disabled={isLoading || Boolean(success)}>
+              {isLoading ? 'Creating account...' : success ? 'Verification Email Sent' : 'Create Account'} <ArrowRight size={16} />
             </button>
           </form>
 
