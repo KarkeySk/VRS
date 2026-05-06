@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { FileText, Filter, ExternalLink } from 'lucide-react'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
+import { emailService } from '@bhatbhati/shared/services/emailService.js'
 
 const statusStyles = {
   submitted: 'bg-status-yellow/20 text-status-yellow',
@@ -76,6 +77,15 @@ export default function CompliancePage() {
       }
 
       await applicationService.updateStatus(id, status)
+
+      if (status === 'approved') {
+        const target = applications.find((app) => app.id === id)
+        await emailService.sendBookingApprovalEmail({
+          userEmail: target?.profiles?.email,
+          bookingId: id,
+        })
+      }
+
       await loadApplications()
     } catch (err) {
       setError(err.message || 'Failed to update status')
