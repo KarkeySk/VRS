@@ -535,6 +535,25 @@ ol {
   font-size: 0.84rem;
 }
 
+.auth-alert-success,
+.auth-alert-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-alert-success {
+  border-color: rgba(34, 197, 94, 0.32);
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+}
+
+.auth-alert-warning {
+  border-color: rgba(245, 158, 11, 0.34);
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+}
+
 .auth-form {
   display: grid;
   gap: 10px;
@@ -611,6 +630,27 @@ ol {
   cursor: not-allowed;
 }
 
+.auth-secondary-action {
+  width: 100%;
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  padding: 11px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.auth-secondary-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .auth-switch {
   margin-top: 16px;
   text-align: center;
@@ -621,6 +661,64 @@ ol {
 .auth-switch a {
   color: var(--accent);
   font-weight: 700;
+}
+
+.verify-card {
+  text-align: center;
+}
+
+.verify-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.verify-icon.checking svg {
+  animation: wheelSpin 1s linear infinite;
+}
+
+.verify-icon.success {
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.32);
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.verify-icon.error {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.32);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.verify-progress {
+  width: 100%;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.verify-progress::before {
+  content: '';
+  display: block;
+  width: 45%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand-gradient);
+  animation: verifyProgress 1.2s ease-in-out infinite;
+}
+
+.verify-link {
+  text-decoration: none;
+}
+
+.verify-resend-form {
+  text-align: left;
 }
 
 :root[data-theme='light'] .auth-visual-overlay {
@@ -658,6 +756,10 @@ ol {
 
 :root[data-theme='light'] .auth-form input::placeholder {
   color: #7a8697;
+}
+
+:root[data-theme='light'] .auth-secondary-action {
+  background: rgba(255, 255, 255, 0.62);
 }
 
 @media (max-width: 1024px) {
@@ -1422,6 +1524,16 @@ ol {
 
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes verifyProgress {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(230%);
   }
 }
 
