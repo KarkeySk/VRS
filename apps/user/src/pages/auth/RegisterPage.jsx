@@ -59,7 +59,7 @@ export default function RegisterPage() {
         navigate('/dashboard');
         return;
       }
-      setSuccess('Account created. Verify your email once, then sign in normally.');
+      setSuccess('Account created. Email verification is required before you can sign in.');
     } catch (err) {
       setError(err.message || 'Failed to register');
     } finally {
