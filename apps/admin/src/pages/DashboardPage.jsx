@@ -203,11 +203,12 @@ export default function DashboardPage({ onNavigate = () => {} }) {
       const booking = await bookingService.update(selectedBooking.id, { status: nextStatus });
 
       if (shouldSendConfirmationEmail && selectedBooking.customerEmail) {
-        await emailService.sendBookingConfirmationEmail({
+        await emailService.sendBookingApprovalEmail({
           userEmail: selectedBooking.customerEmail,
           bookingId: selectedBooking.id,
           startDate: booking?.start_date || selectedBooking.startDate,
           endDate: booking?.end_date || selectedBooking.endDate,
+          subject: 'Booking confirmed',
           message: `Your booking for ${selectedBooking.vehicle || "your selected vehicle"} has been confirmed.`,
         });
       }
