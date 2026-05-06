@@ -1,11 +1,25 @@
 import { supabase } from '../lib/supabase'
 
+const trimTrailingSlash = (value) => value?.trim().replace(/\/+$/, '')
+
 const getEmailRedirectTo = () => {
+    const explicitRedirectUrl = import.meta.env.VITE_AUTH_REDIRECT_URL?.trim()
+    if (explicitRedirectUrl) return explicitRedirectUrl
+
+    const configuredAppUrl = trimTrailingSlash(
+        import.meta.env.VITE_USER_APP_URL ||
+        import.meta.env.VITE_APP_URL ||
+        import.meta.env.VITE_PUBLIC_SITE_URL
+    )
+    if (configuredAppUrl) return `${configuredAppUrl}/auth/verify`
+
     if (typeof window !== 'undefined' && window.location?.origin) {
         return `${window.location.origin}/auth/verify`
     }
     return undefined
 }
+
+const isEmailVerified = (user) => Boolean(user?.email_confirmed_at || user?.confirmed_at)
 
 export const authService = {
     /** Sign up a new user */
@@ -20,6 +34,10 @@ export const authService = {
             },
         })
         if (error) throw error
+        if (data?.session && !isEmailVerified(data.user)) {
+            await supabase.auth.signOut()
+            return { ...data, session: null }
+        }
         return data
     },
 
@@ -28,6 +46,10 @@ export const authService = {
         if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
+        if (!isEmailVerified(data.user)) {
+            await supabase.auth.signOut()
+            throw new Error('Email verification is required before signing in.')
+        }
         return data
     },
 
@@ -38,7 +60,17 @@ export const authService = {
         if (error) throw error
     },
 
-    /** Update current user password */
+    /** Request password reset email (SCRUM-69: Create reset request endpoint) */
+    resetPasswordForEmail: async (email, redirectTo) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo,
+        })
+        if (error) throw error
+        return data
+    },
+
+    /** Update current user password (SCRUM-72: Reset password API) */
     updatePassword: async (newPassword) => {
         if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase.auth.updateUser({ password: newPassword })
@@ -90,11 +122,66 @@ export const authService = {
         return data
     },
 
+    /** Verify OTP for password recovery (SCRUM-70: Generate/verify token) */
+    verifyOtp: async (email, token) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.verifyOtp({
+            email,
+            token,
+            type: 'recovery',
+        })
+        if (error) throw error
+        return data
+    },
+
+    /** 2FA / MFA Methods */
+    enrollMfa: async () => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+        if (error) throw error
+        return data
+    },
+
+    challengeAndVerifyMfa: async (factorId, code) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.mfa.challengeAndVerify({
+            factorId,
+            code,
+        })
+        if (error) throw error
+        return data
+    },
+
+    unenrollMfa: async (factorId) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.mfa.unenroll({ factorId })
+        if (error) throw error
+        return data
+    },
+
+    listMfaFactors: async () => {
+        if (!supabase) return null
+        const { data, error } = await supabase.auth.mfa.listFactors()
+        if (error) throw error
+        return data
+    },
+
+    getMfaLevel: async () => {
+        if (!supabase) return null
+        const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+        if (error) throw error
+        return data
+    },
+
     /** Get current session */
     getSession: async () => {
         if (!supabase) return null
         const { data, error } = await supabase.auth.getSession()
         if (error) throw error
+        if (data.session?.user && !isEmailVerified(data.session.user)) {
+            await supabase.auth.signOut()
+            return null
+        }
         return data.session
     },
 

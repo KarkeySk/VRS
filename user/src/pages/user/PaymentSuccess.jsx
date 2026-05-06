@@ -1,0 +1,119 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { paymentService } from '@bhatbhati/shared/services/paymentService.js';
+import { notificationService } from '@bhatbhati/shared/services/notificationService.js';
+import { decodeEsewaResponse } from '@bhatbhati/shared/utils/esewaConfig.js';
+import { applicationService } from '@bhatbhati/shared/services/applicationService.js';
+import { useAuth } from '../../context/AuthContext';
+import { CheckCircle, XCircle, Loader, ArrowRight } from 'lucide-react';
+
+export default function PaymentSuccess() {
+    const [searchParams] = useSearchParams();
+    const { user } = useAuth();
+    const [status, setStatus] = useState('verifying');
+    const [message, setMessage] = useState('Verifying your payment...');
+    const appId = searchParams.get('applicationId');
+
+    useEffect(() => {
+        const verify = async () => {
+            const method = searchParams.get('method');
+            const data = searchParams.get('data');
+
+            if (method !== 'esewa' || !data || !appId) {
+                setStatus('error');
+                setMessage('Invalid payment callback.');
+                return;
+            }
+            try {
+                const decoded = decodeEsewaResponse(data);
+                if (!decoded || decoded.status !== 'COMPLETE') {
+                    setStatus('error');
+                    setMessage('Payment was not completed.');
+                    if (appId) await paymentService.markFailed(appId).catch(() => {});
+                    return;
+                }
+                const appData = await applicationService.getById(appId);
+                if (!appData) { setStatus('error'); setMessage('Booking not found.'); return; }
+
+                const paidAmount = Number(decoded.total_amount);
+                const expectedAmount = Number(appData.total_price);
+                if (Math.abs(paidAmount - expectedAmount) > 1) {
+                    setStatus('error');
+                    setMessage(`Amount mismatch. Expected NPR ${expectedAmount}, got NPR ${paidAmount}.`);
+                    await paymentService.markFailed(appId).catch(() => {});
+                    return;
+                }
+                await paymentService.markPaid(appId, decoded.transaction_uuid, decoded.ref_id || null);
+                if (user?.id) {
+                    await notificationService.create({
+                        userId: user.id, type: 'payment_success',
+                        title: 'Payment Successful!',
+                        message: `Payment of NPR ${expectedAmount.toLocaleString()} confirmed.`,
+                        applicationId: appId,
+                    }).catch(() => {});
+                }
+                setStatus('success');
+                setMessage('Payment verified successfully!');
+            } catch (err) {
+                setStatus('error');
+                setMessage(err.message || 'Verification failed. Contact support.');
+            }
+        };
+        verify();
+    }, [searchParams, user?.id, appId]);
+
+    const iconWrap = (bg, border) => ({
+        width: '80px', height: '80px', borderRadius: '50%',
+        background: bg, border: `2px solid ${border}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        margin: '0 auto 24px',
+    });
+    const btnPrimary = {
+        textDecoration: 'none', padding: '14px 28px', borderRadius: '14px',
+        background: 'var(--brand-gradient)', color: 'var(--accent-ink)',
+        fontWeight: '700', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '8px',
+    };
+    const btnSecondary = {
+        textDecoration: 'none', padding: '14px 28px', borderRadius: '14px',
+        background: 'var(--bg-glass)', border: '1px solid var(--border)',
+        color: 'var(--text-primary)', fontWeight: '600', fontSize: '0.85rem',
+    };
+
+    return (
+        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ textAlign: 'center', maxWidth: '480px', padding: '0 20px' }}>
+                {status === 'verifying' && (<>
+                    <div style={iconWrap('rgba(96,187,70,0.08)', 'rgba(96,187,70,0.2)')}>
+                        <Loader size={36} color="#60bb46" className="spin-icon" />
+                    </div>
+                    <h1 style={{ color: 'var(--text-primary)', fontSize: '1.6rem', fontWeight: '800', marginBottom: '12px' }}>Verifying Payment</h1>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{message}</p>
+                </>)}
+                {status === 'success' && (<>
+                    <div style={iconWrap('rgba(52,211,153,0.1)', 'rgba(52,211,153,0.3)')}>
+                        <CheckCircle size={44} color="#34d399" />
+                    </div>
+                    <h1 style={{ color: 'var(--text-primary)', fontSize: '2rem', fontWeight: '800', marginBottom: '12px' }}>Payment Successful!</h1>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '36px' }}>Your booking has been confirmed.</p>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        {appId && <Link to={`/booking/confirm/${appId}`} style={btnPrimary}>View Booking <ArrowRight size={16} /></Link>}
+                        <Link to="/bookings" style={btnSecondary}>All Bookings</Link>
+                    </div>
+                </>)}
+                {status === 'error' && (<>
+                    <div style={iconWrap('rgba(239,68,68,0.08)', 'rgba(239,68,68,0.2)')}>
+                        <XCircle size={44} color="#ef4444" />
+                    </div>
+                    <h1 style={{ color: 'var(--text-primary)', fontSize: '1.8rem', fontWeight: '800', marginBottom: '12px' }}>Payment Failed</h1>
+                    <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '12px' }}>{message}</p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '36px' }}>No money was deducted. Try again or contact support.</p>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        {appId && <Link to={`/payment/${appId}`} style={btnPrimary}>Try Again</Link>}
+                        <Link to="/bookings" style={btnSecondary}>Back to Bookings</Link>
+                    </div>
+                </>)}
+            </div>
+            <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}.spin-icon{animation:spin 1.5s linear infinite}`}</style>
+        </div>
+    );
+}
