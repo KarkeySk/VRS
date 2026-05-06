@@ -165,11 +165,12 @@ export default function NewBookingPage({ onNavigate }) {
       })
 
       if (form.email.trim()) {
-        await emailService.sendBookingConfirmationEmail({
+        await emailService.sendBookingApprovalEmail({
           userEmail: form.email.trim().toLowerCase(),
           bookingId: booking?.id,
           startDate: form.pickupDate,
           endDate: form.returnDate,
+          subject: 'Booking confirmed',
           message: `Your booking for ${selectedVehicleDetails?.name || 'your selected vehicle'} has been confirmed.`,
         })
       }

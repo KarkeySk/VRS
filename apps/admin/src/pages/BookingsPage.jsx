@@ -167,11 +167,12 @@ export default function BookingsPage({ onNavigate }) {
       const booking = await bookingService.update(bookingId, { status: nextStatus })
 
       if (shouldSendConfirmationEmail && row?.customerEmail) {
-        await emailService.sendBookingConfirmationEmail({
+        await emailService.sendBookingApprovalEmail({
           userEmail: row?.customerEmail,
           bookingId,
           startDate: booking?.start_date || row?.startDate,
           endDate: booking?.end_date || row?.endDate,
+          subject: 'Booking confirmed',
           message: `Your booking for ${row?.vehicleName || 'your selected vehicle'} has been confirmed.`,
         })
       }
@@ -193,11 +194,12 @@ export default function BookingsPage({ onNavigate }) {
         throw new Error('This booking has no customer email.')
       }
 
-      await emailService.sendBookingConfirmationEmail({
+      await emailService.sendBookingApprovalEmail({
         userEmail: row.customerEmail,
         bookingId: row.id,
         startDate: row.startDate,
         endDate: row.endDate,
+        subject: 'Booking confirmed',
         message: `Your booking for ${row.vehicleName || 'your selected vehicle'} has been confirmed.`,
       })
 
@@ -246,11 +248,12 @@ export default function BookingsPage({ onNavigate }) {
 
       const customerEmail = app.profiles?.email || app.questionnaire?.customer?.email || ''
       if (app.status !== 'approved' && customerEmail) {
-        await emailService.sendBookingConfirmationEmail({
+        await emailService.sendBookingApprovalEmail({
           userEmail: customerEmail,
           bookingId,
           startDate: app.start_date,
           endDate: app.end_date,
+          subject: 'Booking confirmed',
           message: `Your booking request for ${app.vehicles?.name || 'your selected vehicle'} has been confirmed.`,
         })
       }
@@ -335,11 +338,12 @@ export default function BookingsPage({ onNavigate }) {
 
       if (quickForm.customerEmail.trim()) {
         const vehicle = vehicles.find((item) => item.id === quickForm.vehicleId)
-        await emailService.sendBookingConfirmationEmail({
+        await emailService.sendBookingApprovalEmail({
           userEmail: quickForm.customerEmail.trim().toLowerCase(),
           bookingId: booking?.id,
           startDate: quickForm.startDate,
           endDate: quickForm.endDate,
+          subject: 'Booking confirmed',
           message: `Your booking for ${vehicle?.name || 'your selected vehicle'} has been confirmed.`,
         })
       }
