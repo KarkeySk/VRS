@@ -92,7 +92,7 @@ const ChatBot = () => {
       // This should rarely happen now since we have local fallback
       const errorMessage = {
         id: nextMessageId++,
-        text: "Sorry, I encountered an unexpected error. Please try again.",
+        text: error?.message || "Sorry, I encountered an error. Please try again.",
         sender: "bot",
         timestamp: new Date(),
         isError: true,
