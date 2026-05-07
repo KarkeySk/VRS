@@ -19,9 +19,27 @@ export default function PaymentSuccess() {
             const method = searchParams.get('method');
             const data = searchParams.get('data');
 
-            if (method !== 'esewa' || !data || !appId) {
+            // Diagnostic: log what we actually received so the failure is debuggable.
+            console.log('[PaymentSuccess] callback params:', {
+                fullUrl: window.location.href,
+                method,
+                applicationId: appId,
+                hasData: Boolean(data),
+                dataPreview: data ? `${data.slice(0, 24)}...` : null,
+            });
+
+            const missing = [];
+            if (method !== 'esewa') missing.push('method=esewa');
+            if (!data) missing.push('data');
+            if (!appId) missing.push('applicationId');
+
+            if (missing.length) {
                 setStatus('error');
-                setMessage('Invalid payment callback.');
+                setMessage(
+                    missing.length === 3
+                        ? 'This page is for the payment gateway redirect. Open a booking from your bookings list to pay.'
+                        : `Payment callback is missing: ${missing.join(', ')}. Try paying again.`
+                );
                 return;
             }
             try {
