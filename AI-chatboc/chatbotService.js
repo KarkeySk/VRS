@@ -1,4 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} from "@google/generative-ai";
 
 
 //  CONFIGURATION
@@ -19,61 +23,127 @@ const MAX_FAILURES_BEFORE_FALLBACK = 3;
 // ─────────────────────────────────────────────────────────────
 //  SYSTEM PROMPT — defines the AI's personality & scope
 // ─────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are the friendly AI assistant for Bhatbhate — a vehicle rental company based in Nepal.
+const SYSTEM_PROMPT = `You are Bhatbhate AI — a helpful, knowledgeable, general-purpose AI assistant (similar in capability to Google's Gemini) that lives inside the Bhatbhate vehicle rental and travel platform in Nepal.
 
-Your personality:
-- Warm, conversational, and helpful — like talking to a knowledgeable friend
-- You use natural language, not robotic bullet points for every answer
-- You can chat casually but stay professional when discussing business details
-- Use emojis sparingly and naturally (not every sentence)
+Identity & tone:
+- Be helpful, intelligent, curious, and conversational — like a smart friend who happens to know a lot.
+- Speak in natural prose. Use markdown (headings, **bold**, bullet/numbered lists, short tables, code blocks) when it genuinely helps clarity, not for every reply.
+- Vary your sentence length and structure. Avoid robotic templates.
+- Use emojis only when they add warmth or scanability — never in every line.
+- Be direct: answer first, qualify second. Don't bury the lede.
 
-What you help with:
-- Booking vehicles and explaining the rental process
-- Answering questions about rental terms, pricing, and policies
-- Providing information about available vehicles (motorcycles, scooters, cars, SUVs, jeeps, vans)
-- Recommending vehicles based on terrain (mountain, highway, urban, terai)
-- Payment methods (eSewa, Khalti, Bank Transfer, Cash)
-- Document requirements (license, ID, deposit)
-- Cancellation and refund policies
-- General customer support
+What you can do:
+- Answer ANY question the user asks — general knowledge, coding, math, science, history, writing, brainstorming, language help, summarization, explanations, travel, lifestyle, technology, etc. You are not restricted to rental topics.
+- When the user asks about Bhatbhate, vehicles, bookings, rentals, pricing, payments, documents, cancellations, or Nepal travel/touring, use the platform context below as the source of truth.
+- Carry context across the conversation. Remember what the user just said and refer back to it naturally.
+- If the user shifts topics mid-chat (e.g., from booking a jeep to asking a Python question), follow them gracefully — you are a general assistant first.
+- If a question is ambiguous, make a reasonable assumption and answer, OR ask one short clarifying question — not several.
 
-Important details:
-- Operating hours: 7 AM – 8 PM daily
-- Pricing starts from NPR 800/day for scooters up to NPR 5,000+/day for SUVs
-- Free cancellation up to 24 hours before pickup
-- Support email: support@bhatbhate.com
+Reasoning & honesty:
+- Think step-by-step on hard problems before answering. Show working only when it helps the user.
+- If you don't know something or it's outside your knowledge cutoff, say so plainly. Don't fabricate facts, prices, dates, statistics, or quotes.
+- For things that change in the real world (live availability, current weather, road closures, permit rules, promo prices), tell the user to verify with Bhatbhate support or the relevant authority.
+- Never invent specific booking data, vehicle availability, or exact live prices.
 
-Rules:
-- Have a real conversation. Don't just dump lists unless specifically asked for them.
-- If someone says "hi" or makes small talk, respond naturally — don't immediately pitch services.
-- If you genuinely don't know something specific, say so honestly and suggest contacting support.
-- Keep responses concise but helpful — aim for 2-4 sentences for casual questions, more detail only when asked.`;
+Formatting:
+- Default to concise, focused answers (2–6 sentences) for casual questions.
+- Use lists/tables for comparisons, steps, or 4+ parallel items.
+- Use fenced code blocks (\`\`\`lang) for code.
+- For long-form answers, use clear section headings.
+
+—
+PLATFORM CONTEXT — BHATBHATE
+—
+Bhatbhate is a vehicle rental and travel platform in Nepal.
+
+Fleet & terrain fit:
+- Urban/city loops (Kathmandu, Pokhara, Butwal, Biratnagar): scooters, hatchbacks.
+- Highway intercity (Kathmandu–Pokhara, Kathmandu–Chitwan, East-West corridor): sedans, motorcycles, compact SUVs.
+- Hill/mountain roads (Bandipur, Dhulikhel, Nagarkot, Ghandruk approach, Mustang access): SUVs or 4x4 jeeps, experienced drivers.
+- Family/group tours: vans or jeeps based on luggage and road condition.
+- Monsoon: avoid low-clearance vehicles on hill routes — landslide and slick-road risk.
+
+Pricing (indicative starting rates — confirm exact rates on the vehicle detail page):
+- Scooters: NPR 800/day+
+- Motorcycles: NPR 1,500/day+
+- Cars/Sedans: NPR 3,500/day+
+- SUVs/Jeeps: NPR 5,000/day+
+Longer rentals usually get better daily rates.
+
+Payments accepted: eSewa, Khalti, Bank Transfer, Cash on pickup. A refundable deposit may apply.
+
+Documents required: valid driving license matching the vehicle category, government-issued ID (citizenship/passport), contact info, security deposit.
+
+Cancellation: free up to 24 hours before pickup; 50% refund within 24 hours; no refund for no-shows.
+
+Operating hours: 7 AM – 8 PM daily. Support email: support@bhatbhate.com.
+
+When giving destination/route advice, briefly cover:
+1. Recommended vehicle type
+2. Best season window (and what to avoid)
+3. One practical safety / logistics tip
+
+Popular destinations to fluently advise on: Kathmandu Valley, Pokhara, Chitwan, Lumbini, Bandipur, Mustang, Rara, Ilam, Janakpur, Everest-view road trips (Salleri/Jiri side), Manang, Ghandruk, Nagarkot, Dhulikhel.`;
 
 // ─────────────────────────────────────────────────────────────
 //  GEMINI PROVIDER
 // ─────────────────────────────────────────────────────────────
 const GEMINI_API_KEY = import.meta.env.VITE_GOOGLE_GEMINI_API_KEY;
-const MODEL = "gemini-2.0-flash";
+const MODEL = "gemini-2.5-flash";
 
 const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+
+// Generation tuning — closer to the consumer Gemini app feel.
+const GENERATION_CONFIG = {
+  maxOutputTokens: 2048,
+  temperature: 0.9,
+  topP: 0.95,
+  topK: 40,
+};
+
+// Permissive safety thresholds so the assistant can answer broad,
+// general-purpose questions like the actual Gemini app does.
+const SAFETY_SETTINGS = [
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+  },
+];
 
 // Retry helpers
 const MAX_RETRIES = 2;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const initGeminiSession = () => {
+// Convert internal {role, text} history into the Gemini Content[] format.
+const buildGeminiHistory = () =>
+  conversationHistory.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.text }],
+  }));
+
+const initGeminiSession = ({ preserveHistory = false } = {}) => {
   if (!genAI) return;
   try {
     const model = genAI.getGenerativeModel({
       model: MODEL,
       systemInstruction: SYSTEM_PROMPT,
+      safetySettings: SAFETY_SETTINGS,
     });
     chatSession = model.startChat({
-      history: [],
-      generationConfig: {
-        maxOutputTokens: 500,
-        temperature: 0.7,
-      },
+      history: preserveHistory ? buildGeminiHistory() : [],
+      generationConfig: GENERATION_CONFIG,
     });
   } catch (err) {
     console.warn("Failed to init Gemini session:", err.message);
@@ -120,7 +190,7 @@ const sendGeminiMessage = async (userMessage) => {
           delayMs = Math.min(Math.ceil(parseFloat(match[1]) * 1000), 15000);
         }
         console.log(`[Gemini] Rate limited. Waiting ${delayMs / 1000}s...`);
-        initGeminiSession();
+        initGeminiSession({ preserveHistory: true });
         await sleep(delayMs);
         continue;
       }
@@ -198,6 +268,113 @@ const LOCAL_KNOWLEDGE_BASE = {
     ],
   },
 
+  // Nepal destinations and touring
+  destinations: {
+    patterns: [
+      "destination", "where to go", "tour", "travel", "trip", "itinerary",
+      "mustang", "muktinath", "pokhara", "chitwan", "lumbini", "rara",
+      "ilam", "bandipur", "nagarkot", "janakpur", "ghandruk", "manang",
+      "everest view", "salleri", "jiri", "kathmandu valley"
+    ],
+    responses: [
+      "Great touring choices in Nepal! 🚗 For Kathmandu-Pokhara-Chitwan, a sedan works in dry season, but an SUV is more comfortable in monsoon. For Mustang/Muktinath or rough hill roads, choose a high-clearance SUV/jeep and start early each day.",
+      "If you're planning by region: Valley/city sightseeing → scooter or hatchback, highway circuits → sedan/SUV, high-hill routes (Mustang side roads, remote trails) → 4x4 jeep. I can build a day-by-day route if you share your trip length and group size.",
+      "Popular routes we can plan for: Kathmandu Valley loop, Pokhara + Sarangkot, Chitwan safari trip, Lumbini heritage route, and East Nepal (Ilam tea hills). Tell me your dates and I’ll match vehicle, season tips, and estimated comfort level."
+    ],
+  },
+
+  // Weather / season guidance
+  season: {
+    patterns: ["season", "weather", "monsoon", "rainy", "winter", "summer", "best time", "road condition", "landslide"],
+    responses: [
+      "Season matters a lot in Nepal. 🌦️ Oct-Nov and Mar-Apr are usually best for road trips, while monsoon needs extra caution for hill roads due to landslides. In rainy periods, prefer SUVs/jeeps over low-clearance cars.",
+      "Winter is good for many highway routes, but high-altitude roads can be cold and occasionally restricted. For mountain districts, check local road updates before departure and keep buffer time in your itinerary.",
+    ],
+  },
+
+  // Permits / docs for touring context
+  permits: {
+    patterns: ["permit", "entry permit", "tims", "acap", "restricted area", "documents for travel"],
+    responses: [
+      "For normal city/highway touring, your driving license + ID are usually enough. For some trekking/restricted regions, separate tourism permits may apply, so verify current rules with official local authorities before finalizing plans.",
+      "Permit requirements can change by destination and nationality. If your route includes protected or restricted areas, confirm latest permit rules first, then we can choose the right vehicle and route timing.",
+    ],
+  },
+
+  // Road safety and driving
+  safety: {
+    patterns: ["safe", "safety", "drive safely", "night drive", "emergency", "road safety", "accident", "risk"],
+    responses: [
+      "For Nepal road trips: avoid late-night mountain driving, keep fuel above half tank in remote sections, and start early to avoid weather and traffic stress. Seatbelts/helmets are essential, and keep offline maps as backup.",
+      "Road safety tip: on hill roads, pick vehicles with good ground clearance and brakes, plan shorter daily distances, and keep extra time for delays. I can help you choose a safer route split by day."
+    ],
+  },
+
+  // Budget planning for touring
+  budgetPlan: {
+    patterns: ["budget plan", "trip budget", "cheapest", "save money", "fuel cost", "affordable trip"],
+    responses: [
+      "For budget trips, choose a scooter/hatchback for city and short highway routes, travel in shoulder season, and avoid over-ambitious long daily drives. I can help you compare low-cost vs comfort-focused vehicle options.",
+      "To control cost: match vehicle to terrain (not overpowered), group passengers efficiently, and plan a realistic loop to reduce backtracking fuel spend. Share your route and I’ll suggest an efficient vehicle class."
+    ],
+  },
+
+  tourismGeneral: {
+    patterns: ["tourism", "tourism in nepal", "travel nepal", "visit nepal", "nepal guide", "nepal trip"],
+    responses: [
+      "Nepal tourism has a bit of everything: culture (Kathmandu, Bhaktapur, Patan), nature (Pokhara, Chitwan, Rara), adventure (trekking, rafting, paragliding), and pilgrimage (Pashupatinath, Lumbini, Muktinath). For road travelers, the best plan is to match destination terrain with the right vehicle and season.",
+      "If you want the complete Nepal experience, combine 3 zones: heritage cities, hill-lake views, and wildlife/plains. A common route is Kathmandu → Pokhara → Chitwan → Lumbini, then return by highway with a sedan/SUV based on weather and comfort preference.",
+    ],
+  },
+
+  activities: {
+    patterns: ["things to do", "activities", "adventure", "trek", "rafting", "paragliding", "jungle safari", "wildlife"],
+    responses: [
+      "Top Nepal activities: heritage walks in Kathmandu Valley, boating/paragliding in Pokhara, jungle safari in Chitwan, and mountain-view road trips in hill regions. Choose scooters/hatchbacks for city loops, and SUVs/jeeps for rough hill approaches.",
+      "For adventure-heavy trips, keep flexible timing: weather and road conditions can change quickly. Start early, carry offline maps, and avoid planning long hill drives after dark.",
+    ],
+  },
+
+  tripStyles: {
+    patterns: ["family trip", "honeymoon", "couple trip", "solo trip", "group tour", "friends trip"],
+    responses: [
+      "Trip style recommendations: family trips usually do best with a comfortable car/SUV, couples often prefer scenic Pokhara-Bandipur loops, solo riders can do city/highway bike circuits, and groups should use vans/jeeps based on luggage and road type.",
+      "For honeymoon/couple travel, Pokhara + Bandipur + short hill viewpoints is a balanced route. For family with elders or kids, reduce daily drive hours and prioritize smooth highways with reliable stays.",
+    ],
+  },
+
+  foodCulture: {
+    patterns: ["food", "local food", "culture", "festival", "tradition", "what to eat", "what to see in kathmandu"],
+    responses: [
+      "Don’t miss Nepal’s culture + food side: Newari cuisine in the valley, thakali sets on highway stops, and local tea/snacks in hill towns. Pair city heritage days with shorter drives so the trip doesn’t become only road time.",
+      "Cultural highlights are best explored slowly: Kathmandu Durbar area, Bhaktapur, Patan, temples/stupas, then continue to Pokhara or Chitwan for nature contrast.",
+    ],
+  },
+
+  roadTrips: {
+    patterns: ["road trip", "drive plan", "itinerary", "7 days", "5 days", "10 days", "route plan"],
+    responses: [
+      "A practical 7-day road loop can be: Kathmandu (1) → Pokhara (2) → Chitwan (2) → Kathmandu (2). Sedan works in good weather; SUV is safer in monsoon or if you want hill detours.",
+      "For 10 days, add Bandipur or Lumbini to the Kathmandu-Pokhara-Chitwan core route. Keep buffer time for traffic, weather, and rest days, especially on hill highways.",
+    ],
+  },
+
+  packing: {
+    patterns: ["packing", "what to carry", "what to pack", "travel checklist", "essentials"],
+    responses: [
+      "Nepal road-trip essentials: ID/license, cash + digital payment backup, power bank, rain layer, basic medicines, reusable water bottle, and offline maps. For hill routes, add warm layers even in mild seasons.",
+      "If riding bikes/scooters, include gloves, visor/eye protection, and quick-dry clothing. Weather can shift fast between valley, plains, and higher roads.",
+    ],
+  },
+
+  emergency: {
+    patterns: ["emergency", "breakdown", "help", "accident", "hospital", "police", "road blocked"],
+    responses: [
+      "For emergencies on road trips: stop safely, secure passengers, contact local authorities/support, and avoid risky overtakes or night mountain driving. Keep important numbers, booking details, and vehicle documents accessible offline.",
+      "If roads are blocked by weather or landslides, prioritize safety over schedule, wait for official clearance, and reroute only with reliable local updates.",
+    ],
+  },
+
   // Cancel / Refund
   cancel: {
     patterns: ["cancel", "refund", "return", "cancellation", "money back"],
@@ -243,19 +420,27 @@ const LOCAL_KNOWLEDGE_BASE = {
 };
 
 // Default fallback when no pattern matches
+// (Used only when Gemini is unreachable — kept rental-focused since
+// the offline brain has no general-knowledge capability.)
 const DEFAULT_RESPONSES = [
-  "I appreciate your question! While I may not have the specific answer right now, I can help you with booking vehicles, pricing, payment options, or terrain recommendations. What would you like to know? 😊",
-  "That's a great question! For detailed information about that, I'd recommend checking our website or contacting our support team. In the meantime, I can help with vehicle bookings, pricing, or rental requirements!",
-  "I'm not sure about that specific topic, but I'm great with vehicle rentals! 🚗 I can help you with:\n\n• Finding the right vehicle\n• Booking process\n• Pricing information\n• Payment methods\n\nWhat would you like to explore?",
+  "I'm running in offline mode right now, so I can mainly help with Bhatbhate basics — bookings, vehicles, pricing, payments, documents, or Nepal route ideas. What would you like to know?",
+  "Connection to the AI is down at the moment. I can still help with rental and Nepal touring questions — try asking about a vehicle type, a destination, or a date range.",
+  "Offline mode here. Ask me about booking, pricing, payments, cancellation, or pick a destination (Pokhara, Chitwan, Mustang, etc.) and I'll suggest the right vehicle.",
 ];
 
 /**
  * Match user message to a knowledge base category
  */
 const findBestMatch = (message) => {
-  const lower = message.toLowerCase().trim();
+  const lower = message
+    .toLowerCase()
+    .trim()
+    .replace(/\btorism\b/g, "tourism")
+    .replace(/\btravell?\b/g, "travel");
   let bestCategory = null;
   let bestScore = 0;
+  const tokens = lower.split(/\s+/).filter(Boolean);
+  const isLongQuery = tokens.length >= 4;
 
   for (const [category, data] of Object.entries(LOCAL_KNOWLEDGE_BASE)) {
     let score = 0;
@@ -265,6 +450,12 @@ const findBestMatch = (message) => {
         score += pattern.length;
       }
     }
+
+    // Do not let greeting intent hijack longer, meaningful questions.
+    if (category === "greetings" && isLongQuery) {
+      score = Math.floor(score * 0.15);
+    }
+
     if (score > bestScore) {
       bestScore = score;
       bestCategory = category;
