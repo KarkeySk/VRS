@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import Navbar from './components/layout/Navbar'
@@ -33,11 +33,17 @@ function App() {
                 <ThemeProvider>
                     <Navbar />
                     <AnimatedRoutes />
-                    <ChatBot />
+                    <ChatBotGate />
                 </ThemeProvider>
             </AuthProvider>
         </BrowserRouter>
     )
+}
+
+function ChatBotGate() {
+    const { user } = useAuth()
+    if (!user) return null
+    return <ChatBot />
 }
 
 function AnimatedRoutes() {
