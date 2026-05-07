@@ -1,65 +1,36 @@
 # Bhatbhati AI Chatbot
 
-A Google Gemini-powered chatbot for the Bhatbhati vehicle rental platform.
-
-## Features
-
-- 🤖 AI-powered responses using Google Gemini
-- 💬 Real-time conversation with message history
-- 🎨 Beautiful, responsive UI with Tailwind CSS
-- ⚡ Lightweight and performant
-- 📱 Mobile-friendly design
-- 🔄 Chat reset functionality
-
-## Installation
-
-1. Install the dependency in your user app:
-
-```bash
-npm install @google/generative-ai
-```
-
-2. Add your Google Gemini API key to your `.env` file:
-
-```
-VITE_GOOGLE_GEMINI_API_KEY=your_api_key_here
-```
-
-Get your API key from: https://makersuite.google.com/app/apikey
-
-## Usage
-
-Import and use the ChatBot component in your React app:
-
-```jsx
-import ChatBot from "@bhatbhati/ai-chatbot/ChatBot";
-
-function App() {
-  return (
-    <div>
-      {/* Your app content */}
-      <ChatBot />
-    </div>
-  );
-}
-```
-
-## File Structure
-
-- `ChatBot.jsx` - Main React component
-- `ChatBot.css` - Styling and animations
-- `chatbotService.js` - Gemini API integration and conversation management
-- `package.json` - Dependencies
-
-## Environment Variables
-
-Required:
-- `VITE_GOOGLE_GEMINI_API_KEY` - Your Google Gemini API key
+Floating chat assistant for the Bhatbhati vehicle rental platform. Runs through a Supabase Edge Function so the LLM provider key stays server-side.
 
 ## Architecture
 
-The chatbot uses:
-- Google's Generative AI (Gemini Pro) for intelligent responses
-- React hooks for state management
-- Tailwind CSS for styling
-- Lucide React for icons
+```
+Browser (ChatBot.jsx)
+  → supabase.functions.invoke('chatbot')
+  → Edge Function (supabase/functions/chatbot/index.ts)
+  → Google Gemini API
+```
+
+The frontend never sees the Gemini key. It's a Supabase secret (`GEMINI_API_KEY`).
+
+## Setup
+
+See `SETUP.md` for the full Supabase deploy steps. TL;DR:
+
+1. `supabase secrets set GEMINI_API_KEY=...`
+2. `supabase functions deploy chatbot --project-ref <ref>`
+3. Make sure `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` are set in `user/.env`.
+
+## Files
+
+- `ChatBot.jsx` — React component (floating bubble + window)
+- `ChatBot.css` — styling
+- `chatbotService.js` — calls the `chatbot` Edge Function and tracks conversation history client-side
+
+## Usage
+
+Already mounted in `user/src/App.jsx`. To embed elsewhere:
+
+```jsx
+import ChatBot from '../../AI-chatboc/ChatBot.jsx'
+```
