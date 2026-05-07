@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
     setSuccessMessage('');
     setIsLoading(true);
     try {
-      await resetPasswordForEmail(email, window.location.origin + '/auth/update-password');
+      await resetPasswordForEmail(email);
       setSuccessMessage('An OTP has been sent to your email.');
       setStep('otp');
     } catch (err) {
