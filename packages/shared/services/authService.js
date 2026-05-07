@@ -61,10 +61,13 @@ export const authService = {
     },
 
     /** Request password reset email (SCRUM-69: Create reset request endpoint) */
-    resetPasswordForEmail: async (email, redirectTo) => {
+    resetPasswordForEmail: async (email) => {
         if (!supabase) throw new Error('Supabase is not configured')
+        const redirectUrl = typeof window !== 'undefined'
+            ? `${window.location.origin}/auth/update-password`
+            : undefined
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo,
+            redirectTo: redirectTo,
         })
         if (error) throw error
         return data
@@ -195,7 +198,7 @@ export const authService = {
 
     /** Listen to auth state changes */
     onAuthStateChange: (callback) => {
-        if (!supabase) return { data: { listener: { subscription: { unsubscribe: () => {} } } } }
+        if (!supabase) return { data: { listener: { subscription: { unsubscribe: () => { } } } } }
         return supabase.auth.onAuthStateChange(callback)
     },
 
