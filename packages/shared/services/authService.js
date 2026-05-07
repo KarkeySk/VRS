@@ -67,7 +67,7 @@ export const authService = {
             ? `${window.location.origin}/auth/update-password`
             : undefined
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: redirectTo,
+            redirectTo: redirectUrl,
         })
         if (error) throw error
         return data
