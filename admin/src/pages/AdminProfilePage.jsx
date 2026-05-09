@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '@bhatbhati/shared/services/authService.js'
 import { profileService } from '@bhatbhati/shared/services/profileService.js'
+import { getFriendlyAuthError, getPasswordError } from '@bhatbhati/shared/utils/authFeedback.js'
 import {
   User,
   Lock,
@@ -95,7 +96,7 @@ export default function AdminProfilePage({ onNavigate }) {
           avatarUrl: dbProfile?.avatar_url || '',
         }))
       } catch (err) {
-        setError(err.message || 'Failed to load profile')
+        setError(getFriendlyAuthError(err, 'Failed to load profile. Please try again.'))
       } finally {
         setLoading(false)
       }
@@ -115,7 +116,10 @@ export default function AdminProfilePage({ onNavigate }) {
     setMessage('')
     try {
       const user = await authService.getUser()
-      if (!user) throw new Error('You are signed out. Please log in again.')
+      if (!user) {
+        setError('You are signed out. Please log in again.')
+        return
+      }
 
       await profileService.update(user.id, {
         full_name: profile.fullName,
@@ -128,7 +132,7 @@ export default function AdminProfilePage({ onNavigate }) {
         setMessage('Profile changes saved.')
       }
     } catch (err) {
-      setError(err.message || 'Failed to save profile')
+      setError(getFriendlyAuthError(err, 'Failed to save profile. Please try again.'))
     } finally {
       setSaving(false)
     }
@@ -141,17 +145,24 @@ export default function AdminProfilePage({ onNavigate }) {
     setMessage('')
     try {
       if (!passwords.current || !passwords.next || !passwords.confirm) {
-        throw new Error('Please fill all password fields.')
+        setError('Please fill all password fields.')
+        return
       }
-      if (passwords.next.length < 8) {
-        throw new Error('New password must be at least 8 characters long.')
+      const passwordError = getPasswordError(passwords.next)
+      if (passwordError) {
+        setError(passwordError)
+        return
       }
       if (passwords.next !== passwords.confirm) {
-        throw new Error('New password and confirm password do not match.')
+        setError('New password and confirm password do not match.')
+        return
       }
 
       const currentUser = await authService.getUser()
-      if (!currentUser?.email) throw new Error('Session missing. Please log in again.')
+      if (!currentUser?.email) {
+        setError('Session missing. Please log in again.')
+        return
+      }
 
       await authService.signIn(currentUser.email, passwords.current)
       await authService.updatePassword(passwords.next)
@@ -159,7 +170,7 @@ export default function AdminProfilePage({ onNavigate }) {
       setPasswords({ current: '', next: '', confirm: '' })
       setMessage('Password updated successfully.')
     } catch (err) {
-      setError(err.message || 'Failed to update password')
+      setError(getFriendlyAuthError(err, 'Failed to update password. Please try again.'))
     } finally {
       setPasswordSaving(false)
     }
@@ -172,13 +183,16 @@ export default function AdminProfilePage({ onNavigate }) {
     setMessage('')
     try {
       const user = await authService.getUser()
-      if (!user) throw new Error('Session missing. Please log in again.')
+      if (!user) {
+        setError('Session missing. Please log in again.')
+        return
+      }
       const avatarUrl = await profileService.uploadAvatar(user.id, file)
       await profileService.update(user.id, { avatar_url: avatarUrl })
       setProfile((prev) => ({ ...prev, avatarUrl }))
       setMessage('Avatar updated.')
     } catch (err) {
-      setError(err.message || 'Failed to upload avatar')
+      setError(getFriendlyAuthError(err, 'Failed to upload avatar. Please try again.'))
     }
   }
 
@@ -189,7 +203,7 @@ export default function AdminProfilePage({ onNavigate }) {
       await authService.signOut()
       navigate('/login', { replace: true })
     } catch (err) {
-      setError(err.message || 'Failed to sign out')
+      setError(getFriendlyAuthError(err, 'We could not sign you out. Please try again.'))
     } finally {
       setSigningOut(false)
     }
