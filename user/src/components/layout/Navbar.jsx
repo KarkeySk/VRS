@@ -1,7 +1,9 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { LogIn, LogOut, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { getFriendlyAuthError } from '@bhatbhati/shared/utils/authFeedback.js';
 import logo from '../../assets/logo.png';
 import NotificationBell from '../common/NotificationBell';
 
@@ -10,6 +12,8 @@ export default function Navbar() {
     const navigate = useNavigate();
     const { user, signOut } = useAuth();
     const { isDark, toggleTheme } = useTheme();
+    const [isSigningOut, setIsSigningOut] = useState(false);
+    const [logoutError, setLogoutError] = useState('');
 
     const navLinks = [
         { label: 'Dashboard', to: '/dashboard' },
@@ -21,6 +25,19 @@ export default function Navbar() {
     if (location.pathname.startsWith('/auth/')) {
         return null;
     }
+
+    const handleLogout = async () => {
+        setLogoutError('');
+        setIsSigningOut(true);
+        try {
+            await signOut();
+            navigate('/');
+        } catch (err) {
+            setLogoutError(getFriendlyAuthError(err, 'We could not sign you out. Please try again.'));
+        } finally {
+            setIsSigningOut(false);
+        }
+    };
 
     return (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, padding: '10px 20px' }}>
@@ -143,7 +160,8 @@ export default function Navbar() {
                                 Book Now
                             </Link>
                             <button
-                                onClick={() => { signOut(); navigate('/'); }}
+                                onClick={handleLogout}
+                                disabled={isSigningOut}
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
@@ -155,13 +173,14 @@ export default function Navbar() {
                                     fontSize: '0.8125rem',
                                     padding: '10px 20px',
                                     borderRadius: '999px',
-                                    cursor: 'pointer',
+                                    cursor: isSigningOut ? 'not-allowed' : 'pointer',
+                                    opacity: isSigningOut ? 0.7 : 1,
                                     transition: 'border-color 0.25s',
                                 }}
                                 onMouseOver={(e) => e.currentTarget.style.borderColor = 'rgba(232, 115, 42, 0.3)'}
                                 onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
                             >
-                                <LogOut size={14} /> Logout
+                                <LogOut size={14} /> {isSigningOut ? 'Signing out...' : 'Logout'}
                             </button>
                         </>
                     ) : (
@@ -193,6 +212,22 @@ export default function Navbar() {
                     )}
                 </div>
             </nav>
+            {logoutError && (
+                <div style={{
+                    maxWidth: '420px',
+                    margin: '8px auto 0',
+                    border: '1px solid rgba(239,68,68,0.3)',
+                    background: 'rgba(239,68,68,0.12)',
+                    color: '#f87171',
+                    borderRadius: '12px',
+                    padding: '10px 14px',
+                    fontSize: '0.82rem',
+                    textAlign: 'center',
+                    backdropFilter: 'blur(12px)',
+                }}>
+                    {logoutError}
+                </div>
+            )}
         </div>
     );
 }

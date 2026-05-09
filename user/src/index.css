@@ -589,6 +589,24 @@ ol {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.auth-form input[aria-invalid='true'],
+.auth-form select[aria-invalid='true'] {
+  border-color: rgba(239, 68, 68, 0.75);
+}
+
+.auth-form input:disabled,
+.auth-form select:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.auth-field-error {
+  margin-top: -4px;
+  color: #f87171;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
 .auth-password-wrap {
   position: relative;
 }
