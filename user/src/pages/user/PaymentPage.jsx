@@ -49,10 +49,14 @@ export default function PaymentPage() {
             const transactionUuid = generateTransactionUuid();
             const config = getEsewaConfig();
 
-            // Build success URL with application context
+            // eSewa appends `?data=<base64>` to whichever URL we give it.
+            // Our URLs MUST NOT already contain a query string, otherwise the
+            // result becomes `…?foo=bar?data=…` (illegal — second `?` is treated
+            // as part of the previous value and `data` is never parsed).
+            // Encode applicationId in the path instead.
             const baseUrl = window.location.origin;
-            const successUrl = `${baseUrl}/payment/success?method=esewa&applicationId=${applicationId}`;
-            const failureUrl = `${baseUrl}/payment/${applicationId}?failed=true`;
+            const successUrl = `${baseUrl}/payment/success/${applicationId}`;
+            const failureUrl = `${baseUrl}/payment/${applicationId}`;
 
             const payload = buildEsewaPayload({
                 amount: Number(app.total_price),
