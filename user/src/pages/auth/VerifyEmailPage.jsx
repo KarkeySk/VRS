@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, CheckCircle, Mail, RefreshCw, XCircle } from 'lucide-react';
 import { authService } from '@bhatbhati/shared/services/authService.js';
+import { getEmailError, getFriendlyAuthError } from '@bhatbhati/shared/utils/authFeedback.js';
 import logo from '../../assets/logo.png';
 
 const verificationStates = {
@@ -32,11 +33,6 @@ function getHashParams(hash) {
   return new URLSearchParams(cleanHash);
 }
 
-function formatProviderError(error) {
-  if (!error) return '';
-  return error.replace(/\+/g, ' ').replace(/_/g, ' ');
-}
-
 export default function VerifyEmailPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -46,6 +42,7 @@ export default function VerifyEmailPage() {
   const [resendStatus, setResendStatus] = useState('');
   const [resendError, setResendError] = useState('');
   const [isResending, setIsResending] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const query = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const hash = useMemo(() => getHashParams(location.hash), [location.hash]);
@@ -70,7 +67,7 @@ export default function VerifyEmailPage() {
 
       if (providerError) {
         setStatus('error');
-        setMessage(formatProviderError(providerError));
+        setMessage(getFriendlyAuthError(providerError, verificationStates.error.message));
         return;
       }
 
@@ -104,7 +101,7 @@ export default function VerifyEmailPage() {
       } catch (err) {
         if (!cancelled) {
           setStatus('error');
-          setMessage(err.message || verificationStates.error.message);
+          setMessage(getFriendlyAuthError(err, verificationStates.error.message));
         }
       }
     };
@@ -121,13 +118,18 @@ export default function VerifyEmailPage() {
     event.preventDefault();
     setResendStatus('');
     setResendError('');
+
+    const emailError = getEmailError(email);
+    setFieldErrors({ email: emailError });
+    if (emailError) return;
+
     setIsResending(true);
 
     try {
       await authService.resendConfirmation(email.trim());
       setResendStatus('A new verification email has been sent.');
     } catch (err) {
-      setResendError(err.message || 'Could not resend the verification email.');
+      setResendError(getFriendlyAuthError(err, 'Could not resend the verification email. Please try again.'));
     } finally {
       setIsResending(false);
     }
@@ -170,17 +172,23 @@ export default function VerifyEmailPage() {
 
           {(status === 'needsLink' || status === 'error') && (
             <>
-              <form onSubmit={handleResend} className="auth-form verify-resend-form">
+              <form onSubmit={handleResend} className="auth-form verify-resend-form" noValidate>
                 <label htmlFor="verify-email">Email Address</label>
                 <input
                   id="verify-email"
                   type="email"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    setFieldErrors((prev) => ({ ...prev, email: '' }));
+                  }}
                   placeholder="you@email.com"
-                  required
+                  disabled={isResending}
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={fieldErrors.email ? 'verify-email-error' : undefined}
                 />
-                <button type="submit" className="auth-submit" disabled={isResending}>
+                {fieldErrors.email && <p className="auth-field-error" id="verify-email-error">{fieldErrors.email}</p>}
+                <button type="submit" className="auth-submit" disabled={isResending} aria-busy={isResending}>
                   {isResending ? 'Sending...' : 'Send Verification Email'} <Mail size={16} />
                 </button>
               </form>
