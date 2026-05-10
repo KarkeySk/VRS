@@ -215,7 +215,7 @@ export default function RegisterPage() {
             </select>
             {fieldErrors.terrain && <p className="auth-field-error" id="register-terrain-error">{fieldErrors.terrain}</p>}
 
-            <button type="submit" className="auth-submit" disabled={isLoading || Boolean(success)}>
+            <button type="submit" className="auth-submit" disabled={isLoading || Boolean(success)} aria-busy={isLoading}>
               {isLoading ? 'Creating account...' : success ? 'Verification Email Sent' : 'Create Account'} <ArrowRight size={16} />
             </button>
           </form>

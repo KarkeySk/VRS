@@ -144,7 +144,7 @@ export default function ForgotPasswordPage() {
                 </div>
                 {fieldErrors.email && <p className="auth-field-error" id="reset-email-error">{fieldErrors.email}</p>}
 
-                <button type="submit" className="auth-submit" disabled={isLoading}>
+                <button type="submit" className="auth-submit" disabled={isLoading} aria-busy={isLoading}>
                   {isLoading ? 'Sending...' : 'Send Reset Link'} <ArrowRight size={16} />
                 </button>
               </form>
