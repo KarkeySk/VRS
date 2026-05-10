@@ -2,6 +2,11 @@ import { useState, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import {
+  getFriendlyAuthError,
+  getPasswordError,
+  getRequiredError,
+} from '@bhatbhati/shared/utils/authFeedback.js';
 import logo from '../../assets/logo.png';
 
 const fleetSlides = [
@@ -38,11 +43,12 @@ export default function UpdatePasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [sessionReady, setSessionReady] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const { updatePassword, session } = useAuth();
   const navigate = useNavigate();
+  const sessionReady = Boolean(session);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % fleetSlides.length);
@@ -55,11 +61,7 @@ export default function UpdatePasswordPage() {
 
   // Wait for the recovery session to be established from the URL token
   useEffect(() => {
-    if (session) {
-      setSessionReady(true);
-      setCheckingSession(false);
-      return;
-    }
+    if (session) return undefined;
 
     // Give Supabase time to process the recovery token from the URL hash
     const timeout = setTimeout(() => {
@@ -69,22 +71,36 @@ export default function UpdatePasswordPage() {
     return () => clearTimeout(timeout);
   }, [session]);
 
+  const updateField = (name, value) => {
+    if (name === 'password') setPassword(value);
+    if (name === 'confirmPassword') setConfirmPassword(value);
+    setFieldErrors((prev) => ({ ...prev, [name]: '' }));
+  };
+
+  const validatePasswordForm = () => {
+    const nextErrors = {
+      password: getPasswordError(password),
+      confirmPassword: getRequiredError(confirmPassword, 'Confirm password is required.'),
+    };
+
+    if (!nextErrors.password && !nextErrors.confirmPassword && password !== confirmPassword) {
+      nextErrors.confirmPassword = 'Passwords do not match.';
+    }
+
+    setFieldErrors(nextErrors);
+    return !Object.values(nextErrors).some(Boolean);
+  };
+
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
 
     if (!session) {
-      return setError('No active session. Please use the password reset link from your email.');
+      return setError('Your reset session has expired. Please request a new reset link.');
     }
 
-    if (password !== confirmPassword) {
-      return setError('Passwords do not match');
-    }
-
-    if (password.length < 6) {
-      return setError('Password must be at least 6 characters');
-    }
+    if (!validatePasswordForm()) return;
 
     setIsLoading(true);
     try {
@@ -94,7 +110,7 @@ export default function UpdatePasswordPage() {
         navigate('/auth/login');
       }, 3000);
     } catch (err) {
-      setError(err.message || 'Failed to update password');
+      setError(getFriendlyAuthError(err, 'We could not update your password. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -145,7 +161,7 @@ export default function UpdatePasswordPage() {
           </div>
 
           {error && <div className="auth-alert">{error}</div>}
-          {successMessage && <div className="auth-alert" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}>{successMessage}</div>}
+          {successMessage && <div className="auth-alert auth-alert-success">{successMessage}</div>}
 
           {checkingSession ? (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
@@ -163,26 +179,30 @@ export default function UpdatePasswordPage() {
               </Link>
             </div>
           ) : !successMessage && (
-            <form onSubmit={handleUpdatePassword} className="auth-form">
+            <form onSubmit={handleUpdatePassword} className="auth-form" noValidate>
               <label htmlFor="new-password">New Password</label>
               <div className="auth-password-wrap">
                 <input
                   id="new-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => updateField('password', e.target.value)}
                   placeholder="Enter new password"
-                  required
+                  disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.password)}
+                  aria-describedby={fieldErrors.password ? 'new-password-error' : undefined}
                 />
                 <button
                   type="button"
                   className="auth-eye-toggle"
                   onClick={() => setShowPassword((prev) => !prev)}
+                  disabled={isLoading}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              {fieldErrors.password && <p className="auth-field-error" id="new-password-error">{fieldErrors.password}</p>}
 
               <label htmlFor="confirm-password">Confirm Password</label>
               <div className="auth-password-wrap">
@@ -190,13 +210,16 @@ export default function UpdatePasswordPage() {
                   id="confirm-password"
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => updateField('confirmPassword', e.target.value)}
                   placeholder="Confirm new password"
-                  required
+                  disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                  aria-describedby={fieldErrors.confirmPassword ? 'confirm-password-error' : undefined}
                 />
               </div>
+              {fieldErrors.confirmPassword && <p className="auth-field-error" id="confirm-password-error">{fieldErrors.confirmPassword}</p>}
 
-              <button type="submit" className="auth-submit" disabled={isLoading}>
+              <button type="submit" className="auth-submit" disabled={isLoading} aria-busy={isLoading}>
                 {isLoading ? 'Updating...' : 'Update Password'} <ArrowRight size={16} />
               </button>
             </form>
