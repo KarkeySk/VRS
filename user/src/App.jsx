@@ -123,7 +123,7 @@ function AnimatedRoutes() {
                         <Route path="/apply/:inquiryId" element={<BookingApply />} />
                         <Route path="/booking/confirm/:applicationId" element={<BookingConfirm />} />
                         <Route path="/payment/:applicationId" element={<PaymentPage />} />
-                        <Route path="/payment/success" element={<PaymentSuccess />} />
+                        <Route path="/payment/success/:applicationId" element={<PaymentSuccess />} />
                         <Route path="/bookings" element={<BookingsPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
                     </Route>
