@@ -16,6 +16,7 @@ import UpdatePasswordPage from './pages/auth/UpdatePasswordPage'
 import Dashboard from './pages/user/Dashboard'
 import TerrainSelect from './pages/user/TerrainSelect'
 import VehiclesPage from './pages/user/VehiclesPage'
+import VehicleRecommendation from './pages/user/VehicleRecommendation'
 import VehicleDetail from './pages/user/VehicleDetail'
 import InquiryPage from './pages/user/InquiryPage'
 import BookingApply from './pages/user/BookingApply'
@@ -117,6 +118,7 @@ function AnimatedRoutes() {
                     <Route element={<ProtectedRoute />}>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/terrain" element={<TerrainSelect />} />
+                        <Route path="/recommend" element={<VehicleRecommendation />} />
                         <Route path="/vehicles" element={<VehiclesPage />} />
                         <Route path="/vehicles/:id" element={<VehicleDetail />} />
                         <Route path="/inquiry/:id" element={<InquiryPage />} />
