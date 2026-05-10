@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import {
+  getEmailError,
+  getFriendlyAuthError,
+  getPasswordError,
+  isEmailVerificationError,
+} from '@bhatbhati/shared/utils/authFeedback.js';
 import logo from '../../assets/logo.png';
 
 const fleetSlides = [
@@ -37,6 +43,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [verificationRequired, setVerificationRequired] = useState(false);
   const [resendStatus, setResendStatus] = useState('');
   const [resendError, setResendError] = useState('');
@@ -63,15 +71,35 @@ export default function LoginPage() {
     return () => clearInterval(interval);
   }, [nextSlide]);
 
+  const updateField = (name, value) => {
+    if (name === 'email') setEmail(value);
+    if (name === 'password') setPassword(value);
+    if (name === 'mfaCode') setMfaCode(value);
+    setFieldErrors((prev) => ({ ...prev, [name]: '' }));
+  };
+
+  const validateLogin = () => {
+    const nextErrors = {
+      email: getEmailError(email),
+      password: getPasswordError(password),
+    };
+    setFieldErrors(nextErrors);
+    return !Object.values(nextErrors).some(Boolean);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setVerificationRequired(false);
     setResendStatus('');
     setResendError('');
+
+    if (!validateLogin()) return;
+
     setIsLoading(true);
     try {
-      await signIn(email, password);
+      await signIn(email.trim(), password);
       const mfaLevel = await getMfaLevel();
       if (mfaLevel?.nextLevel === 'aal2' && mfaLevel?.currentLevel !== 'aal2') {
         const factorsData = await listMfaFactors();
@@ -82,16 +110,14 @@ export default function LoginPage() {
           return;
         }
       }
-      navigate('/dashboard');
+      setSuccess('Login successful. Taking you to your dashboard...');
+      window.setTimeout(() => navigate('/dashboard'), 650);
     } catch (err) {
-      const message = err.message || 'Failed to login';
-      const isUnverified = err.code === 'email_not_confirmed' || /email not confirmed|verify your email|verification is required/i.test(message);
-
-      if (isUnverified) {
+      if (isEmailVerificationError(err)) {
         setVerificationRequired(true);
         setError('Email verification is required before you can sign in.');
       } else {
-        setError(message);
+        setError(getFriendlyAuthError(err, 'We could not sign you in. Please try again.'));
       }
     } finally {
       setIsLoading(false);
@@ -101,13 +127,20 @@ export default function LoginPage() {
   const handleResendVerification = async () => {
     setResendStatus('');
     setResendError('');
+
+    const emailError = getEmailError(email);
+    if (emailError) {
+      setFieldErrors((prev) => ({ ...prev, email: emailError }));
+      return;
+    }
+
     setIsResending(true);
 
     try {
       await resendConfirmation(email.trim());
       setResendStatus('Verification email sent. Open the link first; sign-in stays blocked until verification is complete.');
     } catch (err) {
-      setResendError(err.message || 'Could not send verification email.');
+      setResendError(getFriendlyAuthError(err, 'Could not send verification email. Please try again.'));
     } finally {
       setIsResending(false);
     }
@@ -116,12 +149,20 @@ export default function LoginPage() {
   const handleVerifyMfa = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+
+    if (!mfaCode.trim()) {
+      setFieldErrors((prev) => ({ ...prev, mfaCode: 'Verification code is required.' }));
+      return;
+    }
+
     setIsLoading(true);
     try {
       await challengeAndVerifyMfa(factorId, mfaCode);
+      setSuccess('Login successful. Taking you to your dashboard...');
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Invalid 2FA code');
+      setError(getFriendlyAuthError(err, 'The verification code is incorrect. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -179,19 +220,23 @@ export default function LoginPage() {
           )}
           {resendStatus && <div className="auth-alert auth-alert-success">{resendStatus}</div>}
           {resendError && <div className="auth-alert">{resendError}</div>}
+          {success && <div className="auth-alert auth-alert-success">{success}</div>}
 
           {step === 'login' ? (
             <>
-              <form onSubmit={handleLogin} className="auth-form">
+              <form onSubmit={handleLogin} className="auth-form" noValidate>
                 <label htmlFor="login-email">Email Address</label>
                 <input
                   id="login-email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => updateField('email', e.target.value)}
                   placeholder="you@email.com"
-                  required
+                  disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
                 />
+                {fieldErrors.email && <p className="auth-field-error" id="login-email-error">{fieldErrors.email}</p>}
 
                 <label htmlFor="login-password">Password</label>
                 <div className="auth-password-wrap">
@@ -199,19 +244,23 @@ export default function LoginPage() {
                     id="login-password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => updateField('password', e.target.value)}
                     placeholder="Enter your password"
-                    required
+                    disabled={isLoading}
+                    aria-invalid={Boolean(fieldErrors.password)}
+                    aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
                   />
                   <button
                     type="button"
                     className="auth-eye-toggle"
                     onClick={() => setShowPassword((prev) => !prev)}
+                    disabled={isLoading}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
+                {fieldErrors.password && <p className="auth-field-error" id="login-password-error">{fieldErrors.password}</p>}
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', marginTop: '-0.5rem' }}>
                   <Link to="/auth/forgot-password" style={{ fontSize: '0.875rem', color: 'var(--accent)', fontWeight: '600', textDecoration: 'none' }}>
@@ -219,7 +268,7 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                <button type="submit" className="auth-submit" disabled={isLoading}>
+                <button type="submit" className="auth-submit" disabled={isLoading} aria-busy={isLoading}>
                   {isLoading ? 'Signing in...' : 'Sign In'} <ArrowRight size={16} />
                 </button>
               </form>
@@ -230,28 +279,32 @@ export default function LoginPage() {
                   className="auth-secondary-action"
                   onClick={handleResendVerification}
                   disabled={isResending || !email.trim()}
+                  aria-busy={isResending}
                 >
                   {isResending ? 'Sending...' : 'Send verification email'} <Mail size={16} />
                 </button>
               )}
             </>
           ) : (
-            <form onSubmit={handleVerifyMfa} className="auth-form">
+            <form onSubmit={handleVerifyMfa} className="auth-form" noValidate>
               <label htmlFor="mfa-code">6-Digit Code</label>
               <div className="auth-password-wrap">
                 <input
                   id="mfa-code"
                   type="text"
                   value={mfaCode}
-                  onChange={(e) => setMfaCode(e.target.value)}
+                  onChange={(e) => updateField('mfaCode', e.target.value)}
                   placeholder="123456"
                   maxLength={6}
-                  required
+                  disabled={isLoading}
+                  aria-invalid={Boolean(fieldErrors.mfaCode)}
+                  aria-describedby={fieldErrors.mfaCode ? 'mfa-code-error' : undefined}
                   autoFocus
                 />
               </div>
+              {fieldErrors.mfaCode && <p className="auth-field-error" id="mfa-code-error">{fieldErrors.mfaCode}</p>}
 
-              <button type="submit" className="auth-submit" disabled={isLoading}>
+              <button type="submit" className="auth-submit" disabled={isLoading} aria-busy={isLoading}>
                 {isLoading ? 'Verifying...' : 'Verify'} <ArrowRight size={16} />
               </button>
 
