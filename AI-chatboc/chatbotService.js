@@ -132,6 +132,246 @@ const sendGeminiMessage = async (userMessage) => {
 };
 
 // ─────────────────────────────────────────────────────────────
+//  TERRAIN RECOMMENDATION SYSTEM (Gemini-powered)
+// ─────────────────────────────────────────────────────────────
+
+const TERRAIN_RECOMMENDATION_PROMPT = `You are a Nepal vehicle recommendation expert for Bhatbhate vehicle rentals.
+
+You will receive terrain context about a specific province in Nepal. Based on the terrain type, altitude, road conditions, and routes, recommend the most suitable vehicle categories.
+
+Nepal terrain knowledge:
+- Koshi Province: Home to Mt. Everest, extreme altitude, snow-covered rough tracks, very narrow mountain roads
+- Madhesh Province: Flat Terai plains, smooth national highways, warm climate, well-paved roads
+- Bagmati Province: Kathmandu valley mix — city roads, some highways, and mountain tracks to Langtang/Helambu
+- Gandaki Province: Annapurna region, famous off-road routes like Upper Mustang, Jomsom Highway (unpaved sections)
+- Lumbini Province: Southern plains with historic sites, smooth highways like Siddhartha Highway, easy hill roads
+- Karnali Province: Most remote region, very few paved roads, extreme terrain, Rara Lake and Dolpo treks
+- Sudurpashchim Province: Far-west, mountain trails, hard border routes, limited road infrastructure
+
+Vehicle categories available:
+- SUV/Jeep: High ground clearance (200mm+), 4WD, suitable for off-road, mountain terrain. Examples: Mahindra Scorpio, Toyota Fortuner, Tata Safari
+- Sedan/Hatchback: Low ground clearance, fuel efficient, comfortable on highways. Examples: Hyundai i20, Maruti Suzuki Swift, Honda City
+- Motorcycle: Versatile for narrow mountain roads, fuel efficient. Examples: Royal Enfield Himalayan (off-road), Honda CB Shine (city)
+- Scooter: Best for city/urban areas only. Examples: Honda Activa, TVS Jupiter
+- Van/Bus: Group travel on paved roads. Examples: Toyota HiAce, Mahindra Bolero Pickup
+- Pickup Truck: Cargo + passengers on rough roads. Examples: Tata Yodha, Mahindra Bolero Camper
+
+IMPORTANT RULES:
+1. For off-road/mountain terrain: ALWAYS recommend high ground clearance vehicles (SUV/Jeep/Pickup) and explain WHY
+2. For flat highways/plains: Recommend sedans, hatchbacks, or any vehicle — explain they don't need high ground clearance
+3. For mixed terrain: Recommend SUVs as primary, sedans as secondary for highway sections
+4. Always mention ground clearance requirements explicitly
+5. Consider altitude — vehicles may struggle above 4000m, mention this
+6. Consider road width — narrow mountain roads favor motorcycles/smaller vehicles
+
+Respond in this EXACT JSON format (no markdown, no code blocks, just raw JSON):
+{
+  "summary": "2-3 sentence overview of the terrain and what vehicles work best",
+  "recommendations": [
+    {
+      "category": "SUV/Jeep",
+      "suitability": 95,
+      "groundClearance": "High (200mm+)",
+      "reason": "Why this category is suitable for this terrain",
+      "bestFor": "Which specific routes/conditions this excels at",
+      "warning": "Any cautions (optional, can be empty string)"
+    }
+  ],
+  "roadConditions": {
+    "paved": "percentage or description",
+    "offRoad": "percentage or description",
+    "difficulty": "Easy/Moderate/Challenging/Extreme"
+  },
+  "tips": ["Practical tip 1", "Practical tip 2"]
+}
+
+Provide 3-4 vehicle category recommendations, sorted by suitability score (highest first).`;
+
+/**
+ * Get AI-powered terrain-based vehicle recommendations
+ * @param {Object} terrainContext - { province, terrain, altitude, temp, routes, description }
+ * @returns {Object} Structured recommendation data
+ */
+export const getTerrainRecommendation = async (terrainContext) => {
+  const { province, terrain, altitude, temp, routes, description } = terrainContext;
+
+  const userPrompt = `Recommend vehicles for this Nepal terrain:
+
+Province: ${province}
+Terrain Type: ${terrain}
+Max Altitude: ${altitude}
+Temperature: ${temp}
+Popular Routes: ${routes.join(', ')}
+Road Description: ${description}
+
+Give me your vehicle recommendations in the JSON format specified.`;
+
+  // Try Gemini first
+  if (genAI && GEMINI_API_KEY && geminiAvailable) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: MODEL,
+        systemInstruction: TERRAIN_RECOMMENDATION_PROMPT,
+      });
+
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          console.log(`[Recommendation] Gemini attempt ${attempt}/${MAX_RETRIES}...`);
+          const result = await model.generateContent(userPrompt);
+          const response = await result.response;
+          let text = response.text().trim();
+
+          // Strip markdown code block wrappers if present
+          text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+
+          const parsed = JSON.parse(text);
+          console.log('[Recommendation] Gemini success');
+          return { ...parsed, provider: 'gemini' };
+        } catch (err) {
+          const msg = err.message || '';
+          const isRateLimit = msg.includes('429') || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED');
+
+          if (isRateLimit && attempt < MAX_RETRIES) {
+            const delayMs = 3000 * attempt;
+            console.log(`[Recommendation] Rate limited. Waiting ${delayMs / 1000}s...`);
+            await sleep(delayMs);
+            continue;
+          }
+
+          if (err instanceof SyntaxError) {
+            console.warn('[Recommendation] Gemini returned invalid JSON, falling back to local');
+            break;
+          }
+
+          throw err;
+        }
+      }
+    } catch (err) {
+      console.warn('[Recommendation] Gemini failed:', err.message);
+    }
+  }
+
+  // Local fallback
+  console.log('[Recommendation] Using local fallback');
+  return { ...getLocalTerrainRecommendation(terrainContext), provider: 'local' };
+};
+
+/**
+ * Local rule-based terrain recommendation (fallback)
+ */
+const getLocalTerrainRecommendation = (terrainContext) => {
+  const { province, terrain, altitude, temp, routes, description } = terrainContext;
+  const provinceLower = province.toLowerCase();
+
+  // Off-road / Mountain terrain
+  if (terrain === 'Ice Peaks' || terrain === 'All Terrain') {
+    const isExtreme = provinceLower.includes('karnali') || provinceLower.includes('sudurpashchim');
+    const isEverest = provinceLower.includes('koshi');
+
+    return {
+      summary: isExtreme
+        ? `${province} is one of Nepal's most remote regions with very few paved roads. You absolutely need a high ground clearance 4WD vehicle to navigate the rough, unpaved mountain trails.`
+        : `${province} has challenging mountain terrain with a mix of paved and unpaved roads. A high ground clearance vehicle is strongly recommended for safe travel.`,
+      recommendations: [
+        {
+          category: 'SUV / Jeep',
+          suitability: isExtreme ? 98 : 92,
+          groundClearance: 'High (200mm+)',
+          reason: `${terrain} terrain requires high ground clearance to handle rocky, unpaved roads and steep inclines. 4WD is essential for mountain passes.`,
+          bestFor: routes.slice(0, 2).join(', '),
+          warning: isEverest ? 'Vehicle performance may decrease significantly above 4,000m altitude due to thin air.' : '',
+        },
+        {
+          category: 'Pickup Truck',
+          suitability: isExtreme ? 85 : 78,
+          groundClearance: 'High (200mm+)',
+          reason: 'Pickup trucks offer excellent ground clearance and can carry supplies for remote journeys. Good for rough roads.',
+          bestFor: 'Remote supply runs and off-road trails',
+          warning: 'Less comfortable for long journeys with passengers.',
+        },
+        {
+          category: 'Motorcycle (Off-road)',
+          suitability: 75,
+          groundClearance: 'Medium-High (180mm+)',
+          reason: 'Narrow mountain roads are often easier to navigate on a motorcycle. Royal Enfield Himalayan is ideal for Nepal mountains.',
+          bestFor: 'Narrow mountain trails and single-track roads',
+          warning: 'Not suitable for carrying heavy luggage or group travel.',
+        },
+        {
+          category: 'Sedan / Hatchback',
+          suitability: isExtreme ? 15 : 35,
+          groundClearance: 'Low (140-160mm)',
+          reason: `Low ground clearance vehicles are NOT recommended for ${terrain} terrain. They will scrape on rocky roads and struggle on steep grades.`,
+          bestFor: 'Only suitable for paved highway sections',
+          warning: '⚠️ High risk of undercarriage damage on unpaved mountain roads.',
+        },
+      ],
+      roadConditions: {
+        paved: isExtreme ? '15-20%' : '40-55%',
+        offRoad: isExtreme ? '80-85%' : '45-60%',
+        difficulty: isExtreme ? 'Extreme' : 'Challenging',
+      },
+      tips: [
+        'Always carry a spare tire and basic repair tools',
+        isExtreme ? 'Fuel stations are scarce — carry extra fuel' : 'Check road conditions before departure',
+        'Inform someone of your travel plans in remote areas',
+        isEverest ? 'Be prepared for altitude sickness above 3,500m' : 'Carry warm clothing for high-altitude passes',
+      ],
+    };
+  }
+
+  // Valley / Plains / Highway terrain
+  return {
+    summary: `${province} features flat terrain with well-paved highways and smooth roads. You don't need high ground clearance — sedans, hatchbacks, and scooters all work great here, offering comfort and fuel efficiency.`,
+    recommendations: [
+      {
+        category: 'Sedan / Hatchback',
+        suitability: 95,
+        groundClearance: 'Low (140-160mm)',
+        reason: 'Smooth, paved highways are perfect for sedans and hatchbacks. They offer the best fuel efficiency and comfort for long drives on flat terrain.',
+        bestFor: routes.slice(0, 2).join(', '),
+        warning: '',
+      },
+      {
+        category: 'Motorcycle',
+        suitability: 88,
+        groundClearance: 'Medium (160mm+)',
+        reason: 'Motorcycles are versatile and fuel efficient for highway travel. Perfect for solo travelers or couples.',
+        bestFor: 'Quick highway trips and town-to-town travel',
+        warning: 'Less comfortable for very long distances.',
+      },
+      {
+        category: 'Scooter',
+        suitability: 75,
+        groundClearance: 'Low (130-150mm)',
+        reason: 'Scooters are great for short urban trips and town visits in the Terai region. Very affordable.',
+        bestFor: 'City exploration and short-distance travel',
+        warning: 'Not ideal for long highway stretches.',
+      },
+      {
+        category: 'SUV / Jeep',
+        suitability: 50,
+        groundClearance: 'High (200mm+)',
+        reason: 'SUVs work on any road but are overkill for flat highways. Higher fuel consumption without the terrain advantage.',
+        bestFor: 'Group travel or if you plan to venture into nearby hills',
+        warning: 'Higher rental cost and fuel consumption compared to sedans.',
+      },
+    ],
+    roadConditions: {
+      paved: '85-95%',
+      offRoad: '5-15%',
+      difficulty: 'Easy',
+    },
+    tips: [
+      'Any vehicle type works well on these roads',
+      'Fuel stations are readily available along highways',
+      `Watch for high temperatures (${temp}) — ensure vehicle AC is working`,
+      'Speed limits are enforced on national highways',
+    ],
+  };
+};
+
+// ─────────────────────────────────────────────────────────────
 //  LOCAL FALLBACK PROVIDER (always works, no API needed)
 // ─────────────────────────────────────────────────────────────
 const LOCAL_KNOWLEDGE_BASE = {
