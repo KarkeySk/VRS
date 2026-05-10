@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Mail, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { getEmailError, getFriendlyAuthError } from '@bhatbhati/shared/utils/authFeedback.js';
 import logo from '../../assets/logo.png';
 
 const fleetSlides = [
@@ -35,6 +36,7 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [linkSent, setLinkSent] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const { resetPasswordForEmail } = useAuth();
@@ -51,12 +53,17 @@ export default function ForgotPasswordPage() {
   const handleSendResetLink = async (e) => {
     e.preventDefault();
     setError('');
+
+    const emailError = getEmailError(email);
+    setFieldErrors({ email: emailError });
+    if (emailError) return;
+
     setIsLoading(true);
     try {
-      await resetPasswordForEmail(email);
+      await resetPasswordForEmail(email.trim());
       setLinkSent(true);
     } catch (err) {
-      setError(err.message || 'Failed to send reset link');
+      setError(getFriendlyAuthError(err, 'We could not send a reset email. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -110,16 +117,21 @@ export default function ForgotPasswordPage() {
 
               {error && <div className="auth-alert">{error}</div>}
 
-              <form onSubmit={handleSendResetLink} className="auth-form">
+              <form onSubmit={handleSendResetLink} className="auth-form" noValidate>
                 <label htmlFor="reset-email">Email Address</label>
                 <div className="auth-password-wrap">
                   <input
                     id="reset-email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setFieldErrors((prev) => ({ ...prev, email: '' }));
+                    }}
                     placeholder="you@email.com"
-                    required
+                    disabled={isLoading}
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={fieldErrors.email ? 'reset-email-error' : undefined}
                   />
                   <button
                     type="button"
@@ -130,8 +142,9 @@ export default function ForgotPasswordPage() {
                     <Mail size={16} />
                   </button>
                 </div>
+                {fieldErrors.email && <p className="auth-field-error" id="reset-email-error">{fieldErrors.email}</p>}
 
-                <button type="submit" className="auth-submit" disabled={isLoading}>
+                <button type="submit" className="auth-submit" disabled={isLoading} aria-busy={isLoading}>
                   {isLoading ? 'Sending...' : 'Send Reset Link'} <ArrowRight size={16} />
                 </button>
               </form>
