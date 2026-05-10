@@ -147,6 +147,20 @@ export default function TerrainSelect() {
         navigate(`/vehicles?terrain=${encodeURIComponent(activeRegion.terrain)}&region=${encodeURIComponent(activeRegion.name)}&wheels=${wheelType}`);
     };
 
+    const handleAIRecommend = () => {
+        if (!activeRegion) return;
+        const params = new URLSearchParams({
+            province: activeRegion.name,
+            terrain: activeRegion.terrain,
+            altitude: activeRegion.altitude,
+            temp: activeRegion.temp,
+            routes: activeRegion.routes.join(','),
+            desc: activeRegion.desc,
+            color: activeRegion.color,
+        });
+        navigate(`/recommend?${params.toString()}`);
+    };
+
     const provinceCenters = {
         koshi: [808, 203],
         madhesh: [560, 300],
@@ -413,6 +427,20 @@ export default function TerrainSelect() {
                                 onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
                                 >
                                     See Vehicles in {activeRegion.name.replace(' Province', '')} <ArrowRight size={16} />
+                                </button>
+
+                                <button onClick={handleAIRecommend} style={{
+                                    width: '100%', padding: '16px', border: '1px solid rgba(232,115,42,0.3)', borderRadius: '14px',
+                                    background: 'linear-gradient(135deg, rgba(232,115,42,0.12), rgba(123,129,255,0.08))',
+                                    color: '#e8732a', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    marginTop: '10px',
+                                    transition: 'transform 0.2s, box-shadow 0.2s, background 0.3s',
+                                }}
+                                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, rgba(232,115,42,0.2), rgba(123,129,255,0.12))'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'linear-gradient(135deg, rgba(232,115,42,0.12), rgba(123,129,255,0.08))'; }}
+                                >
+                                    ✦ Get AI Recommendation
                                 </button>
                             </div>
                         ) : (
