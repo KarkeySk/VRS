@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Mail, KeyRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Mail, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { getEmailError, getFriendlyAuthError } from '@bhatbhati/shared/utils/authFeedback.js';
 import logo from '../../assets/logo.png';
 
 const fleetSlides = [
@@ -33,14 +34,12 @@ const fleetSlides = [
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [step, setStep] = useState('email'); // 'email' | 'otp'
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [linkSent, setLinkSent] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { resetPasswordForEmail, verifyOtp } = useAuth();
-  const navigate = useNavigate();
+  const { resetPasswordForEmail } = useAuth();
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % fleetSlides.length);
@@ -51,31 +50,20 @@ export default function ForgotPasswordPage() {
     return () => clearInterval(interval);
   }, [nextSlide]);
 
-  const handleSendOtp = async (e) => {
+  const handleSendResetLink = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccessMessage('');
-    setIsLoading(true);
-    try {
-      await resetPasswordForEmail(email, window.location.origin + '/auth/update-password');
-      setSuccessMessage('An OTP has been sent to your email.');
-      setStep('otp');
-    } catch (err) {
-      setError(err.message || 'Failed to send OTP');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    setError('');
+    const emailError = getEmailError(email);
+    setFieldErrors({ email: emailError });
+    if (emailError) return;
+
     setIsLoading(true);
     try {
-      await verifyOtp(email, otp);
-      navigate('/auth/update-password');
+      await resetPasswordForEmail(email.trim());
+      setLinkSent(true);
     } catch (err) {
-      setError(err.message || 'Invalid OTP');
+      setError(getFriendlyAuthError(err, 'We could not send a reset email. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -120,89 +108,81 @@ export default function ForgotPasswordPage() {
 
       <main className="auth-main">
         <div className="auth-card">
-          <div className="auth-header">
-            <h1>{step === 'email' ? 'Forgot Password' : 'Enter OTP'}</h1>
-            <p>{step === 'email' ? 'Enter your email to reset your password.' : 'Enter the 6-digit code sent to your email.'}</p>
-          </div>
-
-          {error && <div className="auth-alert">{error}</div>}
-          {successMessage && step === 'email' && <div className="auth-alert" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}>{successMessage}</div>}
-
-          {step === 'email' ? (
-            <form onSubmit={handleSendOtp} className="auth-form">
-              <label htmlFor="reset-email">Email Address</label>
-              <div className="auth-password-wrap">
-                <input
-                  id="reset-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@email.com"
-                  required
-                />
-                <button
-                  type="button"
-                  className="auth-eye-toggle"
-                  disabled
-                  aria-hidden="true"
-                >
-                  <Mail size={16} />
-                </button>
+          {!linkSent ? (
+            <>
+              <div className="auth-header">
+                <h1>Forgot Password</h1>
+                <p>Enter your email and we'll send you a reset link.</p>
               </div>
 
-              <button type="submit" className="auth-submit" disabled={isLoading}>
-                {isLoading ? 'Sending...' : 'Send OTP'} <ArrowRight size={16} />
-              </button>
-            </form>
+              {error && <div className="auth-alert">{error}</div>}
+
+              <form onSubmit={handleSendResetLink} className="auth-form" noValidate>
+                <label htmlFor="reset-email">Email Address</label>
+                <div className="auth-password-wrap">
+                  <input
+                    id="reset-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setFieldErrors((prev) => ({ ...prev, email: '' }));
+                    }}
+                    placeholder="you@email.com"
+                    disabled={isLoading}
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={fieldErrors.email ? 'reset-email-error' : undefined}
+                  />
+                  <button
+                    type="button"
+                    className="auth-eye-toggle"
+                    disabled
+                    aria-hidden="true"
+                  >
+                    <Mail size={16} />
+                  </button>
+                </div>
+                {fieldErrors.email && <p className="auth-field-error" id="reset-email-error">{fieldErrors.email}</p>}
+
+                <button type="submit" className="auth-submit" disabled={isLoading} aria-busy={isLoading}>
+                  {isLoading ? 'Sending...' : 'Send Reset Link'} <ArrowRight size={16} />
+                </button>
+              </form>
+            </>
           ) : (
-            <form onSubmit={handleVerifyOtp} className="auth-form">
-              <label htmlFor="verify-otp">6-Digit OTP</label>
-              <div className="auth-password-wrap">
-                <input
-                  id="verify-otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="123456"
-                  maxLength={6}
-                  required
-                />
-                <button
-                  type="button"
-                  className="auth-eye-toggle"
-                  disabled
-                  aria-hidden="true"
-                >
-                  <KeyRound size={16} />
-                </button>
+            <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(16, 185, 129, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.5rem',
+              }}>
+                <CheckCircle size={32} style={{ color: '#10b981' }} />
               </div>
-
-              <button type="submit" className="auth-submit" disabled={isLoading}>
-                {isLoading ? 'Verifying...' : 'Verify OTP'} <ArrowRight size={16} />
+              <h2 style={{ margin: '0 0 0.75rem', fontSize: '1.5rem', fontWeight: 700 }}>Check Your Email</h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, margin: '0 0 1.5rem' }}>
+                We've sent a password reset link to <strong style={{ color: 'var(--text-primary)' }}>{email}</strong>. 
+                Click the link in your email to set a new password.
+              </p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: '0 0 1.5rem' }}>
+                Didn't receive it? Check your spam folder or try again.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setLinkSent(false);
+                  setError('');
+                }}
+                className="auth-submit"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+              >
+                Try Again <ArrowRight size={16} />
               </button>
-
-              <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStep('email');
-                    setSuccessMessage('');
-                    setError('');
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--accent)',
-                    fontWeight: '600',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  }}
-                >
-                  Change Email
-                </button>
-              </div>
-            </form>
+            </div>
           )}
 
           <p className="auth-switch" style={{ marginTop: '2rem' }}>
