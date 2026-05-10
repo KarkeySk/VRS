@@ -219,7 +219,7 @@ export default function UpdatePasswordPage() {
               </div>
               {fieldErrors.confirmPassword && <p className="auth-field-error" id="confirm-password-error">{fieldErrors.confirmPassword}</p>}
 
-              <button type="submit" className="auth-submit" disabled={isLoading}>
+              <button type="submit" className="auth-submit" disabled={isLoading} aria-busy={isLoading}>
                 {isLoading ? 'Updating...' : 'Update Password'} <ArrowRight size={16} />
               </button>
             </form>

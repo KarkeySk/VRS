@@ -268,7 +268,7 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                <button type="submit" className="auth-submit" disabled={isLoading}>
+                <button type="submit" className="auth-submit" disabled={isLoading} aria-busy={isLoading}>
                   {isLoading ? 'Signing in...' : 'Sign In'} <ArrowRight size={16} />
                 </button>
               </form>
@@ -279,6 +279,7 @@ export default function LoginPage() {
                   className="auth-secondary-action"
                   onClick={handleResendVerification}
                   disabled={isResending || !email.trim()}
+                  aria-busy={isResending}
                 >
                   {isResending ? 'Sending...' : 'Send verification email'} <Mail size={16} />
                 </button>
@@ -303,7 +304,7 @@ export default function LoginPage() {
               </div>
               {fieldErrors.mfaCode && <p className="auth-field-error" id="mfa-code-error">{fieldErrors.mfaCode}</p>}
 
-              <button type="submit" className="auth-submit" disabled={isLoading}>
+              <button type="submit" className="auth-submit" disabled={isLoading} aria-busy={isLoading}>
                 {isLoading ? 'Verifying...' : 'Verify'} <ArrowRight size={16} />
               </button>
 
