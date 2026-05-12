@@ -1,10 +1,5 @@
 import { supabase } from '../lib/supabase'
 
-function profileName(profile = {}) {
-    if (profile.full_name) return profile.full_name
-    return [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim()
-}
-
 function parseNotes(notes) {
     if (!notes || typeof notes !== 'string') return {}
     try {
@@ -14,15 +9,20 @@ function parseNotes(notes) {
     }
 }
 
+function formatDateTime({ startDate, endDate, dateTime }) {
+    if (dateTime) return dateTime
+    if (startDate && endDate) return `${startDate} to ${endDate}`
+    return startDate || endDate || new Date().toISOString()
+}
+
 async function edgeFunctionErrorMessage(error) {
     const fallback = error?.message || 'Failed to send booking approval email'
     const response = error?.context
 
     if (!response?.clone) return fallback
 
-    const clone = response.clone()
     try {
-        const body = await clone.json()
+        const body = await response.clone().json()
         return body?.error || body?.message || fallback
     } catch {
         try {
@@ -34,38 +34,24 @@ async function edgeFunctionErrorMessage(error) {
     }
 }
 
-export async function sendBookingApprovalEmail(booking, user = null) {
-    if (!supabase) throw new Error('Supabase is not configured')
-    if (!booking?.id) throw new Error('Booking is required')
+function buildBookingApprovalMessage({ userEmail, bookingId, startDate, endDate, dateTime, subject, message }) {
+    if (!userEmail) throw new Error('Booking approval email requires a user email')
+    if (!bookingId) throw new Error('Booking approval email requires a booking id')
 
-    const notes = parseNotes(booking.notes)
-    const notesCustomer = notes.customer || {}
-    const profile = user || booking.profiles || {}
-    const customerName = profileName(profile) || notesCustomer.fullName || notesCustomer.name || 'Customer'
-    const customerEmail = profile.email || notesCustomer.email
-
-    if (!customerEmail) {
-        throw new Error('Customer email is required to send booking approval email')
+    return {
+        to: userEmail,
+        subject: subject || 'Booking confirmed',
+        bookingId,
+        dateTime: formatDateTime({ startDate, endDate, dateTime }),
+        message: message || 'Your booking has been confirmed.',
     }
+}
+
+async function invokeBookingEmail(payload) {
+    if (!supabase) throw new Error('Supabase is not configured')
 
     const { data, error } = await supabase.functions.invoke('send-booking-approval-email', {
-        body: {
-            booking: {
-                id: booking.id,
-                start_date: booking.start_date,
-                end_date: booking.end_date,
-                total_price: booking.total_price,
-            },
-            user: {
-                name: customerName,
-                email: customerEmail,
-            },
-            vehicle: {
-                name: booking.vehicles?.name || 'Vehicle',
-                type: booking.vehicles?.type || '',
-                subtitle: booking.vehicles?.subtitle || '',
-            },
-        },
+        body: payload,
     })
 
     if (error) throw new Error(await edgeFunctionErrorMessage(error))
@@ -73,16 +59,32 @@ export async function sendBookingApprovalEmail(booking, user = null) {
     return data
 }
 
-export function shouldSendApprovalEmail({ currentStatus, nextStatus, booking }) {
-    const normalizedCurrentStatus = String(currentStatus || '').toLowerCase()
-    const normalizedNextStatus = String(nextStatus || '').toLowerCase()
-    const isApprovalStatus = ['approved', 'confirmed'].includes(normalizedNextStatus)
+export async function sendBookingApprovalEmail(booking, user = null) {
+    if (!booking?.id) throw new Error('Booking is required')
 
+    const notes = parseNotes(booking.notes)
+    const notesCustomer = notes.customer || {}
+    const profile = user || booking.profiles || {}
+    const customerEmail = profile.email || notesCustomer.email
+    const vehicleName = booking.vehicles?.name || 'your selected vehicle'
+
+    const payload = buildBookingApprovalMessage({
+        userEmail: customerEmail,
+        bookingId: booking.id,
+        startDate: booking.start_date,
+        endDate: booking.end_date,
+        subject: 'Booking confirmed',
+        message: `Your booking for ${vehicleName} has been confirmed.`,
+    })
+
+    return invokeBookingEmail(payload)
+}
+
+export function shouldSendApprovalEmail({ currentStatus, nextStatus, booking }) {
     return (
-        isApprovalStatus
-        && Boolean(booking?.id)
-        && normalizedCurrentStatus !== normalizedNextStatus
-        && booking?.email_sent !== true
+        nextStatus === 'approved'
+        && currentStatus !== 'approved'
+        && booking?.email_sent === false
     )
 }
 
@@ -128,4 +130,21 @@ export async function recordApprovalEmailSent(bookingId) {
     if (logError) throw logError
 
     return data
+}
+
+export const emailService = {
+    buildBookingApprovalMessage,
+
+    sendBookingApprovalEmail: async (details) => {
+        const payload = buildBookingApprovalMessage(details)
+        return invokeBookingEmail(payload)
+    },
+
+    sendBookingConfirmationEmail: async (details) => {
+        return emailService.sendBookingApprovalEmail({
+            ...details,
+            subject: details.subject || 'Booking confirmed',
+            message: details.message || 'Your booking has been confirmed.',
+        })
+    },
 }
