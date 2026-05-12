@@ -11,6 +11,17 @@ import {
 } from '@bhatbhati/shared/utils/authFeedback.js';
 import logo from '../../assets/logo.png';
 
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.5 29.3 4.5 24 4.5 13 4.5 4 13.5 4 24.5s9 20 20 20 20-9 20-20c0-1.4-.1-2.7-.4-4z"/>
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.5 29.3 4.5 24 4.5c-7.6 0-14.2 4.3-17.7 10.2z"/>
+      <path fill="#4CAF50" d="M24 44.5c5.2 0 10-2 13.5-5.2l-6.2-5.2c-2 1.4-4.5 2.2-7.3 2.2-5.3 0-9.7-3.4-11.3-8l-6.5 5C9.6 40.1 16.2 44.5 24 44.5z"/>
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2c-.4.4 6.7-4.9 6.7-14.3 0-1.4-.1-2.7-.4-4z"/>
+    </svg>
+  );
+}
+
 const fleetSlides = [
   {
     image: '/images/fleet-jeep.png',
@@ -45,8 +56,22 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { signUp } = useAuth();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const { signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setSuccess('');
+    setIsGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      // Browser is being redirected to Google; nothing else to do here.
+    } catch (err) {
+      setError(getFriendlyAuthError(err, 'Could not start Google sign-in. Please try again.'));
+      setIsGoogleLoading(false);
+    }
+  };
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % fleetSlides.length);
@@ -144,6 +169,19 @@ export default function RegisterPage() {
               <Mail size={16} /> {success}
             </div>
           )}
+
+          <button
+            type="button"
+            className="auth-secondary-action auth-google-btn"
+            onClick={handleGoogleSignIn}
+            disabled={isLoading || isGoogleLoading || Boolean(success)}
+            aria-busy={isGoogleLoading}
+          >
+            <GoogleIcon />
+            {isGoogleLoading ? 'Redirecting to Google...' : 'Continue with Google'}
+          </button>
+
+          <div className="auth-divider"><span>or sign up with email</span></div>
 
           <form onSubmit={handleRegister} className="auth-form" noValidate>
             <label htmlFor="register-fullname">Full Name</label>
