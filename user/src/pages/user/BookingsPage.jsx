@@ -5,11 +5,11 @@ import { applicationService } from '@bhatbhati/shared/services/applicationServic
 import { Car, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight, CreditCard } from 'lucide-react';
 
 const statusConfig = {
-    submitted:      { label: 'Submitted', color: '#3b82f6', Icon: Clock },
-    'under-review': { label: 'Under Review', color: '#f59e0b', Icon: AlertCircle },
-    approved:       { label: 'Approved', color: '#34d399', Icon: CheckCircle },
-    rejected:       { label: 'Rejected', color: '#ef4444', Icon: XCircle },
-    confirmed:      { label: 'Confirmed', color: '#34d399', Icon: CheckCircle },
+    submitted:      { label: 'Submitted', color: 'var(--status-info)', Icon: Clock },
+    'under-review': { label: 'Under Review', color: 'var(--status-warning)', Icon: AlertCircle },
+    approved:       { label: 'Approved', color: 'var(--status-success)', Icon: CheckCircle },
+    rejected:       { label: 'Rejected', color: 'var(--status-error)', Icon: XCircle },
+    confirmed:      { label: 'Confirmed', color: 'var(--status-success)', Icon: CheckCircle },
     cancelled:      { label: 'Cancelled', color: 'var(--text-secondary)', Icon: XCircle },
 };
 
@@ -50,7 +50,7 @@ export default function BookingsPage() {
                         textAlign: 'center', padding: '80px 20px', background: 'var(--bg-card)',
                         borderRadius: '24px', border: '1px solid var(--border)',
                     }}>
-                        <Car size={48} color="#333" style={{ marginBottom: '16px' }} />
+                        <Car size={48} color="var(--text-muted)" style={{ marginBottom: '16px', opacity: 0.7 }} />
                         <h2 style={{ color: 'var(--text-primary)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '8px' }}>No bookings yet</h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px' }}>Start by choosing a vehicle and sending a request.</p>
                         <Link to="/terrain" style={{
@@ -86,7 +86,7 @@ export default function BookingsPage() {
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div style={{ color: '#e8732a', fontSize: '1.2rem', fontWeight: '800' }}>${app.total_price}</div>
+                                            <div style={{ color: 'var(--accent)', fontSize: '1.2rem', fontWeight: '800' }}>${app.total_price}</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
                                                 <StatusIcon size={14} color={status.color} />
                                                 <span style={{ color: status.color, fontSize: '0.75rem', fontWeight: '600' }}>{status.label}</span>
@@ -95,8 +95,8 @@ export default function BookingsPage() {
 
                                         {(app.status === 'submitted' || app.status === 'under-review') && (
                                             <button onClick={() => handleCancel(app.id)} style={{
-                                                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
-                                                color: '#ef4444', padding: '8px 16px', borderRadius: '10px',
+                                                background: 'var(--status-error-soft)', border: '1px solid var(--status-error-border)',
+                                                color: 'var(--status-error)', padding: '8px 16px', borderRadius: '10px',
                                                 fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer',
                                             }}>
                                                 Cancel
@@ -107,11 +107,11 @@ export default function BookingsPage() {
                                         {app.status === 'approved' && app.payment_status !== 'completed' && (
                                             <Link to={`/payment/${app.id}`} style={{
                                                 textDecoration: 'none',
-                                                background: 'linear-gradient(135deg, #60bb46, #4da836)',
-                                                color: '#fff', padding: '8px 20px', borderRadius: '10px',
+                                                background: 'var(--status-pay)',
+                                                color: '#ffffff', padding: '8px 20px', borderRadius: '10px',
                                                 fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer',
                                                 display: 'flex', alignItems: 'center', gap: '6px',
-                                                boxShadow: '0 4px 12px rgba(96,187,70,0.3)',
+                                                boxShadow: '0 4px 12px var(--status-pay-soft)',
                                             }}>
                                                 <CreditCard size={14} /> Pay Now
                                             </Link>
@@ -120,8 +120,8 @@ export default function BookingsPage() {
                                         {/* Payment completed badge */}
                                         {app.payment_status === 'completed' && (
                                             <span style={{
-                                                background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)',
-                                                color: '#34d399', padding: '6px 12px', borderRadius: '8px',
+                                                background: 'var(--status-success-soft)', border: '1px solid var(--status-success-border)',
+                                                color: 'var(--status-success)', padding: '6px 12px', borderRadius: '8px',
                                                 fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase',
                                                 letterSpacing: '0.5px',
                                             }}>

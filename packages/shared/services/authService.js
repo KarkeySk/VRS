@@ -21,6 +21,20 @@ const getEmailRedirectTo = () => {
 
 const isEmailVerified = (user) => Boolean(user?.email_confirmed_at || user?.confirmed_at)
 
+const getOAuthRedirectTo = () => {
+    const configuredAppUrl = trimTrailingSlash(
+        import.meta.env.VITE_USER_APP_URL ||
+        import.meta.env.VITE_APP_URL ||
+        import.meta.env.VITE_PUBLIC_SITE_URL
+    )
+    if (configuredAppUrl) return `${configuredAppUrl}/auth/callback`
+
+    if (typeof window !== 'undefined' && window.location?.origin) {
+        return `${window.location.origin}/auth/callback`
+    }
+    return undefined
+}
+
 export const authService = {
     /** Sign up a new user */
     signUp: async (email, password, metadata = {}) => {
@@ -50,6 +64,22 @@ export const authService = {
             await supabase.auth.signOut()
             throw new Error('Email verification is required before signing in.')
         }
+        return data
+    },
+
+    /** Begin Google OAuth sign-in. Redirects the browser to Google. */
+    signInWithGoogle: async () => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: getOAuthRedirectTo(),
+                queryParams: {
+                    prompt: 'select_account',
+                },
+            },
+        })
+        if (error) throw error
         return data
     },
 
