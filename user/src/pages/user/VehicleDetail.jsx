@@ -4,8 +4,8 @@ import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js';
 import { useVehicles } from '../../hooks/useVehicles';
 import { normalizeVehicle } from '../../utils/vehicleMapper';
 import {
-    CloudRain, Settings, Unlock, Lock, Navigation, Droplet, 
-    RefreshCw, Briefcase, Star, Wind, Snowflake, Map as MapIcon, Shield, Activity
+    CloudRain, Settings, Unlock, Lock, Navigation, Droplet,
+    RefreshCw, Briefcase, Star, Wind, Snowflake, Map as MapIcon, Shield, Activity, ArrowLeft
 } from 'lucide-react';
 
 const icons = {
@@ -81,8 +81,26 @@ export default function VehicleDetail() {
             <div style={{ position: 'relative', height: '65vh', minHeight: '500px', display: 'flex', alignItems: 'flex-end', paddingBottom: '60px' }}>
                 <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
                     <img src={vehicle.image} alt={vehicle.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #111 5%, rgba(17, 17, 17, 0.4) 60%, rgba(17, 17, 17, 0.1) 100%)' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 5%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.15) 100%)' }} />
                 </div>
+
+                <button
+                    onClick={() => navigate(-1)}
+                    aria-label="Back"
+                    style={{
+                        position: 'absolute', top: '110px', left: 'clamp(16px, 4vw, 48px)', zIndex: 3,
+                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                        padding: '10px 18px', borderRadius: '999px',
+                        background: 'rgba(0, 0, 0, 0.45)', backdropFilter: 'blur(8px)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)', color: '#ffffff',
+                        fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer',
+                        transition: 'background 0.2s, border-color 0.2s',
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.32)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.45)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; }}
+                >
+                    <ArrowLeft size={16} /> Back
+                </button>
                 
                 <div className="container" style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', flexWrap: 'wrap', gap: '20px' }}>
                     <div style={{ maxWidth: '800px' }}>
@@ -94,7 +112,7 @@ export default function VehicleDetail() {
                         <p style={{ fontSize: '1.25rem', color: '#60a5fa', maxWidth: '420px', lineHeight: 1.4, fontWeight: '500' }}>{vehicle.subtitle}</p>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(15, 15, 15, 0.6)', backdropFilter: 'blur(10px)', padding: '12px 20px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(15, 15, 15, 0.6)', backdropFilter: 'blur(10px)', padding: '12px 20px', borderRadius: '24px', border: '1px solid var(--border)' }}>
                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CloudRain size={20} color="#888" />
                          </div>
@@ -116,7 +134,7 @@ export default function VehicleDetail() {
                     <div style={{ flex: '1 1 60%', minWidth: '300px' }}>
                         
                         {/* QUICK SPECS ROW */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '20px', background: 'var(--bg-card)', padding: '30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.02)', marginBottom: '40px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '20px', background: 'var(--bg-card)', padding: '30px', borderRadius: '24px', border: '1px solid var(--border)', marginBottom: '40px' }}>
                             <div>
                                 <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', fontWeight: '600' }}>Engine</div>
                                 <div style={{ fontSize: '1.125rem', fontWeight: '600' }}>{vehicle.engine}</div>
@@ -141,7 +159,7 @@ export default function VehicleDetail() {
                             {vehicle.capabilities.map((cap, i) => {
                                 const IconComp = icons[cap.icon] || Settings;
                                 return (
-                                <div key={i} style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.02)', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                                <div key={i} style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '24px', border: '1px solid var(--border)', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
                                     <div style={{ background: 'var(--bg-glass)', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                         <IconComp size={16} color="var(--accent)" />
                                     </div>
@@ -155,8 +173,8 @@ export default function VehicleDetail() {
 
                         {/* ALTITUDE TOLERANCE CHART */}
                         <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '20px' }}>Height Support</h3>
-                        <div style={{ background: 'var(--bg-card)', padding: '40px 30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.02)', marginBottom: '40px', position: 'relative' }}>
-                            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '120px', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ background: 'var(--bg-card)', padding: '40px 30px', borderRadius: '24px', border: '1px solid var(--border)', marginBottom: '40px', position: 'relative' }}>
+                            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '120px', marginBottom: '16px', borderBottom: '1px solid var(--border)' }}>
                                 <div style={{ flex: 1, height: '15%', background: '#0a1930', borderTopLeftRadius: '4px', borderTopRightRadius: '4px' }}></div>
                                 <div style={{ flex: 1, height: '30%', background: '#0f294d', borderTopLeftRadius: '4px', borderTopRightRadius: '4px' }}></div>
                                 <div style={{ flex: 1, height: '55%', background: '#133a6e', borderTopLeftRadius: '4px', borderTopRightRadius: '4px' }}></div>
@@ -174,9 +192,9 @@ export default function VehicleDetail() {
 
                         {/* TECHNICAL SPECS */}
                         <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '20px' }}>Tech Details</h3>
-                        <div style={{ background: 'var(--bg-card)', padding: '30px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.02)' }}>
+                        <div style={{ background: 'var(--bg-card)', padding: '30px', borderRadius: '24px', border: '1px solid var(--border)' }}>
                             {vehicle.technicalSpecs.map((spec, i) => (
-                                <div key={i} style={{ display: 'flex', borderBottom: i !== vehicle.technicalSpecs.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', padding: '16px 0', alignItems: 'center' }}>
+                                <div key={i} style={{ display: 'flex', borderBottom: i !== vehicle.technicalSpecs.length - 1 ? '1px solid var(--border)' : 'none', padding: '16px 0', alignItems: 'center' }}>
                                     <div style={{ width: '250px', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{spec.label}</div>
                                     <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>{spec.value}</div>
                                 </div>
@@ -186,7 +204,7 @@ export default function VehicleDetail() {
 
                     {/* RIGHT COLUMN - BOOKING PANEL */}
                     <div style={{ flex: '1 1 35%', minWidth: '320px' }}>
-                        <div style={{ position: 'sticky', top: '100px', background: 'var(--bg-card)', padding: '40px', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                        <div style={{ position: 'sticky', top: '100px', background: 'var(--bg-card)', padding: '40px', borderRadius: '32px', border: '1px solid var(--border)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
                             <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', fontWeight: '600' }}>Price From</div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px' }}>
                                 <div>
@@ -197,7 +215,7 @@ export default function VehicleDetail() {
                                 </div>
                                 <div style={{ display: 'flex', gap: '4px' }}>
                                     {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star key={star} size={14} fill={star <= Math.floor(vehicle.rating) ? 'var(--accent)' : 'none'} color={star <= Math.floor(vehicle.rating) ? 'var(--accent)' : '#444'} />
+                                        <Star key={star} size={14} fill={star <= Math.floor(vehicle.rating) ? 'var(--accent)' : 'none'} color={star <= Math.floor(vehicle.rating) ? 'var(--accent)' : 'var(--text-muted)'} />
                                     ))}
                                 </div>
                             </div>
@@ -209,15 +227,15 @@ export default function VehicleDetail() {
 
                             {/* TABS */}
                             <div style={{ display: 'flex', background: 'var(--bg-glass)', borderRadius: '16px', padding: '4px', marginBottom: '32px' }}>
-                                <button 
+                                <button
                                     onClick={() => setDriveType('with-driver')}
-                                    style={{ flex: 1, padding: '12px 0', borderRadius: '12px', fontSize: '0.8125rem', fontWeight: '600', background: driveType === 'with-driver' ? 'rgba(255,255,255,0.1)' : 'transparent', color: driveType === 'with-driver' ? '#fff' : '#888', transition: 'all 0.3s', cursor: 'pointer', border: 'none' }}
+                                    style={{ flex: 1, padding: '12px 0', borderRadius: '12px', fontSize: '0.8125rem', fontWeight: '600', background: driveType === 'with-driver' ? 'var(--bg-glass-hover)' : 'transparent', color: driveType === 'with-driver' ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'all 0.3s', cursor: 'pointer', border: 'none' }}
                                 >
                                     With Driver
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setDriveType('self-drive')}
-                                    style={{ flex: 1, padding: '12px 0', borderRadius: '12px', fontSize: '0.8125rem', fontWeight: '600', background: driveType === 'self-drive' ? 'rgba(255,255,255,0.1)' : 'transparent', color: driveType === 'self-drive' ? '#fff' : '#888', transition: 'all 0.3s', cursor: 'pointer', border: 'none' }}
+                                    style={{ flex: 1, padding: '12px 0', borderRadius: '12px', fontSize: '0.8125rem', fontWeight: '600', background: driveType === 'self-drive' ? 'var(--bg-glass-hover)' : 'transparent', color: driveType === 'self-drive' ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'all 0.3s', cursor: 'pointer', border: 'none' }}
                                 >
                                     Self-Drive
                                 </button>
@@ -230,18 +248,18 @@ export default function VehicleDetail() {
                                     {vehicle.addons.map((addon) => {
                                         const isSelected = selectedAddons.includes(addon.id);
                                         return (
-                                            <div 
-                                                key={addon.id} 
+                                            <div
+                                                key={addon.id}
                                                 onClick={() => toggleAddon(addon.id)}
-                                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '16px', border: `1px solid ${isSelected ? 'var(--accent)' : 'rgba(255,255,255,0.05)'}`, background: isSelected ? 'rgba(232, 115, 42, 0.05)' : '#161616', cursor: 'pointer', transition: 'all 0.2s' }}
+                                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '16px', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, background: isSelected ? 'var(--accent-subtle)' : 'var(--bg-glass)', cursor: 'pointer', transition: 'all 0.2s' }}
                                             >
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                    <div style={{ width: '20px', height: '20px', borderRadius: '6px', border: `1px solid ${isSelected ? 'var(--accent)' : '#444'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isSelected ? 'var(--accent)' : 'transparent', transition: 'all 0.2s' }}>
+                                                    <div style={{ width: '20px', height: '20px', borderRadius: '6px', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isSelected ? 'var(--accent)' : 'transparent', transition: 'all 0.2s' }}>
                                                         {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                                                     </div>
-                                                    <span style={{ fontSize: '0.875rem', color: isSelected ? '#fff' : '#a0a0a0' }}>{addon.name}</span>
+                                                    <span style={{ fontSize: '0.875rem', color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{addon.name}</span>
                                                 </div>
-                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: isSelected ? 'var(--accent)' : 'var(--accent)' }}>+${addon.price}</span>
+                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--accent)' }}>+${addon.price}</span>
                                             </div>
                                         )
                                     })}
@@ -264,24 +282,24 @@ export default function VehicleDetail() {
             
             <div className="container">
                 {/* EXPLORE MORE */}
-                <div style={{ marginTop: '80px', paddingTop: '60px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ marginTop: '80px', paddingTop: '60px', borderTop: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
                         <div>
                             <div style={{ color: 'var(--accent)', letterSpacing: '2px', fontWeight: '600', fontSize: '0.75rem', marginBottom: '8px' }}>MORE OPTIONS</div>
                             <h2 style={{ fontSize: '2.5rem', fontWeight: '800', margin: 0 }}>Similar Vehicles</h2>
                         </div>
-                        <button onClick={() => navigate('/vehicles')} style={{ background: 'var(--bg-glass)', border: '1px solid var(--border)', color: 'var(--text-primary)', padding: '10px 24px', borderRadius: '30px', fontWeight: '500', fontSize: '0.875rem', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background='rgba(255,255,255,0.1)'} onMouseOut={(e) => e.currentTarget.style.background='rgba(255,255,255,0.05)'}>See All Vehicles</button>
+                        <button onClick={() => navigate('/vehicles')} style={{ background: 'var(--bg-glass)', border: '1px solid var(--border)', color: 'var(--text-primary)', padding: '10px 24px', borderRadius: '30px', fontWeight: '500', fontSize: '0.875rem', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background='var(--bg-glass-hover)'} onMouseOut={(e) => e.currentTarget.style.background='var(--bg-glass)'}>See All Vehicles</button>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
                         {relatedVehicles.map(v => (
-                            <div key={v.id} style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => { window.scrollTo(0,0); navigate(`/vehicles/${v.id}`); }} onMouseOver={(e) => e.currentTarget.style.background = '#1a1a1a'} onMouseOut={(e) => e.currentTarget.style.background = '#161616'}>
+                            <div key={v.id} style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '16px', border: '1px solid var(--border)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s, border-color 0.3s' }} onClick={() => { window.scrollTo(0,0); navigate(`/vehicles/${v.id}`); }} onMouseOver={(e) => { e.currentTarget.style.background = 'var(--bg-card-hover)'; e.currentTarget.style.borderColor = 'var(--border-hover)'; }} onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-card)'; e.currentTarget.style.borderColor = 'var(--border)'; }}>
                                 <div style={{ overflow: 'hidden', height: '200px', borderRadius: '16px', position: 'relative', marginBottom: '16px' }}>
-                                    <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2 }}>
+                                    <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2 }}>
                                         MAX {v.altitude?.target}
                                     </div>
                                     <img src={v.image} alt={v.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #161616 0%, transparent 50%)' }} />
+                                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)' }} />
                                 </div>
                                 <div style={{ padding: '0 8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>

@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { ToastProvider } from './components/common/Toast'
+import ScrollToTop from './components/common/ScrollToTop'
 import Navbar from './components/layout/Navbar'
 import ChatBot from '../../AI-chatboc/ChatBot.jsx'
 
@@ -13,6 +15,7 @@ import RegisterPage from './pages/auth/RegisterPage'
 import VerifyEmailPage from './pages/auth/VerifyEmailPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import UpdatePasswordPage from './pages/auth/UpdatePasswordPage'
+import OAuthCallbackPage from './pages/auth/OAuthCallbackPage'
 import Dashboard from './pages/user/Dashboard'
 import TerrainSelect from './pages/user/TerrainSelect'
 import VehiclesPage from './pages/user/VehiclesPage'
@@ -31,9 +34,13 @@ function App() {
         <BrowserRouter>
             <AuthProvider>
                 <ThemeProvider>
-                    <Navbar />
-                    <AnimatedRoutes />
-                    <ChatBotGate />
+                    <ToastProvider>
+                        <a href="#main-content" className="skip-to-content">Skip to main content</a>
+                        <ScrollToTop />
+                        <Navbar />
+                        <AnimatedRoutes />
+                        <ChatBotGate />
+                    </ToastProvider>
                 </ThemeProvider>
             </AuthProvider>
         </BrowserRouter>
@@ -103,7 +110,7 @@ function AnimatedRoutes() {
                 </div>
             )}
 
-            <div className={stage === 'exit' ? 'page-exit' : 'page-enter page-rotate'} key={`${displayKey}-${stage}`}>
+            <main id="main-content" className={stage === 'exit' ? 'page-exit' : 'page-enter page-rotate'} key={`${displayKey}-${stage}`}>
                 <Routes location={displayLocation}>
                     {/* Public routes */}
                     <Route path="/" element={<HomePage />} />
@@ -112,6 +119,7 @@ function AnimatedRoutes() {
                     <Route path="/auth/verify" element={<VerifyEmailPage />} />
                     <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
+                    <Route path="/auth/callback" element={<OAuthCallbackPage />} />
 
                     {/* Protected routes */}
                     <Route element={<ProtectedRoute />}>
@@ -131,7 +139,7 @@ function AnimatedRoutes() {
                     {/* Fallback */}
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>
-            </div>
+            </main>
         </>
     )
 }
