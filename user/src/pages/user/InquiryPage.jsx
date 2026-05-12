@@ -55,7 +55,7 @@ export default function InquiryPage() {
         return (
             <div style={{ paddingTop: '120px', textAlign: 'center', minHeight: '100vh', background: 'var(--bg-primary)' }}>
                 <h2 style={{ color: 'var(--text-primary)' }}>Vehicle not found</h2>
-                <button onClick={() => navigate('/vehicles')} style={{ marginTop: '20px', background: '#e8732a', color: 'var(--accent-ink)', border: 'none', padding: '12px 24px', borderRadius: '10px', fontWeight: '700', cursor: 'pointer' }}>Back to Fleet</button>
+                <button onClick={() => navigate('/vehicles')} style={{ marginTop: '20px', background: 'var(--brand-gradient)', color: 'var(--accent-ink)', border: 'none', padding: '12px 24px', borderRadius: '10px', fontWeight: '700', cursor: 'pointer' }}>Back to Fleet</button>
             </div>
         );
     }
@@ -112,11 +112,11 @@ export default function InquiryPage() {
                         <h2 style={{ color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: '700', marginBottom: '4px' }}>{vehicle.name}</h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: 0 }}>{vehicle.subtitle}</p>
                         <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
-                            {[1,2,3,4,5].map((s) => <Star key={s} size={12} fill={s <= vehicle.rating ? '#e8732a' : 'none'} color={s <= vehicle.rating ? '#e8732a' : '#444'} />)}
+                            {[1,2,3,4,5].map((s) => <Star key={s} size={12} fill={s <= vehicle.rating ? 'var(--accent)' : 'none'} color={s <= vehicle.rating ? 'var(--accent)' : 'var(--text-muted)'} />)}
                         </div>
                     </div>
                     <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#e8732a' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--accent)' }}>
                             NPR {liveTotal.toLocaleString()}
                         </div>
                         <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>per day</div>
@@ -132,7 +132,7 @@ export default function InquiryPage() {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '32px' }}>Tell us your plan. We will review and reply.</p>
 
                 {error && (
-                    <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '12px', marginBottom: '20px', color: '#ef4444', fontSize: '0.8rem' }}>{error}</div>
+                    <div style={{ background: 'var(--status-error-soft)', border: '1px solid var(--status-error-border)', borderRadius: '12px', padding: '12px', marginBottom: '20px', color: 'var(--status-error)', fontSize: '0.8rem' }}>{error}</div>
                 )}
 
                 <form onSubmit={handleSubmit}>
@@ -142,9 +142,9 @@ export default function InquiryPage() {
                             {['self-drive', 'with-driver'].map((dt) => (
                                 <button key={dt} type="button" onClick={() => setDriveType(dt)} style={{
                                     flex: 1, padding: '14px', borderRadius: '14px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer',
-                                    background: driveType === dt ? 'rgba(232,115,42,0.1)' : 'rgba(255,255,255,0.03)',
-                                    border: `1px solid ${driveType === dt ? '#e8732a' : 'rgba(255,255,255,0.08)'}`,
-                                    color: driveType === dt ? '#e8732a' : '#888', transition: 'all 0.2s',
+                                    background: driveType === dt ? 'var(--accent-subtle)' : 'var(--bg-glass)',
+                                    border: `1px solid ${driveType === dt ? 'var(--accent)' : 'var(--border)'}`,
+                                    color: driveType === dt ? 'var(--accent)' : 'var(--text-muted)', transition: 'all 0.2s',
                                 }}>
                                     {dt === 'self-drive' ? 'Self Drive' : 'With Driver'}
                                 </button>
@@ -161,21 +161,21 @@ export default function InquiryPage() {
                                     <div key={addon.id} onClick={() => toggleAddon(addon.id)} style={{
                                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                         padding: '14px 16px', borderRadius: '14px', cursor: 'pointer', transition: 'all 0.2s',
-                                        background: sel ? 'rgba(232,115,42,0.05)' : 'rgba(255,255,255,0.03)',
-                                        border: `1px solid ${sel ? '#e8732a' : 'rgba(255,255,255,0.08)'}`,
+                                        background: sel ? 'var(--accent-subtle)' : 'var(--bg-glass)',
+                                        border: `1px solid ${sel ? 'var(--accent)' : 'var(--border)'}`,
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <div style={{
                                                 width: '18px', height: '18px', borderRadius: '5px',
-                                                border: `1px solid ${sel ? '#e8732a' : '#444'}`,
-                                                background: sel ? '#e8732a' : 'transparent',
+                                                border: `1px solid ${sel ? 'var(--accent)' : 'var(--border)'}`,
+                                                background: sel ? 'var(--accent)' : 'transparent',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             }}>
                                                 {sel && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>}
                                             </div>
-                                            <span style={{ color: sel ? '#fff' : '#aaa', fontSize: '0.85rem' }}>{addon.name}</span>
+                                            <span style={{ color: sel ? 'var(--text-primary)' : 'var(--text-secondary)', fontSize: '0.85rem' }}>{addon.name}</span>
                                         </div>
-                                        <span style={{ color: '#e8732a', fontSize: '0.85rem', fontWeight: '600' }}>+${addon.price}</span>
+                                        <span style={{ color: 'var(--accent)', fontSize: '0.85rem', fontWeight: '600' }}>+${addon.price}</span>
                                     </div>
                                 );
                             })}
