@@ -22,11 +22,11 @@ export default function BookingConfirm() {
             <div style={{ textAlign: 'center', maxWidth: '500px', padding: '0 20px' }}>
                 <div style={{
                     width: '80px', height: '80px', borderRadius: '50%',
-                    background: 'rgba(52,211,153,0.1)', border: '2px solid rgba(52,211,153,0.3)',
+                    background: 'var(--status-success-soft)', border: '2px solid var(--status-success-border)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 24px',
                 }}>
-                    <CheckCircle size={40} color="#34d399" />
+                    <CheckCircle size={40} color="var(--status-success)" />
                 </div>
 
                 <h1 style={{ color: 'var(--text-primary)', fontSize: '2rem', fontWeight: '800', marginBottom: '12px' }}>Request Sent!</h1>
@@ -40,7 +40,7 @@ export default function BookingConfirm() {
                         border: '1px solid var(--border)', marginBottom: '32px', textAlign: 'left',
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                            <Car size={18} color="#e8732a" />
+                            <Car size={18} color="var(--accent)" />
                             <span style={{ color: 'var(--text-primary)', fontWeight: '700' }}>{app.vehicles?.name}</span>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -54,20 +54,20 @@ export default function BookingConfirm() {
                             </div>
                             <div>
                                 <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Total</div>
-                                <div style={{ color: '#e8732a', fontSize: '1.1rem', fontWeight: '800' }}>NPR {Number(app.total_price).toLocaleString()}</div>
+                                <div style={{ color: 'var(--accent)', fontSize: '1.1rem', fontWeight: '800' }}>NPR {Number(app.total_price).toLocaleString()}</div>
                             </div>
                             <div>
                                 <div style={{ color: 'var(--text-muted)', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Payment</div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     {app.payment_status === 'completed' ? (<>
-                                        <CheckCircle size={14} color="#34d399" />
-                                        <span style={{ color: '#34d399', fontSize: '0.85rem', fontWeight: '600' }}>Paid</span>
+                                        <CheckCircle size={14} color="var(--status-success)" />
+                                        <span style={{ color: 'var(--status-success)', fontSize: '0.85rem', fontWeight: '600' }}>Paid</span>
                                     </>) : app.status === 'approved' ? (<>
-                                        <Clock size={14} color="#60bb46" />
-                                        <span style={{ color: '#60bb46', fontSize: '0.85rem', fontWeight: '600' }}>Awaiting Payment</span>
+                                        <Clock size={14} color="var(--status-pay)" />
+                                        <span style={{ color: 'var(--status-pay)', fontSize: '0.85rem', fontWeight: '600' }}>Awaiting Payment</span>
                                     </>) : (<>
-                                        <Clock size={14} color="#f59e0b" />
-                                        <span style={{ color: '#f59e0b', fontSize: '0.85rem', fontWeight: '600' }}>Checking</span>
+                                        <Clock size={14} color="var(--status-warning)" />
+                                        <span style={{ color: 'var(--status-warning)', fontSize: '0.85rem', fontWeight: '600' }}>Checking</span>
                                     </>)}
                                 </div>
                             </div>

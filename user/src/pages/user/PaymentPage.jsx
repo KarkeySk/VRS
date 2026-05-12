@@ -49,10 +49,14 @@ export default function PaymentPage() {
             const transactionUuid = generateTransactionUuid();
             const config = getEsewaConfig();
 
-            // Build success URL with application context
+            // eSewa appends `?data=<base64>` to whichever URL we give it.
+            // Our URLs MUST NOT already contain a query string, otherwise the
+            // result becomes `…?foo=bar?data=…` (illegal — second `?` is treated
+            // as part of the previous value and `data` is never parsed).
+            // Encode applicationId in the path instead.
             const baseUrl = window.location.origin;
-            const successUrl = `${baseUrl}/payment/success?method=esewa&applicationId=${applicationId}`;
-            const failureUrl = `${baseUrl}/payment/${applicationId}?failed=true`;
+            const successUrl = `${baseUrl}/payment/success/${applicationId}`;
+            const failureUrl = `${baseUrl}/payment/${applicationId}`;
 
             const payload = buildEsewaPayload({
                 amount: Number(app.total_price),
@@ -102,8 +106,8 @@ export default function PaymentPage() {
     if (error && !app) {
         return (
             <div style={{ paddingTop: '120px', textAlign: 'center', minHeight: '100vh', background: 'var(--bg-primary)' }}>
-                <AlertCircle size={48} color="#ef4444" style={{ margin: '0 auto 16px' }} />
-                <p style={{ color: '#ef4444', fontSize: '1rem' }}>{error}</p>
+                <AlertCircle size={48} color="var(--status-error)" style={{ margin: '0 auto 16px' }} />
+                <p style={{ color: 'var(--status-error)', fontSize: '1rem' }}>{error}</p>
                 <Link to="/bookings" style={{
                     display: 'inline-block', marginTop: '20px', color: 'var(--text-secondary)',
                     textDecoration: 'none', fontSize: '0.85rem',
@@ -134,9 +138,9 @@ export default function PaymentPage() {
 
                 {error && (
                     <div style={{
-                        background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+                        background: 'var(--status-error-soft)', border: '1px solid var(--status-error-border)',
                         borderRadius: '12px', padding: '12px 16px', marginBottom: '20px',
-                        color: '#ef4444', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px',
+                        color: 'var(--status-error)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '8px',
                     }}>
                         <AlertCircle size={16} /> {error}
                     </div>
@@ -188,7 +192,7 @@ export default function PaymentPage() {
                             padding: '20px 0 0', borderTop: '1px solid var(--border)', marginTop: '4px',
                         }}>
                             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600' }}>Total Amount</span>
-                            <span style={{ color: '#e8732a', fontSize: '1.6rem', fontWeight: '800' }}>
+                            <span style={{ color: 'var(--accent)', fontSize: '1.6rem', fontWeight: '800' }}>
                                 NPR {Number(app.total_price).toLocaleString()}
                             </span>
                         </div>
@@ -213,9 +217,9 @@ export default function PaymentPage() {
                             style={{
                                 width: '100%',
                                 padding: '18px 24px',
-                                border: '2px solid #60bb46',
+                                border: '2px solid var(--status-pay-border)',
                                 borderRadius: '16px',
-                                background: 'linear-gradient(135deg, rgba(96,187,70,0.08), rgba(96,187,70,0.02))',
+                                background: 'var(--status-pay-soft)',
                                 cursor: processing ? 'not-allowed' : 'pointer',
                                 opacity: processing ? 0.7 : 1,
                                 display: 'flex',
@@ -225,15 +229,13 @@ export default function PaymentPage() {
                             }}
                             onMouseOver={(e) => {
                                 if (!processing) {
-                                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(96,187,70,0.15), rgba(96,187,70,0.05))';
-                                    e.currentTarget.style.borderColor = '#4da836';
+                                    e.currentTarget.style.borderColor = 'var(--status-pay)';
                                     e.currentTarget.style.transform = 'translateY(-1px)';
-                                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(96,187,70,0.2)';
+                                    e.currentTarget.style.boxShadow = '0 8px 24px var(--status-pay-soft)';
                                 }
                             }}
                             onMouseOut={(e) => {
-                                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(96,187,70,0.08), rgba(96,187,70,0.02))';
-                                e.currentTarget.style.borderColor = '#60bb46';
+                                e.currentTarget.style.borderColor = 'var(--status-pay-border)';
                                 e.currentTarget.style.transform = 'translateY(0)';
                                 e.currentTarget.style.boxShadow = 'none';
                             }}
@@ -241,10 +243,10 @@ export default function PaymentPage() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                 <div style={{
                                     width: '48px', height: '48px', borderRadius: '12px',
-                                    background: '#60bb46', display: 'flex', alignItems: 'center',
+                                    background: 'var(--status-pay)', display: 'flex', alignItems: 'center',
                                     justifyContent: 'center', flexShrink: 0,
                                 }}>
-                                    <span style={{ color: '#fff', fontSize: '1rem', fontWeight: '800', letterSpacing: '-0.5px' }}>eS</span>
+                                    <span style={{ color: '#ffffff', fontSize: '1rem', fontWeight: '800', letterSpacing: '-0.5px' }}>eS</span>
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
                                     <div style={{ color: 'var(--text-primary)', fontWeight: '700', fontSize: '0.95rem' }}>
@@ -255,7 +257,7 @@ export default function PaymentPage() {
                                     </div>
                                 </div>
                             </div>
-                            <CreditCard size={20} color="#60bb46" />
+                            <CreditCard size={20} color="var(--status-pay)" />
                         </button>
                     </div>
                 )}
@@ -263,11 +265,11 @@ export default function PaymentPage() {
                 {/* Already paid message */}
                 {app?.payment_status === 'completed' && (
                     <div style={{
-                        background: 'rgba(52,211,153,0.05)', borderRadius: '20px', padding: '28px',
-                        border: '1px solid rgba(52,211,153,0.2)', marginBottom: '24px', textAlign: 'center',
+                        background: 'var(--status-success-soft)', borderRadius: '20px', padding: '28px',
+                        border: '1px solid var(--status-success-border)', marginBottom: '24px', textAlign: 'center',
                     }}>
-                        <CheckCircle size={40} color="#34d399" style={{ margin: '0 auto 12px' }} />
-                        <div style={{ color: '#34d399', fontWeight: '700', fontSize: '1rem', marginBottom: '4px' }}>
+                        <CheckCircle size={40} color="var(--status-success)" style={{ margin: '0 auto 12px' }} />
+                        <div style={{ color: 'var(--status-success)', fontWeight: '700', fontSize: '1rem', marginBottom: '4px' }}>
                             Payment Completed
                         </div>
                         <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
@@ -286,7 +288,7 @@ export default function PaymentPage() {
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: '10px',
                     padding: '16px', borderRadius: '12px',
-                    background: 'rgba(255,255,255,0.02)',
+                    background: 'var(--bg-glass)',
                 }}>
                     <Shield size={16} color="var(--text-muted)" />
                     <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem' }}>
