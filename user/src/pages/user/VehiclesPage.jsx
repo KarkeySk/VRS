@@ -32,8 +32,8 @@ export default function VehiclesPage() {
     return (
         <div style={{ paddingTop: '100px', minHeight: '100vh', paddingBottom: '80px', background: 'var(--bg-primary)' }}>
             <div className="container" style={{ position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '20px', right: '0', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-glass)', padding: '8px 16px', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', color: 'var(--text-primary)' }}>
+                <div style={{ position: 'absolute', top: '20px', right: '0', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-glass)', padding: '8px 16px', borderRadius: '30px', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'var(--bg-glass-hover)', borderRadius: '50%', color: 'var(--text-primary)' }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
                     </div>
                     <div>
@@ -42,32 +42,32 @@ export default function VehiclesPage() {
                     </div>
                 </div>
 
-                <div className="section-label" style={{ color: '#e8732a', letterSpacing: '2px', fontWeight: '600' }}>FLEET DISCOVERY</div>
+                <div className="section-label" style={{ color: 'var(--accent)', letterSpacing: '2px', fontWeight: '600' }}>FLEET DISCOVERY</div>
                 <h1 className="section-title" style={{ marginBottom: '16px', fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: '800', lineHeight: 1 }}>Bhatbhate:<br/>Choose Your Ride</h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', maxWidth: '500px', marginBottom: '40px', lineHeight: 1.5 }}>
                     Choose from vehicles made for city roads and mountain roads.
                 </p>
 
                 {/* Filters */}
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
-                    <button 
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '40px', alignItems: 'center' }}>
+                    <button
                         onClick={() => setShowFilters(!showFilters)}
-                        style={{ background: showFilters ? 'linear-gradient(to right, #fcab73, #e8732a)' : 'rgba(255,255,255,0.05)', border: showFilters ? 'none' : '1px solid rgba(255,255,255,0.1)', color: showFilters ? 'var(--accent-ink)' : 'var(--text-primary)', padding: '10px 24px', borderRadius: '30px', fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.3s' }}
+                        style={{ background: showFilters ? 'var(--brand-gradient)' : 'var(--bg-glass)', border: showFilters ? 'none' : '1px solid var(--border)', color: showFilters ? 'var(--accent-ink)' : 'var(--text-primary)', padding: '10px 24px', borderRadius: '30px', fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', transition: 'all 0.3s' }}
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
                         Filters {showFilters ? '✕' : ''}
                     </button>
                     {showFilters && ['All Terrain', 'Ice Peaks', 'Valley Passes'].map((f) => (
-                        <button 
+                        <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            style={{ 
-                                background: filter === f ? 'rgba(255,255,255,0.1)' : 'transparent', 
-                                border: filter === f ? 'none' : '1px solid rgba(255,255,255,0.1)', 
-                                color: filter === f ? 'var(--text-primary)' : 'var(--text-secondary)', 
-                                padding: '10px 24px', 
-                                borderRadius: '30px', 
-                                fontWeight: '500', 
+                            style={{
+                                background: filter === f ? 'var(--bg-glass-hover)' : 'transparent',
+                                border: `1px solid ${filter === f ? 'var(--border-hover)' : 'var(--border)'}`,
+                                color: filter === f ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                padding: '10px 24px',
+                                borderRadius: '30px',
+                                fontWeight: '500',
                                 fontSize: '0.875rem',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
@@ -82,8 +82,8 @@ export default function VehiclesPage() {
                             key={w}
                             onClick={() => setWheelsFilter(w)}
                             style={{
-                                background: wheelsFilter === w ? 'rgba(232,115,42,0.2)' : 'transparent',
-                                border: wheelsFilter === w ? '1px solid rgba(232,115,42,0.55)' : '1px solid rgba(255,255,255,0.1)',
+                                background: wheelsFilter === w ? 'var(--accent-subtle)' : 'transparent',
+                                border: `1px solid ${wheelsFilter === w ? 'var(--accent)' : 'var(--border)'}`,
                                 color: wheelsFilter === w ? 'var(--accent)' : 'var(--text-secondary)',
                                 padding: '10px 20px',
                                 borderRadius: '30px',
@@ -97,11 +97,11 @@ export default function VehiclesPage() {
                             {w === 'all' ? 'All Wheels' : `${w} Wheeler`}
                         </button>
                     ))}
-                    
+
                     <div style={{ flex: 1 }}></div>
-                    <button 
+                    <button
                         onClick={() => setSortHighToLow(!sortHighToLow)}
-                        style={{ background: sortHighToLow ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'var(--text-primary)', padding: '10px 24px', borderRadius: '30px', fontWeight: '500', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', transition: 'all 0.2s' }}
+                        style={{ background: sortHighToLow ? 'var(--bg-glass-hover)' : 'var(--bg-glass)', border: '1px solid var(--border)', color: 'var(--text-primary)', padding: '10px 24px', borderRadius: '30px', fontWeight: '500', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', transition: 'all 0.2s' }}
                     >
                         Price: {sortHighToLow ? 'High to Low' : 'Low to High'}
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: sortHighToLow ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -113,13 +113,13 @@ export default function VehiclesPage() {
                 ) : (
                 <div className="fleet-grid">
                     {filteredVehicles.map(vehicle => (
-                        <div key={vehicle.id} style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s' }} onClick={() => navigate(`/vehicles/${vehicle.id}`)} onMouseOver={(e) => e.currentTarget.style.background = 'var(--bg-card-hover)'} onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-card)'}>
+                        <div key={vehicle.id} style={{ background: 'var(--bg-card)', borderRadius: '24px', padding: '16px', border: '1px solid var(--border)', cursor: 'pointer', transition: 'transform 0.3s, background 0.3s, border-color 0.3s' }} onClick={() => navigate(`/vehicles/${vehicle.id}`)} onMouseOver={(e) => { e.currentTarget.style.background = 'var(--bg-card-hover)'; e.currentTarget.style.borderColor = 'var(--border-hover)'; }} onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-card)'; e.currentTarget.style.borderColor = 'var(--border)'; }}>
                             <div style={{ overflow: 'hidden', height: '240px', borderRadius: '16px', position: 'relative', marginBottom: '20px' }}>
-                                <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ position: 'absolute', top: '12px', left: '12px', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.625rem', fontWeight: '600', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.5px', zIndex: 2, display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg> {vehicle.altitude?.target} RATED
                                 </div>
                                 <img src={vehicle.image} alt={vehicle.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #111 0%, transparent 50%)' }} />
+                                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)' }} />
                             </div>
                             <div style={{ padding: '0 8px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
@@ -146,7 +146,7 @@ export default function VehiclesPage() {
                 )}
 
                 {/* Mountain Conditions Widget at the bottom */}
-                <div style={{ marginTop: '60px', background: 'linear-gradient(180deg, rgba(25,25,25,0.8) 0%, rgba(15,15,15,0.8) 100%)', borderRadius: '24px', padding: '40px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '800px', margin: '60px auto 0' }}>
+                <div style={{ marginTop: '60px', background: 'var(--bg-card)', borderRadius: '24px', padding: 'clamp(24px, 4vw, 40px)', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px', maxWidth: '800px', margin: '60px auto 0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
                         <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'var(--bg-glass)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <CloudRain size={32} color="var(--text-primary)" />
