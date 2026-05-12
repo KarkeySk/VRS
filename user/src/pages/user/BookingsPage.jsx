@@ -1,0 +1,140 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { applicationService } from '@bhatbhati/shared/services/applicationService.js';
+import { Car, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight, CreditCard } from 'lucide-react';
+
+const statusConfig = {
+    submitted:      { label: 'Submitted', color: 'var(--status-info)', Icon: Clock },
+    'under-review': { label: 'Under Review', color: 'var(--status-warning)', Icon: AlertCircle },
+    approved:       { label: 'Approved', color: 'var(--status-success)', Icon: CheckCircle },
+    rejected:       { label: 'Rejected', color: 'var(--status-error)', Icon: XCircle },
+    confirmed:      { label: 'Confirmed', color: 'var(--status-success)', Icon: CheckCircle },
+    cancelled:      { label: 'Cancelled', color: 'var(--text-secondary)', Icon: XCircle },
+};
+
+export default function BookingsPage() {
+    const { user } = useAuth();
+    const [applications, setApplications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!user) return;
+        applicationService.getMyApplications(user.id)
+            .then(setApplications)
+            .catch((err) => {
+                console.warn('Failed to load bookings:', err?.message || err);
+            })
+            .finally(() => setLoading(false));
+    }, [user]);
+
+    const handleCancel = async (id) => {
+        try {
+            await applicationService.cancel(id);
+            setApplications((prev) => prev.map((a) => a.id === id ? { ...a, status: 'cancelled' } : a));
+        } catch (err) {
+            console.warn('Failed to cancel booking:', err?.message || err);
+        }
+    };
+
+    return (
+        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '80px' }}>
+            <div className="container" style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
+                <h1 style={{ color: 'var(--text-primary)', fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>My Bookings</h1>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '36px' }}>Track your booking requests and status.</p>
+
+                {loading ? (
+                    <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '60px 0' }}>Loading...</div>
+                ) : applications.length === 0 ? (
+                    <div style={{
+                        textAlign: 'center', padding: '80px 20px', background: 'var(--bg-card)',
+                        borderRadius: '24px', border: '1px solid var(--border)',
+                    }}>
+                        <Car size={48} color="var(--text-muted)" style={{ marginBottom: '16px', opacity: 0.7 }} />
+                        <h2 style={{ color: 'var(--text-primary)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '8px' }}>No bookings yet</h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px' }}>Start by choosing a vehicle and sending a request.</p>
+                        <Link to="/terrain" style={{
+                            textDecoration: 'none', background: 'var(--brand-gradient)',
+                            color: 'var(--accent-ink)', fontWeight: '700', fontSize: '0.85rem', padding: '14px 28px',
+                            borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '8px',
+                        }}>
+                            Pick Road Type <ArrowRight size={16} />
+                        </Link>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {applications.map((app) => {
+                            const status = statusConfig[app.status] || statusConfig.submitted;
+                            const StatusIcon = status.Icon;
+                            return (
+                                <div key={app.id} style={{
+                                    background: 'var(--bg-card)', borderRadius: '20px', padding: '24px',
+                                    border: '1px solid var(--border)', display: 'flex',
+                                    justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: '1 1 300px' }}>
+                                        {app.vehicles?.image && (
+                                            <img src={app.vehicles.image} alt="" style={{ width: '80px', height: '56px', borderRadius: '10px', objectFit: 'cover' }} />
+                                        )}
+                                        <div>
+                                            <h3 style={{ color: 'var(--text-primary)', fontSize: '1rem', fontWeight: '700', marginBottom: '4px' }}>{app.vehicles?.name || 'Vehicle'}</h3>
+                                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
+                                                {app.start_date} → {app.end_date} · {app.drive_type === 'with-driver' ? 'With Driver' : 'Self Drive'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ color: 'var(--accent)', fontSize: '1.2rem', fontWeight: '800' }}>${app.total_price}</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                                                <StatusIcon size={14} color={status.color} />
+                                                <span style={{ color: status.color, fontSize: '0.75rem', fontWeight: '600' }}>{status.label}</span>
+                                            </div>
+                                        </div>
+
+                                        {(app.status === 'submitted' || app.status === 'under-review') && (
+                                            <button onClick={() => handleCancel(app.id)} style={{
+                                                background: 'var(--status-error-soft)', border: '1px solid var(--status-error-border)',
+                                                color: 'var(--status-error)', padding: '8px 16px', borderRadius: '10px',
+                                                fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer',
+                                            }}>
+                                                Cancel
+                                            </button>
+                                        )}
+
+                                        {/* Pay Now button for approved bookings */}
+                                        {app.status === 'approved' && app.payment_status !== 'completed' && (
+                                            <Link to={`/payment/${app.id}`} style={{
+                                                textDecoration: 'none',
+                                                background: 'var(--status-pay)',
+                                                color: '#ffffff', padding: '8px 20px', borderRadius: '10px',
+                                                fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', gap: '6px',
+                                                boxShadow: '0 4px 12px var(--status-pay-soft)',
+                                            }}>
+                                                <CreditCard size={14} /> Pay Now
+                                            </Link>
+                                        )}
+
+                                        {/* Payment completed badge */}
+                                        {app.payment_status === 'completed' && (
+                                            <span style={{
+                                                background: 'var(--status-success-soft)', border: '1px solid var(--status-success-border)',
+                                                color: 'var(--status-success)', padding: '6px 12px', borderRadius: '8px',
+                                                fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase',
+                                                letterSpacing: '0.5px',
+                                            }}>
+                                                ✓ Paid
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
