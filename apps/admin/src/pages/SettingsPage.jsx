@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Map, User, Cog, Edit, AlertTriangle } from 'lucide-react'
 
 const SETTINGS_KEY = 'bhatbhati_admin_settings_v1'
@@ -23,13 +23,9 @@ function readSavedSettings() {
 }
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState(defaultSettings)
+  const [settings, setSettings] = useState(readSavedSettings)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-
-  useEffect(() => {
-    setSettings(readSavedSettings())
-  }, [])
 
   const update = (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
