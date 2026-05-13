@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authService } from '@bhatbhati/shared/services/authService.js'
 import { profileService } from '@bhatbhati/shared/services/profileService.js'
@@ -17,9 +17,27 @@ import {
   Key,
   Clock,
   Monitor,
-  Smartphone,
   CheckCircle,
+  QrCode,
+  RefreshCw,
+  ShieldCheck,
+  XCircle,
 } from 'lucide-react'
+
+function formatSessionExpiry(session) {
+  if (!session?.expires_at) return 'Access token validated'
+  const expiry = new Date(session.expires_at * 1000)
+  return `Access valid until ${expiry.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+}
+
+function getDeviceLabel() {
+  const ua = navigator.userAgent
+  if (/Edg\//.test(ua)) return 'Current browser - Edge'
+  if (/Chrome\//.test(ua)) return 'Current browser - Chrome'
+  if (/Firefox\//.test(ua)) return 'Current browser - Firefox'
+  if (/Safari\//.test(ua)) return 'Current browser - Safari'
+  return 'Current browser'
+}
 
 export default function AdminProfilePage({ onNavigate }) {
   const navigate = useNavigate()
@@ -32,7 +50,15 @@ export default function AdminProfilePage({ onNavigate }) {
   const [notifEmail, setNotifEmail] = useState(true)
   const [notifSms, setNotifSms] = useState(false)
   const [notifPush, setNotifPush] = useState(true)
-  const [twoFactor, setTwoFactor] = useState(true)
+  const [twoFactor, setTwoFactor] = useState(false)
+  const [twoFactorBusy, setTwoFactorBusy] = useState(false)
+  const [mfaEnrollment, setMfaEnrollment] = useState(null)
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaStatus, setMfaStatus] = useState({
+    currentLevel: 'aal1',
+    nextLevel: 'aal1',
+    verifiedFactors: [],
+  })
 
   const [profile, setProfile] = useState({
     fullName: 'Admin User',
@@ -50,10 +76,7 @@ export default function AdminProfilePage({ onNavigate }) {
     confirm: '',
   })
 
-  const [sessions, setSessions] = useState([
-    { id: 'current', device: 'Windows PC — Chrome', location: 'Kathmandu, Nepal', time: 'Current session', icon: Monitor, current: true },
-    { id: 'mobile', device: 'iPhone 15 Pro — Safari', location: 'Pokhara, Nepal', time: '2 hours ago', icon: Smartphone, current: false },
-  ])
+  const [sessions, setSessions] = useState([])
 
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -61,13 +84,43 @@ export default function AdminProfilePage({ onNavigate }) {
   const [saving, setSaving] = useState(false)
   const [passwordSaving, setPasswordSaving] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
+  const [sessionSaving, setSessionSaving] = useState(false)
+
+  const loadSecurityState = useCallback(async () => {
+    const session = await authService.getValidatedSession()
+
+    setSessions(session ? [{
+      id: 'current',
+      device: getDeviceLabel(),
+      location: 'Validated current session',
+      time: formatSessionExpiry(session),
+      icon: Monitor,
+      current: true,
+      access: session.access_token ? 'Access token present' : 'Access token missing',
+    }] : [])
+
+    try {
+      const status = await authService.getMfaStatus()
+      setTwoFactor(status.enabled)
+      setMfaStatus({
+        currentLevel: status.assurance?.currentLevel || 'aal1',
+        nextLevel: status.assurance?.nextLevel || 'aal1',
+        verifiedFactors: status.verifiedTotp || [],
+      })
+    } catch (err) {
+      console.warn('MFA status check failed:', err.message)
+      setTwoFactor(false)
+      setMfaStatus({ currentLevel: 'aal1', nextLevel: 'aal1', verifiedFactors: [] })
+    }
+  }, [])
 
   useEffect(() => {
     const load = async () => {
       setLoading(true)
       setError('')
       try {
-        const user = await authService.getUser()
+        const session = await authService.getValidatedSession()
+        const user = session?.user
         if (!user) {
           navigate('/login', { replace: true })
           return
@@ -85,6 +138,7 @@ export default function AdminProfilePage({ onNavigate }) {
           role: dbProfile?.role === 'admin' ? 'Super Admin' : 'User',
           avatarUrl: dbProfile?.avatar_url || '',
         }))
+        await loadSecurityState()
       } catch (err) {
         setError(err.message || 'Failed to load profile')
       } finally {
@@ -92,7 +146,7 @@ export default function AdminProfilePage({ onNavigate }) {
       }
     }
     load()
-  }, [navigate])
+  }, [loadSecurityState, navigate])
 
   const updateProfileField = (key, value) => {
     setProfile((prev) => ({ ...prev, [key]: value }))
@@ -172,7 +226,7 @@ export default function AdminProfilePage({ onNavigate }) {
   const handleSignOut = async () => {
     try {
       setSigningOut(true)
-      await authService.signOut()
+      await authService.signOut('local')
       navigate('/login', { replace: true })
     } catch (err) {
       setError(err.message || 'Failed to sign out')
@@ -181,9 +235,105 @@ export default function AdminProfilePage({ onNavigate }) {
     }
   }
 
-  const revokeSession = (sessionId) => {
-    setSessions((prev) => prev.filter((s) => s.id !== sessionId))
-    setMessage('Session revoked from this device list.')
+  const startTwoFactorEnrollment = async () => {
+    setTwoFactorBusy(true)
+    setError('')
+    setMessage('')
+    try {
+      const status = await authService.getMfaStatus()
+      if (status.enabled) {
+        await loadSecurityState()
+        setMessage('Two-factor authentication is already enabled.')
+        return
+      }
+
+      const enrollment = await authService.enrollMfaFactor(`${profile.email || 'Admin'} TOTP`)
+      setMfaEnrollment(enrollment)
+      setMfaCode('')
+      setMessage('Scan the QR code and enter the authenticator code to enable 2FA.')
+    } catch (err) {
+      setError(err.message || 'Could not start two-factor enrollment.')
+    } finally {
+      setTwoFactorBusy(false)
+    }
+  }
+
+  const verifyTwoFactorEnrollment = async () => {
+    if (!mfaEnrollment?.id) return
+    setTwoFactorBusy(true)
+    setError('')
+    setMessage('')
+    try {
+      await authService.verifyMfaCode(mfaEnrollment.id, mfaCode.trim())
+      setMfaEnrollment(null)
+      setMfaCode('')
+      await loadSecurityState()
+      setMessage('Two-factor authentication enabled.')
+    } catch (err) {
+      setError(err.message || 'Could not verify authenticator code.')
+    } finally {
+      setTwoFactorBusy(false)
+    }
+  }
+
+  const cancelTwoFactorEnrollment = async () => {
+    const pendingFactorId = mfaEnrollment?.id
+    setMfaEnrollment(null)
+    setMfaCode('')
+    setMessage('')
+    if (!pendingFactorId) return
+
+    try {
+      await authService.unenrollMfaFactor(pendingFactorId)
+      await loadSecurityState()
+    } catch (err) {
+      setError(err.message || 'Could not cancel two-factor enrollment.')
+    }
+  }
+
+  const disableTwoFactor = async () => {
+    setTwoFactorBusy(true)
+    setError('')
+    setMessage('')
+    try {
+      const status = await authService.getMfaStatus()
+      const factors = status.verifiedTotp || []
+      if (!factors.length) {
+        await loadSecurityState()
+        return
+      }
+
+      await Promise.all(factors.map((factor) => authService.unenrollMfaFactor(factor.id)))
+      await loadSecurityState()
+      setMessage('Two-factor authentication disabled.')
+    } catch (err) {
+      setError(err.message || 'Could not disable two-factor authentication.')
+    } finally {
+      setTwoFactorBusy(false)
+    }
+  }
+
+  const handleTwoFactorToggle = () => {
+    if (twoFactor) {
+      disableTwoFactor()
+    } else {
+      startTwoFactorEnrollment()
+    }
+  }
+
+  const revokeOtherSessions = async () => {
+    setSessionSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      await authService.signOut('others')
+      await loadSecurityState()
+      setMessage('Other sessions were signed out. Existing access tokens expire on Supabase schedule.')
+    } catch (err) {
+      setError(err.message || 'Could not sign out other sessions.')
+    } finally {
+      setSessionSaving(false)
+    }
   }
 
   if (loading) {
@@ -232,7 +382,7 @@ export default function AdminProfilePage({ onNavigate }) {
               <div className="flex-1">
                 <h3 className="text-xl font-bold mb-1">{profile.displayName || 'Admin'}</h3>
                 <p className="text-sm text-brand-orange font-semibold mb-1">Fleet Director</p>
-                <p className="text-xs text-txt-secondary mb-3">Member since January 2024 · Kathmandu, Nepal</p>
+                <p className="text-xs text-txt-secondary mb-3">Member since January 2024 - Kathmandu, Nepal</p>
                 <div className="flex items-center gap-3">
                   <span className="px-2.5 py-1 bg-status-green/20 text-status-green text-[10px] font-bold rounded-full uppercase">Active</span>
                   <span className="px-2.5 py-1 bg-brand-orange/20 text-brand-orange text-[10px] font-bold rounded-full uppercase">{profile.role}</span>
@@ -279,7 +429,7 @@ export default function AdminProfilePage({ onNavigate }) {
               </div>
               <div>
                 <label className="text-xs text-txt-secondary mb-1.5 block">Role</label>
-                <input type="text" value={`Fleet Director — ${profile.role}`} readOnly className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-secondary cursor-not-allowed" />
+                <input type="text" value={`Fleet Director - ${profile.role}`} readOnly className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm text-txt-secondary cursor-not-allowed" />
               </div>
             </div>
           </div>
@@ -345,12 +495,72 @@ export default function AdminProfilePage({ onNavigate }) {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">Two-Factor Authentication</p>
-                  <p className="text-xs text-txt-secondary">Extra security for your account</p>
+                  <p className="text-xs text-txt-secondary">
+                    {twoFactor ? 'Authenticator app is enabled' : 'Optional authenticator app protection'}
+                  </p>
                 </div>
               </div>
-              <button type="button" onClick={() => setTwoFactor(!twoFactor)} className={`w-11 h-6 rounded-full relative border-none ${twoFactor ? 'bg-brand-orange' : 'bg-dark-border'}`}>
+              <button
+                type="button"
+                onClick={handleTwoFactorToggle}
+                disabled={twoFactorBusy}
+                aria-pressed={twoFactor}
+                className={`w-11 h-6 rounded-full relative border-none disabled:opacity-60 ${twoFactor ? 'bg-brand-orange' : 'bg-dark-border'}`}
+              >
                 <div className={`absolute top-0.5 w-5 h-5 rounded-full ${twoFactor ? 'right-0.5 bg-white' : 'left-0.5 bg-txt-secondary'}`} />
               </button>
+            </div>
+
+            {mfaEnrollment && (
+              <div className="bg-dark-deeper rounded-lg px-4 py-4 mb-4 border border-brand-orange/30">
+                <div className="flex items-start gap-4">
+                  <div className="w-28 h-28 rounded-lg bg-white p-2 flex items-center justify-center shrink-0">
+                    {mfaEnrollment.totp?.qr_code ? (
+                      <img src={mfaEnrollment.totp.qr_code} alt="Authenticator QR code" className="w-full h-full object-contain" />
+                    ) : (
+                      <QrCode className="w-16 h-16 text-dark" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold mb-1">Verify authenticator app</p>
+                    <p className="text-xs text-txt-secondary mb-3">Scan the QR code or enter the secret, then submit the 6-digit code.</p>
+                    {mfaEnrollment.totp?.secret && (
+                      <div className="mb-3 rounded-md bg-dark border border-dark-border px-3 py-2 text-[11px] text-txt-secondary break-all">
+                        {mfaEnrollment.totp.secret}
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        value={mfaCode}
+                        onChange={(e) => setMfaCode(e.target.value)}
+                        placeholder="123456"
+                        maxLength={8}
+                        className="w-36 bg-dark border border-dark-border rounded-lg px-3 py-2 text-sm"
+                      />
+                      <button type="button" onClick={verifyTwoFactorEnrollment} disabled={twoFactorBusy || !mfaCode.trim()} className="btn-action px-4 py-2 text-xs disabled:opacity-60">
+                        {twoFactorBusy ? 'Verifying...' : 'Enable 2FA'}
+                      </button>
+                      <button type="button" onClick={cancelTwoFactorEnrollment} className="px-4 py-2 text-xs text-txt-secondary bg-transparent border border-dark-border rounded-full">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-dark-deeper rounded-lg px-4 py-3">
+                <p className="text-[10px] text-txt-secondary uppercase tracking-wider font-semibold mb-1">Current Level</p>
+                <p className="text-sm font-semibold text-txt-primary">{mfaStatus.currentLevel?.toUpperCase()}</p>
+              </div>
+              <div className="bg-dark-deeper rounded-lg px-4 py-3">
+                <p className="text-[10px] text-txt-secondary uppercase tracking-wider font-semibold mb-1">Next Level</p>
+                <p className="text-sm font-semibold text-txt-primary">{mfaStatus.nextLevel?.toUpperCase()}</p>
+              </div>
             </div>
 
             <p className="text-xs text-txt-secondary uppercase tracking-wider font-semibold mb-3">Active Sessions</p>
@@ -368,17 +578,22 @@ export default function AdminProfilePage({ onNavigate }) {
                           {session.device}
                           {session.current && <span className="px-1.5 py-0.5 bg-status-green/20 text-status-green text-[9px] font-bold rounded uppercase">Current</span>}
                         </p>
-                        <p className="text-xs text-txt-secondary">{session.location} · {session.time}</p>
+                        <p className="text-xs text-txt-secondary">{session.location} - {session.time}</p>
+                        <p className="text-[10px] text-txt-muted">{session.access}</p>
                       </div>
                     </div>
-                    {!session.current && (
-                      <button type="button" onClick={() => revokeSession(session.id)} className="text-xs text-status-red hover:text-status-red/80 bg-transparent border-none cursor-pointer font-semibold">
-                        Revoke
-                      </button>
-                    )}
+                    <ShieldCheck className="w-4 h-4 text-status-green" />
                   </div>
                 )
               })}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" onClick={loadSecurityState} className="px-4 py-2 text-xs text-txt-secondary bg-transparent border border-dark-border rounded-full inline-flex items-center gap-2">
+                <RefreshCw className="w-3.5 h-3.5" /> Refresh Security
+              </button>
+              <button type="button" onClick={revokeOtherSessions} disabled={sessionSaving} className="px-4 py-2 text-xs text-status-red bg-transparent border border-status-red/30 rounded-full inline-flex items-center gap-2 disabled:opacity-60">
+                <XCircle className="w-3.5 h-3.5" /> {sessionSaving ? 'Signing out...' : 'Sign Out Other Sessions'}
+              </button>
             </div>
           </div>
 

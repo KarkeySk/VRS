@@ -6,7 +6,8 @@ import { Navigate, Outlet } from 'react-router-dom'
  * Redirects unauthenticated users to /auth/login.
  */
 export function ProtectedRoute() {
-    const { user, loading } = useAuth()
+    const { user, loading, mfaRequired } = useAuth()
     if (loading) return null // or a loading spinner
+    if (user && mfaRequired) return <Navigate to="/auth/login?mfa=required" replace />
     return user ? <Outlet /> : <Navigate to="/auth/login" replace />
 }
