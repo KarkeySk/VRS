@@ -88,6 +88,16 @@ export function shouldSendApprovalEmail({ currentStatus, nextStatus, booking }) 
     )
 }
 
+export async function sendApprovalEmailOnce(booking) {
+    if (!booking?.id || booking.email_sent === true) {
+        return { status: 'skipped' }
+    }
+
+    await sendBookingApprovalEmail(booking)
+    const recorded = await recordApprovalEmailSent(booking.id)
+    return recorded ? { status: 'sent' } : { status: 'skipped' }
+}
+
 export async function getBookingEmailDetails(bookingId) {
     if (!supabase) throw new Error('Supabase is not configured')
 
