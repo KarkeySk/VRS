@@ -28,7 +28,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     let unsub = null
-    authService.getSession().then((session) => {
+    authService.getValidatedSession().then((session) => {
       setUserId(session?.user?.id ?? 'guest')
     }).catch(() => {
       setUserId('guest')
@@ -38,7 +38,7 @@ export function ThemeProvider({ children }) {
       const result = authService.onAuthStateChange((_event, session) => {
         setUserId(session?.user?.id ?? 'guest')
       })
-      unsub = result?.data?.listener?.subscription
+      unsub = result?.data?.subscription || result?.data?.listener?.subscription
     } catch {
       unsub = null
     }

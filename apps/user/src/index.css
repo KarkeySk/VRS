@@ -535,6 +535,12 @@ ol {
   font-size: 0.84rem;
 }
 
+.auth-alert-success {
+  border-color: rgba(95, 167, 118, 0.35);
+  background: rgba(95, 167, 118, 0.12);
+  color: #79d296;
+}
+
 .auth-form {
   display: grid;
   gap: 10px;
@@ -547,6 +553,18 @@ ol {
   font-size: 0.65rem;
   font-weight: 700;
   margin-top: 6px;
+}
+
+.auth-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.auth-label-row label {
+  margin-top: 0;
 }
 
 .auth-form input,
@@ -587,6 +605,48 @@ ol {
   border: none;
   background: transparent;
   color: #99a0ac;
+}
+
+.auth-link-button,
+.auth-back-button {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0;
+}
+
+.auth-link-button:disabled,
+.auth-back-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.auth-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: #a5acb8;
+}
+
+.auth-resend-button {
+  justify-self: center;
+  margin-top: 2px;
+}
+
+.auth-step-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: var(--accent-subtle);
+  border: 1px solid rgba(232, 115, 42, 0.22);
 }
 
 .auth-submit {
