@@ -1,16 +1,205 @@
-# React + Vite
+# Bhatbhati VRS — Vehicle Rental System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Monorepo containing two React + Vite frontends and a Supabase backend.
 
-Currently, two official plugins are available:
+## Layout
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```
+.
+├── user/             Customer-facing React app  (port 5173)
+├── admin/            Internal admin React app   (port 5174)
+├── backend/          Supabase: SQL migrations, seed data, Edge Functions
+├── packages/
+│   └── shared/       Shared services + utils used by both apps
+├── scripts/          One-off scripts (wireframe capture, etc.)
+└── package.json      npm workspaces root
+```
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Node.js 20+** (developed against v24)
+- **npm 10+** (ships with Node)
+- A **Supabase project** (free tier is fine)
 
-## Expanding the ESLint configuration
+> ⚠️ Use `npm` only. Do not mix in `pnpm` or `yarn` — the lockfile and workspace config are npm-specific. Do not run `npm install` inside `user/` or `admin/`; only at the repo root.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Setup
+
+### 1. Install dependencies
+
+From the repo root:
+
+```bash
+npm install
+```
+
+This installs everything for `user/`, `admin/`, and `packages/shared/` via npm workspaces. A single `node_modules/` is created at the root.
+
+### 2. Configure environment variables
+
+Create a `.env` file at the repo root (both apps read from there — see `envDir` in each `vite.config.js`):
+
+```bash
+# Supabase (required)
+VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<your-anon-or-publishable-key>
+
+# eSewa payments (optional — defaults to sandbox/test credentials)
+VITE_ESEWA_MERCHANT_CODE=EPAYTEST
+VITE_ESEWA_SECRET_KEY=8gBm/:&EnhH.1/q
+VITE_ESEWA_PAYMENT_URL=https://rc-epay.esewa.com.np/api/epay/main/v2/form
+
+# Weather widget (optional)
+VITE_WEATHER_LOCATION=Kathmandu
+VITE_WEATHER_LAT=27.7172
+VITE_WEATHER_LON=85.3240
+```
+
+> If eSewa vars are omitted, the app falls back to the public sandbox credentials. To go live, replace with real merchant credentials and the production URL `https://epay.esewa.com.np/api/epay/main/v2/form`.
+
+### 3. Set up the database
+
+See [`backend/README.md`](backend/README.md) for the full migration order. Quick version:
+
+1. In your Supabase dashboard → **SQL Editor**, run each file in `backend/migrations/` in numeric order (001 → 010).
+2. Run each seed file in `backend/seed/` in numeric order to populate vehicles, an admin user, and UI assets.
+3. (Optional) Toggle **Confirm Email OFF** in Authentication → Providers → Email for local dev.
+
+## Running the project
+
+> **All `npm` commands below are run from the repo root** (`VRS/`), **not** from inside `user/`, `admin/`, `backend/`, or `packages/`. The npm workspace setup expects this.
+
+### First-time setup walkthrough
+
+Open a terminal and run, **in order**:
+
+```bash
+# 1. Go to the project root
+cd /path/to/VRS
+
+# 2. Install all dependencies (one time, or whenever package.json changes)
+npm install
+
+# 3. Make sure the .env file exists at the repo root
+ls .env        # if missing, create it using the template in "2. Configure environment variables" above
+
+# 4. Start the dev servers
+npm run dev
+```
+
+That last command starts **both** apps in parallel. You should see something like:
+
+```
+[user]  ➜  Local:   http://localhost:5173/
+[admin] ➜  Local:   http://localhost:5174/
+```
+
+### Open the apps in your browser
+
+| App | URL | Who uses it |
+|---|---|---|
+| **User app** (customer) | <http://localhost:5173> | Public site — browse vehicles, book, pay |
+| **Admin app** (internal) | <http://localhost:5174> | Operations — fleet, bookings, dashboard |
+
+### Run only one app
+
+If you don't need both running at the same time:
+
+```bash
+# From the repo root:
+npm run dev:user      # user app only — http://localhost:5173
+npm run dev:admin     # admin app only — http://localhost:5174
+```
+
+### Stopping the dev server
+
+In the terminal where it's running, press **Ctrl+C** (Windows/Linux) or **Cmd+C** (macOS).
+
+### All available commands
+
+Run all of these from the repo root (`VRS/`):
+
+| Command | What it does |
+|---|---|
+| `npm install` | Install/update dependencies for the whole workspace |
+| `npm run dev` | Start **both** apps (user :5173 + admin :5174) in parallel |
+| `npm run dev:user` | Start only the user app on :5173 |
+| `npm run dev:admin` | Start only the admin app on :5174 |
+| `npm run build:user` | Production build of the user app → `user/dist/` |
+| `npm run build:admin` | Production build of the admin app → `admin/dist/` |
+| `npm run capture:wireframes` | Playwright script that captures page screenshots |
+
+### Working on the backend (database)
+
+The backend lives in `backend/` (Supabase). You don't run a server locally — your code talks to the hosted Supabase project directly.
+
+To apply schema changes:
+
+```bash
+cd backend
+# then follow backend/README.md to run migrations in the Supabase dashboard
+```
+
+Or with the Supabase CLI (if installed):
+
+```bash
+cd backend
+supabase db push
+```
+
+## Default admin login (development only)
+
+After running the seed files in `backend/seed/`:
+
+- Email: `admin@gmail.com`
+- Password: `admin123`
+
+Log in at <http://localhost:5174> using these. To promote any other user to admin, run the SQL snippet in [`backend/README.md`](backend/README.md#make-a-user-admin).
+
+## Migrating to a new machine
+
+```bash
+git clone <repo-url>
+cd VRS
+npm install
+cp /path/to/your/.env .env   # or recreate using the template above
+npm run dev
+```
+
+That's it — the npm workspace handles all transitive dependencies (including `crypto-js` used by the eSewa integration).
+
+## Troubleshooting
+
+**`Failed to resolve import "crypto-js"` (or any package) when starting Vite**
+Someone ran `npm install` inside `user/` or `admin/` instead of at the root. Fix:
+
+```bash
+# from the repo root
+rm -rf user/node_modules admin/node_modules user/package-lock.json admin/package-lock.json
+rm -rf node_modules apps/user/node_modules/.vite apps/admin/node_modules/.vite
+npm install
+```
+
+**Port already in use (`5173` or `5174`)**
+Another Vite server is already running. Find and stop it:
+
+```bash
+# Linux/macOS
+lsof -i :5173
+kill <PID>
+```
+
+Or change the port in `user/vite.config.js` / `admin/vite.config.js` (`server.port`).
+
+**`.env` changes not taking effect**
+Vite reads `.env` at startup. Restart the dev server (Ctrl+C, then `npm run dev` again). Also make sure each variable is prefixed with `VITE_` — anything else won't be exposed to the browser.
+
+**"Supabase is not configured" / blank pages with auth errors**
+`VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` is missing or wrong in `.env`. Check the values in your Supabase dashboard → Project Settings → API.
+
+**Payment redirects back with "Payment was cancelled or failed"**
+You're hitting the eSewa sandbox. Use the sandbox test login: ID `9806800001`, password `Nepal@123`, MPIN `1122`, OTP `123456`. Real eSewa accounts won't work against the sandbox URL.
+
+## Project status
+
+See [`PROJECT_STATUS.md`](PROJECT_STATUS.md) for implemented features, current architecture, and the production-readiness checklist.
