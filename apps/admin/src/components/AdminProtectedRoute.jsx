@@ -10,12 +10,20 @@ export default function AdminProtectedRoute({ children }) {
     let mounted = true
     const check = async () => {
       try {
-        const session = await authService.getSession()
+        const session = await authService.getValidatedSession()
+        const accessToken = await authService.getAccessToken()
         const userId = session?.user?.id
-        if (!userId) {
+        if (!userId || !accessToken) {
           if (mounted) setIsAllowed(false)
           return
         }
+
+        const assurance = await authService.getAuthenticatorAssuranceLevel().catch(() => null)
+        if (assurance?.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+          if (mounted) setIsAllowed(false)
+          return
+        }
+
         const admin = await authService.isAdmin(userId)
         if (mounted) setIsAllowed(Boolean(admin))
       } catch {
