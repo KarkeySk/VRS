@@ -39,7 +39,7 @@ export default function Sidebar({ activePage, onNavigate }) {
             <button
               key={item.id}
               type="button"
-              onClick={(e) => {
+              onClick={() => {
                 onNavigate(item.id);
               }}
               className={`nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all duration-200 ${
