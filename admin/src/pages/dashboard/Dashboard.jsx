@@ -1,0 +1,94 @@
+import { useState } from 'react'
+import Sidebar from '@/components/Sidebar'
+import TopBar from '@/components/TopBar'
+import DashboardPage from '@/pages/DashboardPage'
+import FleetPage from '@/pages/FleetPage'
+import BookingsPage from '@/pages/BookingsPage'
+import CompliancePage from '@/pages/CompliancePage'
+import OperationsPage from '@/pages/OperationsPage'
+import SettingsPage from '@/pages/SettingsPage'
+import AddVehiclePage from '@/pages/AddVehiclePage'
+import NewBookingPage from '@/pages/NewBookingPage'
+import AdminProfilePage from '@/pages/AdminProfilePage'
+
+const PAGE_META = {
+  // Top bar titles + CTA configuration per view.
+  dashboard: { title: 'Fleet Command', subtitle: 'Bikes • Cars • Jeeps', showNewBtn: true },
+  fleet: { title: 'Fleet', showNewBtn: false },
+  bookings: { title: 'Bookings', showNewBtn: true },
+  compliance: { title: 'Checks & Logs', showNewBtn: false },
+  operations: { title: 'Operations & Logs', subtitle: 'Admin', showNewBtn: false },
+  settings: { title: 'Settings', showNewBtn: false },
+  'add-vehicle': { title: 'Add Vehicle', subtitle: 'Form', showNewBtn: false },
+  'new-booking': { title: 'New Booking', subtitle: 'Booking Form', showNewBtn: false },
+  'admin-profile': { title: 'Profile', subtitle: 'Account', showNewBtn: false },
+}
+
+export default function Dashboard() {
+  // Local routing state for the admin shell.
+  const [activePage, setActivePage] = useState('dashboard')
+  // Ephemeral message shown in the top bar area.
+  const [topBarMessage, setTopBarMessage] = useState('')
+  // Current page metadata used by TopBar.
+  const meta = PAGE_META[activePage]
+
+  const renderPage = () => {
+    // Simple view routing driven by local state.
+    switch (activePage) {
+      case 'dashboard':
+        return <DashboardPage onNavigate={setActivePage} />
+      case 'fleet':
+        return <FleetPage />
+      case 'bookings':
+        return <BookingsPage onNavigate={setActivePage} />
+      case 'compliance':
+        return <CompliancePage />
+      case 'operations':
+        return <OperationsPage />
+      case 'settings':
+        return <SettingsPage />
+      case 'add-vehicle':
+        return <AddVehiclePage onNavigate={setActivePage} />
+      case 'new-booking':
+        return <NewBookingPage onNavigate={setActivePage} />
+      case 'admin-profile':
+        return <AdminProfilePage onNavigate={setActivePage} />
+      default:
+        return <DashboardPage />
+    }
+  }
+
+  return (
+    // Full-height layout containing sidebar + content.
+    <div className="flex h-screen overflow-hidden bg-dark-deeper text-txt-primary font-sans">
+      {/* Sidebar controls page switching. */}
+      <Sidebar activePage={activePage} onNavigate={setActivePage} />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header with actions and page label. */}
+        <TopBar
+          title={meta.title}
+          subtitle={meta.subtitle}
+          showNewBooking={meta.showNewBtn}
+          onNewBooking={() => setActivePage('new-booking')}
+          onShowNotifications={() => setTopBarMessage('Notifications will be added soon.')}
+          onShowHelp={() => setTopBarMessage('Need help? Open Add Vehicle, New Booking, or Profile.')}
+        />
+        <main className="flex-1 overflow-y-auto p-6">
+          {topBarMessage && (
+            <div className="mb-4 rounded-md border border-brand-orange/30 bg-brand-orange/10 px-3 py-2 text-xs text-brand-orange flex items-center justify-between gap-3">
+              <span>{topBarMessage}</span>
+              <button
+                type="button"
+                className="bg-transparent border-none text-brand-orange cursor-pointer text-xs font-semibold"
+                onClick={() => setTopBarMessage('')}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+          {renderPage()}
+        </main>
+      </div>
+    </div>
+  )
+}
