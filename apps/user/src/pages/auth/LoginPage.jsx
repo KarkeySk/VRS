@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Eye, EyeOff, KeyRound, MailCheck, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Eye, EyeOff, MailCheck, ShieldCheck } from 'lucide-react'
 import { authService } from '@bhatbhati/shared/services/authService.js'
 import { useAuth } from '../../context/AuthContext'
 import logo from '../../assets/logo.png'
@@ -44,7 +44,6 @@ export default function LoginPage() {
   const [flow, setFlow] = useState('sign-in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [otp, setOtp] = useState('')
   const [mfaCode, setMfaCode] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -166,26 +165,13 @@ export default function LoginPage() {
     clearNotices()
     setIsLoading(true)
     try {
-      await authService.requestPasswordReset(email.trim(), getRecoveryRedirectUrl())
+      const cleanEmail = email.trim()
+      if (!cleanEmail) throw new Error('Email address is required.')
+      await authService.requestPasswordReset(cleanEmail, getRecoveryRedirectUrl())
       setResetSent(true)
-      setMessage('Password reset sent. Enter the OTP or open the secure link from your email.')
+      setMessage('Password reset link sent. Open the secure link from your email to choose a new password.')
     } catch (err) {
       setError(err.message || 'Could not send password reset.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleRecoveryOtp = async (e) => {
-    e.preventDefault()
-    clearNotices()
-    setIsLoading(true)
-    try {
-      await authService.verifyPasswordRecoveryOtp(email.trim(), otp.trim())
-      setFlow('reset')
-      setMessage('OTP verified. Choose a new password.')
-    } catch (err) {
-      setError(err.message || 'OTP could not be verified.')
     } finally {
       setIsLoading(false)
     }
@@ -221,17 +207,17 @@ export default function LoginPage() {
   const goToSignIn = () => {
     setFlow('sign-in')
     setPassword('')
-    setOtp('')
     setMfaCode('')
     setNewPassword('')
     setConfirmPassword('')
+    setResetSent(false)
     clearNotices()
   }
 
   const slide = fleetSlides[currentSlide]
   const header = {
     'sign-in': ['Welcome back', 'Sign in to continue.'],
-    forgot: ['Reset password', 'Use your email OTP or recovery link.'],
+    forgot: ['Reset password', 'Use the secure link from your email.'],
     reset: ['Create new password', 'Finish your secure recovery.'],
     mfa: ['Two-factor check', 'Confirm this sign-in.'],
   }[flow]
@@ -296,7 +282,7 @@ export default function LoginPage() {
 
               <div className="auth-label-row">
                 <label htmlFor="login-password">Password</label>
-                <button type="button" className="auth-link-button" onClick={() => { clearNotices(); setFlow('forgot') }}>
+                <button type="button" className="auth-link-button" onClick={() => { clearNotices(); setResetSent(false); setFlow('forgot') }}>
                   Forgot password?
                 </button>
               </div>
@@ -353,7 +339,7 @@ export default function LoginPage() {
           )}
 
           {flow === 'forgot' && (
-            <form onSubmit={resetSent ? handleRecoveryOtp : handlePasswordResetRequest} className="auth-form">
+            <form onSubmit={handlePasswordResetRequest} className="auth-form">
               <div className="auth-step-icon">
                 <MailCheck size={20} />
               </div>
@@ -362,41 +348,22 @@ export default function LoginPage() {
                 id="reset-email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  setResetSent(false)
+                }}
                 placeholder="you@email.com"
                 autoComplete="email"
                 required
               />
 
-              {resetSent && (
-                <>
-                  <label htmlFor="reset-otp">Recovery OTP</label>
-                  <input
-                    id="reset-otp"
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="123456"
-                    maxLength={8}
-                    required
-                  />
-                </>
-              )}
-
               <button type="submit" className="auth-submit" disabled={isLoading}>
                 {isLoading
-                  ? 'Working...'
+                  ? 'Sending...'
                   : resetSent
-                    ? 'Verify OTP'
-                    : 'Send Reset OTP'} <KeyRound size={16} />
+                    ? 'Send New Link'
+                    : 'Send Reset Link'} <MailCheck size={16} />
               </button>
-              {resetSent && (
-                <button type="button" className="auth-link-button auth-resend-button" onClick={handlePasswordResetRequest} disabled={isLoading}>
-                  Send a new OTP
-                </button>
-              )}
               <button type="button" className="auth-back-button" onClick={goToSignIn}>
                 <ArrowLeft size={15} /> Back to sign in
               </button>
