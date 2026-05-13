@@ -1,0 +1,552 @@
+/* Tailwind base + utilities layer */
+@import "tailwindcss";
+
+/* ===== CUSTOM THEME ===== */
+@theme {
+  --font-sans: "Inter", sans-serif;
+
+  /* Travel palette: vehicle + nature + city */
+  --color-dark: #162127;
+  --color-dark-deeper: #0c1317;
+  --color-dark-card: #1c2a33;
+  --color-dark-border: #2f4250;
+  --color-dark-hover: #243541;
+
+  /* Brand */
+  --color-brand-orange: #d3742f;
+  --color-brand-orange-dark: #bf6229;
+  --color-brand-city: #4b7898;
+  --color-brand-nature: #5a8666;
+
+  /* Status */
+  --color-status-green: #5fa776;
+  --color-status-yellow: #d39a3e;
+  --color-status-red: #ef4444;
+
+  /* Text */
+  --color-txt-primary: #eff5f9;
+  --color-txt-secondary: #a8b9c8;
+  --color-txt-muted: #73889a;
+}
+
+/* ===== GLOBAL RESETS ===== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-dark-deeper);
+  color: var(--color-txt-primary);
+  font-family: var(--font-sans);
+}
+
+:root[data-theme='light'] {
+  --color-dark: #faf6ef;
+  --color-dark-deeper: #f2ede3;
+  --color-dark-card: #ffffff;
+  --color-dark-border: #d2c9bb;
+  --color-dark-hover: #f3ebdd;
+
+  --color-brand-orange: #be6228;
+  --color-brand-orange-dark: #aa541f;
+  --color-brand-city: #4a7593;
+  --color-brand-nature: #5c8868;
+
+  --color-status-green: #5f9f73;
+  --color-status-yellow: #c18a34;
+
+  --color-txt-primary: #1f2e3a;
+  --color-txt-secondary: #546678;
+  --color-txt-muted: #718394;
+}
+
+:root[data-theme='light'] body {
+  background-color: #f2ede3;
+}
+
+/* ===== Brand Variants ===== */
+:root[data-brand='mountain-premium'] {
+  --color-dark: #172129;
+  --color-dark-deeper: #10171d;
+  --color-dark-card: #1f2d36;
+  --color-dark-border: #344955;
+  --color-dark-hover: #2a3c48;
+
+  --color-brand-orange: #a86a37;
+  --color-brand-orange-dark: #945a2d;
+  --color-brand-city: #557a9e;
+  --color-brand-nature: #4d7a65;
+
+  --color-status-green: #5f9b73;
+  --color-status-yellow: #ba8740;
+}
+
+:root[data-theme='light'][data-brand='mountain-premium'] {
+  --color-dark: #f7f2e9;
+  --color-dark-deeper: #f0eadf;
+  --color-dark-card: #fffdf8;
+  --color-dark-border: #d4cabd;
+  --color-dark-hover: #f4ecdf;
+
+  --color-brand-orange: #9f6030;
+  --color-brand-orange-dark: #8e5328;
+  --color-brand-city: #5c7fa6;
+  --color-brand-nature: #567f6a;
+}
+
+:root[data-brand='urban-adventure'] {
+  --color-dark: #17232b;
+  --color-dark-deeper: #0f161d;
+  --color-dark-card: #1d2f3a;
+  --color-dark-border: #325063;
+  --color-dark-hover: #274455;
+
+  --color-brand-orange: #3a6f9a;
+  --color-brand-orange-dark: #315f86;
+  --color-brand-city: #7ba8c9;
+  --color-brand-nature: #4f8a6f;
+
+  --color-status-green: #5f9f78;
+  --color-status-yellow: #ba8b44;
+}
+
+:root[data-theme='light'][data-brand='urban-adventure'] {
+  --color-dark: #f6f1e9;
+  --color-dark-deeper: #efe8dd;
+  --color-dark-card: #fffdf8;
+  --color-dark-border: #cfd2cb;
+  --color-dark-hover: #f3ece2;
+
+  --color-brand-orange: #3f749f;
+  --color-brand-orange-dark: #34628a;
+  --color-brand-city: #4d7ca7;
+  --color-brand-nature: #568d73;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-dark-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-dark-hover);
+}
+
+/* ===== CALENDAR DAY HOVER ===== */
+.cal-day:hover:not(.cal-today):not(.cal-other) {
+  background-color: rgba(255, 143, 63, 0.15);
+}
+
+/* ===== BOOKING CARD HOVER ===== */
+.booking-card:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: var(--color-dark-border);
+}
+
+/* ===== NAV LINK HOVER ===== */
+.nav-link:hover:not(.nav-active) {
+  background-color: rgba(255, 143, 63, 0.1);
+  color: #ffffff;
+}
+
+/* ===== TAB UNDERLINE ===== */
+.tab-active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-brand-orange);
+}
+
+/* ===== SEARCH INPUT ===== */
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--color-brand-orange);
+  border-color: var(--color-brand-orange);
+}
+
+/* ===== ACTION BUTTON ===== */
+.btn-action {
+  background: linear-gradient(125deg, #eec79f 0%, var(--color-brand-orange) 52%, var(--color-brand-city) 100%) !important;
+  color: #1a1a1a !important;
+  border: none !important;
+  border-radius: 9999px !important;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-action:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(211, 116, 47, 0.3);
+}
+
+/* ===== PROGRESS BAR ===== */
+.progress-bar {
+  transition: width 1s ease-in-out;
+}
+
+/* ===== TRACKING CHART ===== */
+.tracking-chart {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+.chart-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(to top, rgba(211, 116, 47, 0.08) 0%, transparent 100%);
+}
+
+/* ===== FLEET INTRO ===== */
+@keyframes fleet-road-flow {
+  0% { background-position: 0 0; }
+  100% { background-position: 36px 0; }
+}
+
+@keyframes fleet-drive {
+  0% { transform: translateX(-20%) translateY(0); opacity: 0; }
+  8% { opacity: 1; }
+  40% { transform: translateX(45%) translateY(0); opacity: 1; }
+  60% { transform: translateX(70%) translateY(-1px); opacity: 1; }
+  100% { transform: translateX(125%) translateY(0); opacity: 0; }
+}
+
+.fleet-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(92, 122, 106, 0.18), transparent 35%),
+    radial-gradient(circle at 76% 75%, rgba(75, 120, 152, 0.24), transparent 40%),
+    linear-gradient(135deg, #0b1419 0%, #111c22 52%, #18242c 100%);
+  transition: opacity 320ms ease;
+}
+
+.fleet-intro--leave {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fleet-intro__glow {
+  position: absolute;
+  width: min(72vw, 880px);
+  height: min(38vw, 420px);
+  filter: blur(44px);
+  background: radial-gradient(circle, rgba(211, 116, 47, 0.17), transparent 64%);
+}
+
+.fleet-intro__content {
+  position: relative;
+  width: min(86vw, 860px);
+  padding: 28px 30px 34px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  background: rgba(13, 19, 24, 0.8);
+  backdrop-filter: blur(6px);
+}
+
+.fleet-intro__label {
+  margin: 0 0 8px;
+  color: var(--color-txt-secondary);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.fleet-intro__title {
+  margin: 0 0 18px;
+  font-size: clamp(1.25rem, 1rem + 1.6vw, 2rem);
+  font-weight: 800;
+  color: var(--color-txt-primary);
+}
+
+.fleet-road {
+  position: relative;
+  width: 100%;
+  height: 88px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+    linear-gradient(90deg, rgba(255,255,255,0.16) 0 10px, transparent 10px 24px);
+  background-size: auto, 34px 1px;
+  background-repeat: no-repeat, repeat-x;
+  background-position: 0 0, 0 50%;
+  animation: fleet-road-flow 1100ms linear infinite;
+  overflow: hidden;
+}
+
+.fleet-road__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.fleet-road__line:nth-child(1) { top: 22%; }
+.fleet-road__line:nth-child(2) { top: 50%; }
+.fleet-road__line:nth-child(3) { top: 78%; }
+
+.fleet-vehicle {
+  position: absolute;
+  top: 50%;
+  left: -14%;
+  width: 56px;
+  height: 18px;
+  margin-top: -9px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.24);
+  box-shadow: inset 0 0 0 1px rgba(12, 19, 23, 0.42);
+  animation: fleet-drive 2200ms linear infinite;
+}
+
+.fleet-vehicle::before,
+.fleet-vehicle::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(12, 19, 23, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.fleet-vehicle::before { left: 8px; }
+.fleet-vehicle::after { right: 8px; }
+
+.fleet-vehicle--one {
+  background: linear-gradient(120deg, #eec79f 0%, #d3742f 58%, #4b7898 100%);
+}
+
+.fleet-vehicle--two {
+  width: 50px;
+  margin-top: 10px;
+  animation-delay: 520ms;
+  background: linear-gradient(120deg, #5a8666 0%, #4b7898 60%, #d3742f 100%);
+}
+
+.fleet-vehicle--three {
+  width: 62px;
+  margin-top: -26px;
+  animation-delay: 980ms;
+  background: linear-gradient(120deg, #4b7898 0%, #d3742f 65%, #be6228 100%);
+}
+
+/* ===== FLEET COMMAND THEME ===== */
+.fleet-command-banner {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(80, 174, 230, 0.26), transparent 38%),
+    radial-gradient(circle at 86% 74%, rgba(224, 132, 56, 0.22), transparent 44%),
+    linear-gradient(128deg, #101c24 0%, #162833 48%, #1f3645 100%);
+}
+
+.fleet-command-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(110deg, transparent 0 48%, rgba(255,255,255,0.08) 49%, transparent 52%),
+    linear-gradient(130deg, transparent 0 64%, rgba(255,255,255,0.05) 65%, transparent 68%);
+  pointer-events: none;
+}
+
+.fleet-command-banner__content {
+  position: relative;
+  z-index: 1;
+  padding: 30px;
+}
+
+.fleet-command-banner__kicker {
+  margin: 0 0 10px;
+  color: #b5cde0;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.fleet-command-banner h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.55rem, 2.2vw, 2.1rem);
+  letter-spacing: -0.02em;
+}
+
+.fleet-command-banner p {
+  margin: 0;
+  color: var(--color-txt-secondary);
+  max-width: 720px;
+}
+
+.fleet-command-banner__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.fleet-command-banner__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.13);
+  padding: 8px 12px;
+  background: rgba(8, 13, 18, 0.45);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.theme-tile {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.02);
+  text-align: left;
+  color: var(--color-txt-primary);
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.theme-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.22);
+}
+
+.theme-tile--active {
+  box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+}
+
+.theme-tile__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.theme-tile__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.theme-tile__tag {
+  font-size: 11px;
+  color: var(--color-txt-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.theme-tile h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.theme-tile p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-txt-secondary);
+}
+
+.theme-tile__bar {
+  margin-top: 14px;
+  height: 7px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.theme-tile__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.theme-bike {
+  background: linear-gradient(135deg, rgba(84, 174, 233, 0.2), rgba(61, 100, 127, 0.14));
+}
+.theme-bike .theme-tile__icon,
+.theme-bike .theme-tile__bar span { background: rgba(84, 174, 233, 0.28); }
+
+.theme-car {
+  background: linear-gradient(135deg, rgba(110, 203, 165, 0.2), rgba(59, 118, 95, 0.14));
+}
+.theme-car .theme-tile__icon,
+.theme-car .theme-tile__bar span { background: rgba(110, 203, 165, 0.28); }
+
+.theme-jeep {
+  background: linear-gradient(135deg, rgba(232, 138, 64, 0.22), rgba(114, 71, 36, 0.14));
+}
+.theme-jeep .theme-tile__icon,
+.theme-jeep .theme-tile__bar span { background: rgba(232, 138, 64, 0.3); }
+
+.theme-bike.theme-tile--active { border-color: rgba(84, 174, 233, 0.7); }
+.theme-car.theme-tile--active { border-color: rgba(110, 203, 165, 0.7); }
+.theme-jeep.theme-tile--active { border-color: rgba(232, 138, 64, 0.75); }
+
+.vehicle-theme-panel {
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+  padding: 18px;
+}
+
+.vehicle-theme-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.vehicle-theme-panel__eyebrow {
+  margin: 0 0 3px;
+  font-size: 11px;
+  color: var(--color-txt-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-weight: 700;
+}
+
+.vehicle-theme-panel__header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 760px) {
+  .fleet-command-banner__content {
+    padding: 20px;
+  }
+
+  .vehicle-theme-panel__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
