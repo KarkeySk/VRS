@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Mail } from 'lucide-react';
+import { ArrowRight, Mail, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
   getEmailError,
@@ -166,7 +166,7 @@ export default function RegisterPage() {
           {error && <div className="auth-alert">{error}</div>}
           {success && (
             <div className="auth-alert auth-alert-success">
-              <Mail size={16} /> {success}
+              <CheckCircle size={16} /> {success}
             </div>
           )}
 
