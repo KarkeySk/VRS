@@ -49,6 +49,30 @@
   50%       { opacity: 1;   transform: scaleY(1); }
 }
 
+@keyframes wheelSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes verifyProgress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+@keyframes driftLights {
+  from { transform: translateX(-50px) translateY(-50px); }
+  to   { transform: translateX(50px) translateY(50px); }
+}
+
+@keyframes roadDash {
+  from { transform: translateX(80px); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes bikeRun {
+  0%   { left: -128px; }
+  100% { left: 100%; }
+}
+
 /* ===== CSS VARIABLES ===== */
 /* Brand palette: Pantone 715 C (#FF5723) · Pantone Black 3 C (#272827) · Pantone 7527 C (#E8E2D9) */
 :root {
