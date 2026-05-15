@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
   getFriendlyAuthError,
@@ -161,7 +161,11 @@ export default function UpdatePasswordPage() {
           </div>
 
           {error && <div className="auth-alert">{error}</div>}
-          {successMessage && <div className="auth-alert auth-alert-success">{successMessage}</div>}
+          {successMessage && (
+            <div className="auth-alert auth-alert-success">
+              <CheckCircle size={16} /> {successMessage}
+            </div>
+          )}
 
           {checkingSession ? (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
