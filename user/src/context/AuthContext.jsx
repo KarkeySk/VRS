@@ -45,24 +45,23 @@ export function AuthProvider({ children }) {
         }
     }, [])
 
-    console.log('[AuthContext] authService.signInWithGoogle:', typeof authService?.signInWithGoogle, authService)
     const value = {
         user,
         session,
         loading,
-        signIn: authService.signIn,
-        signUp: authService.signUp,
-        signInWithGoogle: authService.signInWithGoogle,
-        resendConfirmation: authService.resendConfirmation,
-        signOut: authService.signOut,
-        resetPasswordForEmail: authService.resetPasswordForEmail,
-        updatePassword: authService.updatePassword,
-        verifyOtp: authService.verifyOtp,
-        enrollMfa: authService.enrollMfa,
-        challengeAndVerifyMfa: authService.challengeAndVerifyMfa,
-        unenrollMfa: authService.unenrollMfa,
-        listMfaFactors: authService.listMfaFactors,
-        getMfaLevel: authService.getMfaLevel,
+        signIn: (...args) => authService.signIn(...args),
+        signUp: (...args) => authService.signUp(...args),
+        signInWithGoogle: (...args) => authService.signInWithGoogle(...args),
+        resendConfirmation: (...args) => authService.resendConfirmation(...args),
+        signOut: (...args) => authService.signOut(...args),
+        resetPasswordForEmail: (...args) => authService.resetPasswordForEmail(...args),
+        updatePassword: (...args) => authService.updatePassword(...args),
+        verifyOtp: (...args) => authService.verifyOtp(...args),
+        enrollMfa: (...args) => authService.enrollMfa(...args),
+        challengeAndVerifyMfa: (...args) => authService.challengeAndVerifyMfa(...args),
+        unenrollMfa: (...args) => authService.unenrollMfa(...args),
+        listMfaFactors: (...args) => authService.listMfaFactors(...args),
+        getMfaLevel: (...args) => authService.getMfaLevel(...args),
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

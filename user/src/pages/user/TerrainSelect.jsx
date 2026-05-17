@@ -184,11 +184,11 @@ export default function TerrainSelect() {
     };
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '80px' }}>
+        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '40px' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
 
                 {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--accent-subtle)', padding: '6px 16px', borderRadius: '30px', fontSize: '0.65rem', fontWeight: '700', letterSpacing: '2px', color: 'var(--accent)', marginBottom: '16px', border: '1px solid var(--accent-subtle)' }}>
                         <MapPin size={12} /> PICK YOUR AREA
                     </div>
@@ -200,10 +200,10 @@ export default function TerrainSelect() {
                     </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
 
-                    {/* Map */}
-                    <div style={{ flex: '1 1 55%', minWidth: '350px' }}>
+                    {/* Map — sticky so it stays visible while the panel scrolls */}
+                    <div style={{ flex: '0 0 52%', position: 'sticky', top: '88px' }}>
                         <div style={{
                             background: 'var(--bg-card)', borderRadius: '24px', padding: '24px',
                             border: '1px solid var(--border)', position: 'relative',
@@ -293,111 +293,98 @@ export default function TerrainSelect() {
                     </div>
 
                     {/* Info Panel */}
-                    <div style={{ flex: '1 1 35%', minWidth: '300px' }}>
+                    <div style={{ flex: '1 1 0', minWidth: '280px' }}>
                         {activeRegion ? (
                             <div style={{
-                                background: 'var(--bg-card)', borderRadius: '24px', padding: '32px',
+                                background: 'var(--bg-card)', borderRadius: '20px', padding: '20px',
                                 border: `1px solid ${activeRegion.color}25`,
                                 transition: 'all 0.3s',
                             }}>
                                 {/* Region header */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                                     <div style={{
-                                        width: '44px', height: '44px', borderRadius: '14px',
+                                        width: '38px', height: '38px', borderRadius: '12px',
                                         background: activeRegion.color + '15', display: 'flex',
                                         alignItems: 'center', justifyContent: 'center',
-                                        border: `1px solid ${activeRegion.color}30`,
+                                        border: `1px solid ${activeRegion.color}30`, flexShrink: 0,
                                     }}>
-                                        <Mountain size={22} color={activeRegion.color} />
+                                        <Mountain size={18} color={activeRegion.color} />
                                     </div>
                                     <div>
-                                        <h2 style={{ color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: '800', marginBottom: '2px' }}>{activeRegion.name}</h2>
+                                        <h2 style={{ color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: '800', marginBottom: '2px' }}>{activeRegion.name}</h2>
                                         <span style={{
-                                            fontSize: '0.6rem', fontWeight: '700', letterSpacing: '1.5px',
+                                            fontSize: '0.58rem', fontWeight: '700', letterSpacing: '1.5px',
                                             color: activeRegion.color, textTransform: 'uppercase',
                                         }}>{activeRegion.terrain}</span>
                                     </div>
                                 </div>
 
-                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '24px' }}>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, marginBottom: '14px' }}>
                                     {activeRegion.desc}
                                 </p>
 
                                 {activeImages.length > 0 && (
-                                    <div style={{ marginBottom: '24px' }}>
+                                    <div style={{ marginBottom: '14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                                         <img
                                             src={activeImages[0]}
                                             alt={`${activeRegion.name} location`}
                                             loading="lazy"
                                             style={{
-                                                width: '100%',
-                                                height: '180px',
-                                                objectFit: 'cover',
-                                                borderRadius: '14px',
-                                                border: '1px solid var(--border)',
-                                                marginBottom: '8px',
+                                                width: '100%', height: '100px', objectFit: 'cover',
+                                                borderRadius: '10px', border: '1px solid var(--border)',
+                                                gridColumn: '1 / -1',
                                             }}
                                         />
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                            {activeImages.slice(1, 3).map((imageUrl, idx) => (
-                                                <img
-                                                    key={imageUrl}
-                                                    src={imageUrl}
-                                                    alt={`${activeRegion.name} view ${idx + 2}`}
-                                                    loading="lazy"
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '86px',
-                                                        objectFit: 'cover',
-                                                        borderRadius: '10px',
-                                                        border: '1px solid var(--border)',
-                                                    }}
-                                                />
-                                            ))}
-                                        </div>
+                                        {activeImages.slice(1, 3).map((imageUrl, idx) => (
+                                            <img
+                                                key={imageUrl}
+                                                src={imageUrl}
+                                                alt={`${activeRegion.name} view ${idx + 2}`}
+                                                loading="lazy"
+                                                style={{
+                                                    width: '100%', height: '64px', objectFit: 'cover',
+                                                    borderRadius: '8px', border: '1px solid var(--border)',
+                                                }}
+                                            />
+                                        ))}
                                     </div>
                                 )}
 
                                 {/* Stats */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                                        <Navigation size={14} color="var(--text-muted)" style={{ marginBottom: '6px' }} />
-                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Height</div>
-                                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeRegion.altitude}</div>
-                                    </div>
-                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                                        <Thermometer size={14} color="var(--text-muted)" style={{ marginBottom: '6px' }} />
-                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Temp</div>
-                                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeRegion.temp}</div>
-                                    </div>
-                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                                        <Wind size={14} color="var(--text-muted)" style={{ marginBottom: '6px' }} />
-                                        <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Routes</div>
-                                        <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeRegion.routes.length}</div>
-                                    </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px' }}>
+                                    {[
+                                        { Icon: Navigation, label: 'Height', value: activeRegion.altitude },
+                                        { Icon: Thermometer, label: 'Temp', value: activeRegion.temp },
+                                        { Icon: Wind, label: 'Routes', value: activeRegion.routes.length },
+                                    ].map(({ Icon, label, value }) => (
+                                        <div key={label} style={{ background: 'var(--bg-glass)', borderRadius: '10px', padding: '10px 8px', textAlign: 'center', border: '1px solid var(--border)' }}>
+                                            <Icon size={13} color="var(--text-muted)" style={{ marginBottom: '4px' }} />
+                                            <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>{label}</div>
+                                            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-primary)' }}>{value}</div>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 {/* Popular routes */}
-                                <div style={{ marginBottom: '24px' }}>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '12px' }}>Top Routes</div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ marginBottom: '14px' }}>
+                                    <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>Top Routes</div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                         {activeRegion.routes.map((route) => (
                                             <div key={route} style={{
-                                                display: 'flex', alignItems: 'center', gap: '10px',
-                                                padding: '10px 14px', borderRadius: '12px',
-                                                background: 'var(--bg-glass)',
-                                                border: '1px solid var(--border)',
+                                                display: 'flex', alignItems: 'center', gap: '8px',
+                                                padding: '8px 12px', borderRadius: '10px',
+                                                background: 'var(--bg-glass)', border: '1px solid var(--border)',
                                             }}>
-                                                <MapPin size={13} color={activeRegion.color} />
-                                                <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: '500' }}>{route}</span>
+                                                <MapPin size={12} color={activeRegion.color} />
+                                                <span style={{ color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: '500' }}>{route}</span>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
 
-                                <div style={{ marginBottom: '20px' }}>
-                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '10px' }}>Vehicle Kind</div>
-                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                <div style={{ marginBottom: '14px' }}>
+                                    <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>Vehicle Kind</div>
+                                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                                         {[
                                             { id: 'all', label: 'All' },
                                             { id: 'four', label: 'Four Wheeler' },
@@ -425,36 +412,36 @@ export default function TerrainSelect() {
 
                                 {/* CTA */}
                                 <button onClick={handleProceed} style={{
-                                    width: '100%', padding: '16px', border: 'none', borderRadius: '14px',
+                                    width: '100%', padding: '13px', border: 'none', borderRadius: '12px',
                                     background: `linear-gradient(135deg, ${activeRegion.color}cc, ${activeRegion.color})`,
-                                    color: 'var(--accent-ink)', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer',
+                                    color: 'var(--accent-ink)', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    boxShadow: `0 8px 25px ${activeRegion.color}30`,
-                                    transition: 'transform 0.2s, box-shadow 0.2s',
+                                    boxShadow: `0 6px 18px ${activeRegion.color}30`,
+                                    transition: 'transform 0.2s',
                                 }}
                                 onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
                                 onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
                                 >
-                                    See Vehicles in {activeRegion.name.replace(' Province', '')} <ArrowRight size={16} />
+                                    See Vehicles in {activeRegion.name.replace(' Province', '')} <ArrowRight size={15} />
                                 </button>
 
                                 <button onClick={handleAIRecommend} style={{
-                                    width: '100%', padding: '16px', border: '1px solid var(--accent-subtle)', borderRadius: '14px',
+                                    width: '100%', padding: '11px', border: '1px solid var(--accent-subtle)', borderRadius: '12px',
                                     background: 'var(--accent-subtle)',
-                                    color: 'var(--accent)', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
+                                    color: 'var(--accent)', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    marginTop: '10px',
-                                    transition: 'transform 0.2s, opacity 0.2s',
+                                    marginTop: '8px',
+                                    transition: 'opacity 0.2s',
                                 }}
-                                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.opacity = '0.85'; }}
-                                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.opacity = '1'; }}
+                                onMouseOver={(e) => { e.currentTarget.style.opacity = '0.8'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.opacity = '1'; }}
                                 >
                                     ✦ Get AI Recommendation
                                 </button>
                             </div>
                         ) : (
                             <div style={{
-                                background: 'var(--bg-card)', borderRadius: '24px', padding: '48px 32px',
+                                background: 'var(--bg-card)', borderRadius: '20px', padding: '32px 20px',
                                 border: '1px solid var(--border)', textAlign: 'center',
                             }}>
                                 <div style={{
