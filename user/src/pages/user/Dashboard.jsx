@@ -9,43 +9,29 @@ const quickActions = [
     {
         label: 'Pick Road Type',
         desc: 'Find vehicles tuned to your route — mountain, valley, off-road or highway.',
-        // Dark mode: moody dawn-lit road
-        imageDark: 'https://images.unsplash.com/photo-1758701321116-985af34d993f?w=1400&h=1000&auto=format&fit=crop&q=80',
-        // Light mode: bright, airy mountain road
-        imageLight: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1400&h=1000&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1758701321116-985af34d993f?w=1400&h=1000&auto=format&fit=crop&q=80',
         to: '/terrain',
-        accent: '#e8732a',
-        accentLight: '#c1662c',
         Icon: MapPin,
     },
     {
         label: 'Browse Fleet',
         desc: 'See every vehicle available — bikes, jeeps, SUVs and pickups.',
-        imageDark: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1400&h=1000&auto=format&fit=crop&q=80',
-        imageLight: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1400&h=1000&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1400&h=1000&auto=format&fit=crop&q=80',
         to: '/vehicles',
-        accent: '#7b81ff',
-        accentLight: '#4a66c4',
         Icon: Car,
     },
     {
         label: 'My Bookings',
         desc: 'Track requests, payments and trip status in one place.',
-        imageDark: 'https://images.unsplash.com/photo-1643083945816-d7265247256f?w=1400&h=1000&auto=format&fit=crop&q=80',
-        imageLight: 'https://images.unsplash.com/photo-1454179083322-198bb4daae41?w=1400&h=1000&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1643083945816-d7265247256f?w=1400&h=1000&auto=format&fit=crop&q=80',
         to: '/bookings',
-        accent: '#34d399',
-        accentLight: '#1f8d63',
         Icon: Calendar,
     },
     {
         label: 'Profile',
         desc: 'Update contact details, documents and preferences.',
-        imageDark: 'https://images.unsplash.com/photo-1668071484590-faf28e5ed5a4?w=1400&h=1000&auto=format&fit=crop&q=80',
-        imageLight: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?w=1400&h=1000&auto=format&fit=crop&q=80',
+        image: 'https://images.unsplash.com/photo-1668071484590-faf28e5ed5a4?w=1400&h=1000&auto=format&fit=crop&q=80',
         to: '/profile',
-        accent: '#f59e0b',
-        accentLight: '#b45309',
         Icon: UserRound,
     },
 ];
@@ -57,30 +43,41 @@ export default function Dashboard() {
     const firstName = fullName ? fullName.split(' ')[0] : 'there';
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ paddingTop: '84px', paddingBottom: '40px', minHeight: '100vh', background: 'var(--page-bg)', fontFamily: "'Inter', sans-serif" }}>
             <div className="container">
-                <header style={{ marginBottom: 'clamp(32px, 5vw, 48px)' }}>
-                    <p style={{ color: 'var(--accent)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: 12 }}>
+                <header style={{ marginBottom: '20px' }}>
+                    <p style={{
+                        color: 'var(--accent)',
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        letterSpacing: '3px',
+                        textTransform: 'uppercase',
+                        marginBottom: 6,
+                    }}>
                         Welcome back
                     </p>
-                    <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+                    <h1 style={{
+                        fontSize: 'clamp(1.6rem, 3vw, 2.2rem)',
+                        fontWeight: 800,
+                        color: 'var(--text-primary)',
+                        marginBottom: 4,
+                        lineHeight: 1.15,
+                    }}>
                         Hello, {firstName}
                     </h1>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>Ready for your next trip?</p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
+                        Ready for your next trip?
+                    </p>
                 </header>
 
                 <section
                     aria-label="Quick actions"
-                    style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, marginBottom: 60 }}
+                    style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 24 }}
                 >
                     {quickActions.map((action) => {
-                        const accent = isDark ? action.accent : action.accentLight;
-                        const image = isDark ? action.imageDark : action.imageLight;
-                        // Light mode uses a softer, warmer overlay so the image actually shows through;
-                        // dark mode keeps the deep gradient for legibility on dark cards.
                         const overlay = isDark
-                            ? 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(8,8,8,0.74) 58%, rgba(8,8,8,0.95) 100%)'
-                            : 'linear-gradient(180deg, rgba(255,253,248,0.0) 0%, rgba(33,45,58,0.45) 60%, rgba(33,45,58,0.82) 100%)';
+                            ? 'linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.58) 50%, rgba(0,0,0,0.88) 100%)'
+                            : 'linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.30) 50%, rgba(0,0,0,0.68) 100%)';
                         const Icon = action.Icon;
                         return (
                             <Link
@@ -88,23 +85,27 @@ export default function Dashboard() {
                                 to={action.to}
                                 className="dash-tile"
                                 style={{
-                                    '--tile-accent': accent,
                                     textDecoration: 'none',
                                     background: 'var(--bg-card)',
-                                    borderRadius: 22,
-                                    border: '1px solid var(--border)',
+                                    borderRadius: 20,
+                                    border: isDark
+                                        ? '1px solid rgba(255,255,255,0.07)'
+                                        : '1px solid rgba(0,0,0,0.12)',
                                     cursor: 'pointer',
                                     position: 'relative',
                                     overflow: 'hidden',
-                                    minHeight: 280,
+                                    minHeight: 252,
                                     display: 'flex',
                                     alignItems: 'flex-end',
-                                    transition: 'border-color 0.25s, transform 0.25s, box-shadow 0.25s',
+                                    transition: 'transform 0.22s, box-shadow 0.22s',
                                     isolation: 'isolate',
+                                    boxShadow: isDark
+                                        ? '0 4px 24px rgba(0,0,0,0.35)'
+                                        : '0 4px 20px rgba(0,0,0,0.12)',
                                 }}
                             >
                                 <img
-                                    src={image}
+                                    src={action.image}
                                     alt=""
                                     aria-hidden="true"
                                     loading="lazy"
@@ -114,85 +115,105 @@ export default function Dashboard() {
                                         width: '100%',
                                         height: '100%',
                                         objectFit: 'cover',
-                                        // In light mode lift the image a notch so it doesn't feel washed out
-                                        filter: isDark ? 'none' : 'saturate(1.05) contrast(1.02)',
+                                        filter: isDark
+                                            ? 'brightness(0.82) saturate(0.9)'
+                                            : 'brightness(1.1) saturate(1.05)',
+                                        transition: 'filter 0.4s ease',
                                     }}
                                 />
                                 <div style={{ position: 'absolute', inset: 0, background: overlay, zIndex: 1 }} />
+
+                                {/* Top-left icon badge */}
                                 <span
                                     aria-hidden="true"
                                     style={{
                                         position: 'absolute',
-                                        top: 14,
-                                        left: 14,
+                                        top: 16,
+                                        left: 16,
                                         zIndex: 2,
-                                        width: 36,
-                                        height: 36,
+                                        width: 38,
+                                        height: 38,
                                         borderRadius: 12,
-                                        background: `${accent}33`,
-                                        border: `1px solid ${accent}77`,
+                                        background: 'rgba(0,0,0,0.38)',
+                                        border: '1px solid rgba(255,255,255,0.18)',
                                         display: 'grid',
                                         placeItems: 'center',
                                         color: '#fff',
-                                        backdropFilter: 'blur(6px)',
+                                        backdropFilter: 'blur(8px)',
                                     }}
                                 >
-                                    <Icon size={16} />
+                                    <Icon size={17} />
                                 </span>
+
+                                {/* Top-right quick link badge */}
                                 <span
                                     style={{
                                         position: 'absolute',
-                                        top: 14,
-                                        right: 14,
+                                        top: 16,
+                                        right: 16,
                                         zIndex: 2,
-                                        padding: '5px 10px',
+                                        padding: '4px 10px',
                                         borderRadius: 999,
-                                        background: 'rgba(0,0,0,0.4)',
-                                        border: `1px solid ${accent}66`,
-                                        color: '#fff',
-                                        fontSize: '0.62rem',
+                                        background: 'rgba(0,0,0,0.38)',
+                                        border: '1px solid rgba(255,255,255,0.18)',
+                                        color: 'rgba(255,255,255,0.9)',
+                                        fontSize: '0.6rem',
                                         fontWeight: 700,
-                                        letterSpacing: '0.8px',
+                                        letterSpacing: '1px',
                                         textTransform: 'uppercase',
-                                        backdropFilter: 'blur(6px)',
+                                        backdropFilter: 'blur(8px)',
                                     }}
                                 >
                                     Quick Link
                                 </span>
+
+                                {/* Bottom content */}
                                 <div
                                     style={{
                                         position: 'relative',
                                         zIndex: 2,
                                         width: '100%',
-                                        padding: 22,
+                                        padding: '14px 16px 16px',
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        gap: 10,
+                                        gap: 8,
                                     }}
                                 >
-                                    <h2 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 800, margin: 0 }}>
+                                    <h2 style={{
+                                        color: '#fff',
+                                        fontSize: '1.15rem',
+                                        fontWeight: 700,
+                                        margin: 0,
+                                        textShadow: '0 1px 8px rgba(0,0,0,0.5)',
+                                    }}>
                                         {action.label}
                                     </h2>
-                                    <p style={{ color: 'rgba(255,255,255,0.86)', fontSize: '0.85rem', lineHeight: 1.5, margin: 0 }}>
+                                    <p style={{
+                                        color: 'rgba(255,255,255,0.82)',
+                                        fontSize: '0.82rem',
+                                        lineHeight: 1.55,
+                                        margin: 0,
+                                        textShadow: '0 1px 6px rgba(0,0,0,0.45)',
+                                    }}>
                                         {action.desc}
                                     </p>
                                     <span
                                         style={{
-                                            marginTop: 8,
+                                            marginTop: 10,
                                             display: 'inline-flex',
                                             alignItems: 'center',
-                                            gap: 8,
+                                            gap: 7,
                                             color: '#fff',
                                             fontSize: '0.78rem',
                                             fontWeight: 700,
-                                            background: `${accent}b3`,
-                                            border: `1px solid ${accent}`,
+                                            background: '#FF5723',
                                             borderRadius: 999,
-                                            padding: '8px 14px',
+                                            padding: '8px 16px',
                                             width: 'fit-content',
+                                            boxShadow: '0 2px 12px rgba(255,87,35,0.45)',
                                         }}
                                     >
-                                        Open <ArrowRight size={15} />
+                                        Open <ArrowRight size={14} />
                                     </span>
                                 </div>
                             </Link>
@@ -203,23 +224,25 @@ export default function Dashboard() {
                 <section
                     aria-label="Suggestion"
                     style={{
-                        background: 'var(--brand-soft-gradient)',
-                        borderRadius: 24,
-                        padding: 'clamp(24px, 5vw, 40px)',
-                        border: '1px solid var(--border)',
+                        background: isDark
+                            ? 'linear-gradient(135deg, rgba(255,87,35,0.12) 0%, rgba(39,40,39,0.6) 100%)'
+                            : 'linear-gradient(135deg, rgba(255,87,35,0.08) 0%, rgba(232,226,217,0.5) 100%)',
+                        borderRadius: 16,
+                        padding: '20px 24px',
+                        border: isDark ? '1px solid rgba(255,87,35,0.18)' : '1px solid rgba(255,87,35,0.14)',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         flexWrap: 'wrap',
-                        gap: 20,
-                        marginBottom: 60,
+                        gap: 16,
+                        marginBottom: 24,
                     }}
                 >
                     <div>
-                        <h2 style={{ color: 'var(--text-primary)', fontSize: '1.4rem', fontWeight: 700, marginBottom: 8 }}>
+                        <h2 style={{ color: 'var(--text-primary)', fontSize: '1.3rem', fontWeight: 700, marginBottom: 6 }}>
                             Not sure which vehicle?
                         </h2>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0, lineHeight: 1.5 }}>
                             Choose your road type and we&apos;ll suggest a ride that fits.
                         </p>
                     </div>
@@ -228,24 +251,25 @@ export default function Dashboard() {
                         style={{
                             textDecoration: 'none',
                             background: 'var(--brand-gradient)',
-                            color: 'var(--accent-ink)',
+                            color: '#fff',
                             fontWeight: 700,
-                            fontSize: '0.85rem',
-                            padding: '14px 28px',
+                            fontSize: '0.84rem',
+                            padding: '13px 26px',
                             borderRadius: 999,
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 8,
-                            boxShadow: '0 8px 24px var(--accent-glow)',
+                            boxShadow: '0 6px 20px rgba(255,87,35,0.3)',
+                            whiteSpace: 'nowrap',
                         }}
                     >
-                        Pick Road Type <ArrowRight size={16} />
+                        Pick Road Type <ArrowRight size={15} />
                     </Link>
                 </section>
 
                 <section
                     aria-label="Trip planning panels"
-                    style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20, marginBottom: 60 }}
+                    style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}
                 >
                     <WeatherPanel />
                     <CalendarPanel />

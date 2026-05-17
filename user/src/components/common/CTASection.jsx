@@ -1,6 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
+const STATS = [
+  { value: '200+', label: 'Vehicles' },
+  { value: '50+',  label: 'Routes'   },
+  { value: '4.9★', label: 'Rating'   },
+  { value: '24/7', label: 'Support'  },
+]
+
 export default function CTASection() {
   const sectionRef = useRef(null)
 
@@ -8,9 +15,7 @@ export default function CTASection() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible')
-          }
+          if (entry.isIntersecting) entry.target.classList.add('visible')
         })
       },
       { threshold: 0.2 }
@@ -24,10 +29,15 @@ export default function CTASection() {
 
   return (
     <section className="cta" id="cta" ref={sectionRef}>
-      <div className="container">
+      <div className="container" style={{ position: 'relative', zIndex: 2 }}>
+        <p className="cta-eyebrow reveal">Nepal's Premier Vehicle Rental</p>
         <h2 className="cta-title reveal" id="cta-title">
           READY TO<br />START?
         </h2>
+        <p className="cta-subtitle reveal">
+          From Himalayan mountain trails to valley highways —<br />
+          every road, every terrain, one platform.
+        </p>
         <div className="cta-buttons reveal">
           <Link to="/vehicles" className="btn btn-primary" id="cta-explore-btn">
             Explore Vehicles
@@ -35,9 +45,17 @@ export default function CTASection() {
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </Link>
-          <Link to="/terrain" className="btn btn-outline" id="cta-contact-btn">
+          <Link to="/terrain" className="btn-outline-white" id="cta-contact-btn">
             Plan by Terrain
           </Link>
+        </div>
+        <div className="cta-stats reveal">
+          {STATS.map((s) => (
+            <div key={s.label} className="cta-stat">
+              <span className="cta-stat-value">{s.value}</span>
+              <span className="cta-stat-label">{s.label}</span>
+            </div>
+          ))}
         </div>
       </div>
     </section>
