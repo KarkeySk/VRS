@@ -38,10 +38,10 @@ export default function BookingsPage() {
     };
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '80px' }}>
+        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '40px' }}>
             <div className="container" style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
                 <h1 style={{ color: 'var(--text-primary)', fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>My Bookings</h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '36px' }}>Track your booking requests and status.</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>Track your booking requests and status.</p>
 
                 {loading ? (
                     <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '60px 0' }}>Loading...</div>
