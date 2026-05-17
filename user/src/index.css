@@ -1,6 +1,445 @@
 /* Brand fonts: Inter (body) + Space Grotesk (display fallback for TT Lakes Neue) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
+.dash-tile:hover { transform: translateY(-4px); box-shadow: 0 14px 40px rgba(0,0,0,0.28) !important; }
+.dash-tile:active { transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATION SYSTEM  —  single definition (above duplicate blocks)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Previously-referenced but undefined keyframes ──────── */
+@keyframes driftLights {
+  0%   { transform: translate(0,    0)    scale(1);    }
+  33%  { transform: translate(28px, -18px) scale(1.04); }
+  66%  { transform: translate(-18px, 14px) scale(0.97); }
+  100% { transform: translate(8px,  -8px)  scale(1.02); }
+}
+@keyframes roadDash {
+  from { transform: translateX(0);     }
+  to   { transform: translateX(-52px); }
+}
+@keyframes bikeRun {
+  from { left: -140px;              }
+  to   { left: calc(100% + 20px);  }
+}
+@keyframes wheelSpin {
+  from { transform: rotate(0deg);   }
+  to   { transform: rotate(360deg); }
+}
+@keyframes verifyProgress {
+  from { width: 30%; opacity: 0.6; }
+  to   { width: 90%; opacity: 1;   }
+}
+
+/* ─── Page-level transitions ─────────────────────────────── */
+@keyframes pg-exit {
+  from { opacity: 1; transform: translateY(0)     scale(1);    }
+  to   { opacity: 0; transform: translateY(-10px)  scale(0.99); }
+}
+@keyframes pg-enter {
+  from { opacity: 0; transform: translateY(16px)  scale(0.995); }
+  to   { opacity: 1; transform: translateY(0)      scale(1);    }
+}
+
+/* ─── Bike overlay sweep ─────────────────────────────────── */
+@keyframes bike-sweep-ltr {
+  from { transform: translateX(-160%);             }
+  to   { transform: translateX(160vw);             }
+}
+@keyframes bike-sweep-rtl {
+  from { transform: translateX(160vw)  scaleX(-1); }
+  to   { transform: translateX(-160%)  scaleX(-1); }
+}
+@keyframes overlay-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
+
+/* ─── General purpose ────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+@keyframes pop-in {
+  0%   { transform: scale(0.72); opacity: 0; }
+  70%  { transform: scale(1.07);             }
+  100% { transform: scale(1);    opacity: 1; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0);    }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes spin      { to { transform: rotate(360deg); } }
+@keyframes pulse-ring {
+  0%   { transform: scale(0.85); opacity: 1; }
+  100% { transform: scale(1.7);  opacity: 0; }
+}
+
+/* ══ PAGE TRANSITIONS ══════════════════════════════════════ */
+
+.page-exit {
+  animation: pg-exit 0.26s ease-in forwards;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+.page-enter.page-rotate {
+  animation: pg-enter 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+/* ══ BIKE TRANSITION OVERLAY ═══════════════════════════════ */
+
+.transition-bike-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+  background: rgba(26, 27, 26, 0.92);
+  animation:
+    overlay-in  0.13s ease-out          forwards,
+    overlay-out 0.16s ease-in  0.38s    forwards;
+}
+:root[data-theme='light'] .transition-bike-overlay {
+  background: rgba(232, 226, 217, 0.93);
+}
+/* Accent speed strip */
+.transition-bike-overlay::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0; right: 0;
+  height: 2px;
+  margin-top: 20px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.55;
+}
+
+.transition-bike-shape {
+  position: absolute;
+  top: 50%;
+  margin-top: -40px;
+  width: 180px;
+  height: 80px;
+  animation: bike-sweep-ltr 0.52s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+.transition-bike-overlay.rtl .transition-bike-shape {
+  animation: bike-sweep-rtl 0.52s cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+
+/* Wheels */
+.transition-bike-wheel {
+  position: absolute;
+  border-radius: 50%;
+  border: 5px solid var(--accent);
+  animation: wheelSpin 0.28s linear infinite;
+}
+.transition-bike-wheel-back  { width: 46px; height: 46px; bottom: 0; left: 12px;  }
+.transition-bike-wheel-front { width: 46px; height: 46px; bottom: 0; right: 12px; }
+
+/* Chassis */
+.transition-bike-body {
+  position: absolute;
+  bottom: 23px; left: 28px; right: 28px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 3px 12px 2px 2px;
+}
+.transition-bike-fairing {
+  position: absolute;
+  bottom: 38px; right: 18px;
+  width: 48px; height: 15px;
+  background: var(--accent);
+  border-radius: 999px 999px 0 0;
+  transform: skewX(-10deg);
+}
+.transition-bike-tank {
+  position: absolute;
+  bottom: 38px; left: 46px;
+  width: 52px; height: 13px;
+  background: #FF6F40;
+  border-radius: 8px;
+  opacity: 0.85;
+}
+.transition-bike-seat {
+  position: absolute;
+  bottom: 40px; left: 32px;
+  width: 36px; height: 6px;
+  background: #111;
+  border-radius: 3px;
+}
+.transition-bike-tail {
+  position: absolute;
+  bottom: 25px; left: 5px;
+  width: 24px; height: 11px;
+  background: var(--accent);
+  border-radius: 2px 0 0 3px;
+  transform: skewY(-4deg);
+}
+.transition-bike-handle {
+  position: absolute;
+  bottom: 42px; right: 14px;
+  width: 14px; height: 7px;
+  border-top: 3px solid rgba(176,169,158,.75);
+  border-right: 3px solid rgba(176,169,158,.75);
+  border-radius: 0 4px 0 0;
+  transform: rotate(-8deg);
+}
+.transition-bike-fork {
+  position: absolute;
+  bottom: 8px; right: 36px;
+  width: 3px; height: 24px;
+  background: rgba(176,169,158,.65);
+  transform: rotate(10deg);
+  transform-origin: bottom;
+}
+.transition-bike-headlight-glow {
+  position: absolute;
+  right: -10px; bottom: 14px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,220,90,.9) 0%, transparent 70%);
+  filter: blur(3px);
+}
+.transition-bike-rider-head {
+  position: absolute;
+  bottom: 56px; left: 72px;
+  width: 13px; height: 13px;
+  background: rgba(176,169,158,.82);
+  border-radius: 50%;
+}
+.transition-bike-rider-back {
+  position: absolute;
+  bottom: 48px; left: 64px;
+  width: 20px; height: 17px;
+  background: #181918;
+  border-radius: 6px 3px 0 0;
+  border-top: 2px solid rgba(176,169,158,.55);
+}
+
+/* ══ SCROLL REVEAL ═════════════════════════════════════════ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity   0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger wrapper — add .stagger-children to a list parent */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.48s ease, transform 0.48s ease;
+}
+.stagger-children.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0.00s; }
+.stagger-children.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.08s; }
+.stagger-children.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.16s; }
+.stagger-children.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.24s; }
+.stagger-children.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.32s; }
+.stagger-children.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.40s; }
+
+/* ══ MICRO-INTERACTIONS ════════════════════════════════════ */
+
+/* Generic lift-on-hover card */
+.anim-card {
+  transition:
+    transform    0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow   0.24s ease,
+    border-color 0.2s  ease;
+}
+.anim-card:hover  { transform: translateY(-5px); box-shadow: 0 18px 44px rgba(0,0,0,0.28); }
+.anim-card:active { transform: translateY(-2px); }
+
+/* Shimmer skeleton loader */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 0%,
+    var(--bg-card-hover) 50%,
+    var(--bg-card) 100%
+  );
+  background-size: 400px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+/* Slide-in underline for text links */
+.link-underline { position: relative; text-decoration: none; }
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 1.5px;
+  background: var(--accent);
+  transition: width 0.22s ease;
+}
+.link-underline:hover::after { width: 100%; }
+
+/* Animated status-dot with pulse ring */
+.pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.pulse-dot::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+
+/* Vehicle-card image zoom on hover */
+.vehicle-card { overflow: hidden; }
+.vehicle-card .vehicle-card-img {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              filter    0.45s ease;
+}
+.vehicle-card:hover .vehicle-card-img {
+  transform: scale(1.06);
+}
+
+/* Route-card parallax-scale on hover */
+.route-card .route-card-img img {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.route-card:hover .route-card-img img { transform: scale(1.07); }
+
+/* Navbar link active underline slide */
+.nav-link-active-bar {
+  display: block;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.22s ease;
+}
+.nav-link-active-bar.active { transform: scaleX(1); }
+
+/* ══ REDUCED MOTION ════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+  }
+  .reveal                  { opacity: 1; transform: none; }
+  .stagger-children > *   { opacity: 1; transform: none; }
+  .transition-bike-overlay { display: none !important; }
+  .page-exit, .page-enter.page-rotate { animation: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+
+/* ===== CTA SECTION EXTRAS (single definition) ===== */
+.cta-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0 0 16px;
+  position: relative;
+  z-index: 2;
+}
+.cta-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 480px;
+  margin: 0 auto 36px;
+  line-height: 1.65;
+  position: relative;
+  z-index: 2;
+}
+.cta-stats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  position: relative;
+  z-index: 2;
+  flex-wrap: wrap;
+  padding-top: 36px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+.cta-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.cta-stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.cta-stat-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.60);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.btn-outline-white {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.70);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.btn-outline-white:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Light mode: brighter image exposure, lighter overlay, sharper text */
+:root[data-theme='light'] .cta::before {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.28) 0%,
+    rgba(0, 0, 0, 0.18) 50%,
+    rgba(0, 0, 0, 0.38) 100%
+  );
+}
+:root[data-theme='light'] .cta-eyebrow {
+  color: rgba(255, 255, 255, 0.90);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+:root[data-theme='light'] .cta-title {
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.38);
+}
+:root[data-theme='light'] .cta-subtitle {
+  color: rgba(255, 255, 255, 0.90);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.40);
+}
+:root[data-theme='light'] .cta-stat-value {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+:root[data-theme='light'] .cta-stat-label {
+  color: rgba(255, 255, 255, 0.80);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+:root[data-theme='light'] .cta-stats {
+  border-top-color: rgba(255, 255, 255, 0.28);
+}
+
 /*
   TT Lakes Neue (primary display font — purchase license at typeType.ru)
   When font files are available, add them here:
@@ -1134,6 +1573,16 @@ ol {
   filter: brightness(1.18) saturate(0.85);
 }
 
+:root[data-theme='light'] .route-card-overlay {
+  background: linear-gradient(to top,
+    rgba(0, 0, 0, 0.60) 0%,
+    rgba(0, 0, 0, 0.16) 50%,
+    rgba(0, 0, 0, 0.0) 100%);
+}
+:root[data-theme='light'] .route-card-img img {
+  filter: brightness(1.1) saturate(1.05);
+}
+
 .hero-overlay {
   position: absolute;
   inset: 0;
@@ -1651,23 +2100,28 @@ ol {
 
 /* ===== CTA SECTION ===== */
 .cta {
-  padding: 120px 0;
+  padding: 100px 0 80px;
   background: var(--bg-primary);
+  background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center 40%;
   text-align: center;
   position: relative;
   overflow: hidden;
+  color: #fff;
 }
 
 .cta::before {
   content: '';
   position: absolute;
-  top: -200px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, var(--accent-glow), transparent 70%);
-  opacity: 0.3;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.42) 50%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -1677,9 +2131,10 @@ ol {
   line-height: 1.05;
   letter-spacing: -0.03em;
   max-width: 600px;
-  margin: 0 auto 40px;
+  margin: 0 auto 16px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  color: #fff;
 }
 
 .cta-buttons {
@@ -1688,7 +2143,8 @@ ol {
   flex-wrap: wrap;
   gap: 16px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  margin-bottom: 56px;
 }
 
 /* ===== FOOTER ===== */
@@ -2778,6 +3234,16 @@ ol {
   filter: brightness(1.18) saturate(0.85);
 }
 
+:root[data-theme='light'] .route-card-overlay {
+  background: linear-gradient(to top,
+    rgba(0, 0, 0, 0.60) 0%,
+    rgba(0, 0, 0, 0.16) 50%,
+    rgba(0, 0, 0, 0.0) 100%);
+}
+:root[data-theme='light'] .route-card-img img {
+  filter: brightness(1.1) saturate(1.05);
+}
+
 .hero-overlay {
   position: absolute;
   inset: 0;
@@ -3295,23 +3761,28 @@ ol {
 
 /* ===== CTA SECTION ===== */
 .cta {
-  padding: 120px 0;
+  padding: 100px 0 80px;
   background: var(--bg-primary);
+  background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center 40%;
   text-align: center;
   position: relative;
   overflow: hidden;
+  color: #fff;
 }
 
 .cta::before {
   content: '';
   position: absolute;
-  top: -200px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, var(--accent-glow), transparent 70%);
-  opacity: 0.3;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.42) 50%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -3321,9 +3792,10 @@ ol {
   line-height: 1.05;
   letter-spacing: -0.03em;
   max-width: 600px;
-  margin: 0 auto 40px;
+  margin: 0 auto 16px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  color: #fff;
 }
 
 .cta-buttons {
@@ -3332,7 +3804,8 @@ ol {
   flex-wrap: wrap;
   gap: 16px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  margin-bottom: 56px;
 }
 
 /* ===== FOOTER ===== */
@@ -4422,6 +4895,16 @@ ol {
   filter: brightness(1.18) saturate(0.85);
 }
 
+:root[data-theme='light'] .route-card-overlay {
+  background: linear-gradient(to top,
+    rgba(0, 0, 0, 0.60) 0%,
+    rgba(0, 0, 0, 0.16) 50%,
+    rgba(0, 0, 0, 0.0) 100%);
+}
+:root[data-theme='light'] .route-card-img img {
+  filter: brightness(1.1) saturate(1.05);
+}
+
 .hero-overlay {
   position: absolute;
   inset: 0;
@@ -4939,23 +5422,28 @@ ol {
 
 /* ===== CTA SECTION ===== */
 .cta {
-  padding: 120px 0;
+  padding: 100px 0 80px;
   background: var(--bg-primary);
+  background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=80');
+  background-size: cover;
+  background-position: center 40%;
   text-align: center;
   position: relative;
   overflow: hidden;
+  color: #fff;
 }
 
 .cta::before {
   content: '';
   position: absolute;
-  top: -200px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, var(--accent-glow), transparent 70%);
-  opacity: 0.3;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.42) 50%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -4965,9 +5453,10 @@ ol {
   line-height: 1.05;
   letter-spacing: -0.03em;
   max-width: 600px;
-  margin: 0 auto 40px;
+  margin: 0 auto 16px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  color: #fff;
 }
 
 .cta-buttons {
@@ -4976,7 +5465,8 @@ ol {
   flex-wrap: wrap;
   gap: 16px;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+  margin-bottom: 56px;
 }
 
 /* ===== FOOTER ===== */

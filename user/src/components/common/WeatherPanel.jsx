@@ -133,8 +133,8 @@ export default function WeatherPanel() {
       style={{
         background: "var(--bg-card)",
         border: "1px solid var(--border)",
-        borderRadius: "22px",
-        padding: "28px",
+        borderRadius: "16px",
+        padding: "20px",
         position: "relative",
       }}
     >
@@ -144,7 +144,7 @@ export default function WeatherPanel() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: "24px",
+          marginBottom: "16px",
         }}
       >
         <h3
@@ -203,7 +203,7 @@ export default function WeatherPanel() {
               padding: "10px 12px",
               borderRadius: "8px",
               border: "1px solid var(--border)",
-              background: "rgba(255,255,255,0.02)",
+              background: "var(--bg-primary)",
               color: "var(--text-primary)",
               fontSize: "13px",
               fontFamily: "'Inter', sans-serif",
@@ -252,7 +252,7 @@ export default function WeatherPanel() {
                     transition: "all 0.15s",
                   }}
                   onMouseOver={(e) => {
-                    e.target.style.background = "rgba(255,255,255,0.04)";
+                    e.target.style.background = "var(--bg-glass-hover)";
                     e.target.style.color = "var(--text-primary)";
                   }}
                   onMouseOut={(e) => {
