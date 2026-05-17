@@ -23,7 +23,11 @@ const MAX_FAILURES_BEFORE_FALLBACK = 3;
 // ─────────────────────────────────────────────────────────────
 //  SYSTEM PROMPT — defines the AI's personality & scope
 // ─────────────────────────────────────────────────────────────
-const SYSTEM_PROMPT = `You are Bhatbhate AI — a helpful, knowledgeable, general-purpose AI assistant (similar in capability to Google's Gemini) that lives inside the Bhatbhate vehicle rental and travel platform in Nepal.
+
+// Live fleet data injected at runtime — see injectFleetData()
+let _liveFleet = '';
+
+const BASE_SYSTEM_PROMPT = `You are Bhatbhate AI — a helpful, knowledgeable, general-purpose AI assistant (similar in capability to Google's Gemini) that lives inside the Bhatbhate vehicle rental and travel platform in Nepal.
 
 Identity & tone:
 - Be helpful, intelligent, curious, and conversational — like a smart friend who happens to know a lot.
@@ -42,8 +46,8 @@ What you can do:
 Reasoning & honesty:
 - Think step-by-step on hard problems before answering. Show working only when it helps the user.
 - If you don't know something or it's outside your knowledge cutoff, say so plainly. Don't fabricate facts, prices, dates, statistics, or quotes.
-- For things that change in the real world (live availability, current weather, road closures, permit rules, promo prices), tell the user to verify with Bhatbhate support or the relevant authority.
-- Never invent specific booking data, vehicle availability, or exact live prices.
+- For live vehicle availability or real-time booking slots, direct the user to the Vehicles page or Bookings page on the platform.
+- Never invent vehicle names, prices, or specs that are not in the LIVE FLEET section below.
 
 Formatting:
 - Default to concise, focused answers (2–6 sentences) for casual questions.
@@ -63,13 +67,6 @@ Fleet & terrain fit:
 - Family/group tours: vans or jeeps based on luggage and road condition.
 - Monsoon: avoid low-clearance vehicles on hill routes — landslide and slick-road risk.
 
-Pricing (indicative starting rates — confirm exact rates on the vehicle detail page):
-- Scooters: NPR 800/day+
-- Motorcycles: NPR 1,500/day+
-- Cars/Sedans: NPR 3,500/day+
-- SUVs/Jeeps: NPR 5,000/day+
-Longer rentals usually get better daily rates.
-
 Payments accepted: eSewa, Khalti, Bank Transfer, Cash on pickup. A refundable deposit may apply.
 
 Documents required: valid driving license matching the vehicle category, government-issued ID (citizenship/passport), contact info, security deposit.
@@ -79,11 +76,25 @@ Cancellation: free up to 24 hours before pickup; 50% refund within 24 hours; no 
 Operating hours: 7 AM – 8 PM daily. Support email: support@bhatbhate.com.
 
 When giving destination/route advice, briefly cover:
-1. Recommended vehicle type
+1. Recommended vehicle type and the specific vehicle name(s) from the LIVE FLEET
 2. Best season window (and what to avoid)
 3. One practical safety / logistics tip
 
 Popular destinations to fluently advise on: Kathmandu Valley, Pokhara, Chitwan, Lumbini, Bandipur, Mustang, Rara, Ilam, Janakpur, Everest-view road trips (Salleri/Jiri side), Manang, Ghandruk, Nagarkot, Dhulikhel.`;
+
+// Fleet instructions appended only when live data is available
+const FLEET_INSTRUCTIONS = `
+VEHICLE ANSWER RULES (follow these strictly):
+- When asked "what vehicles do you have", "show me your fleet", "available vehicles", or any variant → list EVERY vehicle from LIVE FLEET below, formatted clearly.
+- When recommending a vehicle for a trip or terrain → pick the best match(es) from LIVE FLEET and explain WHY using their actual specs (engine, drive, capacity, category).
+- Always quote the exact NPR price per day from LIVE FLEET. Never use generic ranges.
+- If a user asks about a vehicle type (SUV, bike, scooter) → filter LIVE FLEET by that type and list matching entries.
+- If LIVE FLEET is empty or not yet loaded → say "Let me check our current fleet — you can also browse all vehicles directly on the Vehicles page."`;
+
+const buildSystemPrompt = () =>
+  _liveFleet
+    ? `${BASE_SYSTEM_PROMPT}\n${FLEET_INSTRUCTIONS}\n\n—\nLIVE FLEET — ACTUAL VEHICLES IN THE DATABASE\n(These are the ONLY real vehicles. Use exact names and prices.)\n—\n${_liveFleet}`
+    : BASE_SYSTEM_PROMPT;
 
 // ─────────────────────────────────────────────────────────────
 //  GEMINI PROVIDER
@@ -138,7 +149,7 @@ const initGeminiSession = ({ preserveHistory = false } = {}) => {
   try {
     const model = genAI.getGenerativeModel({
       model: MODEL,
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction: buildSystemPrompt(),
       safetySettings: SAFETY_SETTINGS,
     });
     chatSession = model.startChat({
@@ -751,6 +762,46 @@ const sendLocalMessage = (userMessage) => {
 
 //  PUBLIC API (used by ChatBot.jsx)
 
+/**
+ * Inject live fleet data from the database into the system prompt.
+ * Call this once after fetching vehicles from Supabase.
+ * Rebuilds the Gemini session so the AI immediately knows the real fleet.
+ *
+ * @param {Array} vehicles - raw vehicle rows from vehicleService.getAll()
+ */
+export const injectFleetData = (vehicles) => {
+  if (!Array.isArray(vehicles) || vehicles.length === 0) return;
+
+  _liveFleet = vehicles
+    .map((v) => {
+      const price = Number(v.price_per_day ?? v.price ?? 0);
+      const caps = Array.isArray(v.capabilities) ? v.capabilities.join(', ') : '';
+      const specs = Array.isArray(v.technical_specs)
+        ? v.technical_specs.map((s) => `${s.label}: ${s.value}`).join(' | ')
+        : '';
+      const parts = [
+        `Name: ${v.name || 'Unknown'}`,
+        `Type: ${v.type || '-'}`,
+        `Category: ${v.category || '-'}`,
+        `Price: Rs. ${price.toLocaleString()}/day`,
+        v.engine   ? `Engine: ${v.engine}`   : null,
+        v.drive    ? `Drive: ${v.drive}`     : null,
+        v.torque   ? `Torque: ${v.torque}`   : null,
+        v.capacity ? `Seats: ${v.capacity}`  : null,
+        v.rating   ? `Rating: ${v.rating}★`  : null,
+        v.subtitle ? `Subtitle: ${v.subtitle}` : null,
+        caps       ? `Capabilities: ${caps}` : null,
+        specs      ? `Specs: ${specs}`       : null,
+        `Available: ${v.is_available ? 'Yes' : 'No'}`,
+      ].filter(Boolean);
+      return `• ${parts.join(' | ')}`;
+    })
+    .join('\n');
+
+  console.log(`[Chatbot] Fleet injected: ${vehicles.length} vehicles`);
+  // Rebuild session so Gemini picks up the new system prompt immediately
+  initGeminiSession({ preserveHistory: true });
+};
 
 /**
  * Initialize a new chat session
@@ -861,4 +912,17 @@ export const getProviderStatus = () => {
     fallbackActive: !geminiAvailable || !genAI,
     failureCount,
   };
+};
+
+/**
+ * Reset only the failure/availability state without clearing conversation history.
+ * Call this when the user reopens the chat window so Gemini gets another chance
+ * after a previous failure cycle.
+ */
+export const resetProviderState = () => {
+  failureCount = 0;
+  geminiAvailable = true;
+  if (genAI && !chatSession) {
+    initGeminiSession({ preserveHistory: true });
+  }
 };
