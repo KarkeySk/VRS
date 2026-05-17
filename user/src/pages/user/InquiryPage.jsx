@@ -100,7 +100,7 @@ export default function InquiryPage() {
     };
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '80px' }}>
+        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '40px' }}>
             <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px' }}>
                 <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', cursor: 'pointer', marginBottom: '32px' }}>
                     <ArrowLeft size={16} /> Back to vehicle
