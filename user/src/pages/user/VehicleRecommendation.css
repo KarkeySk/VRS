@@ -807,6 +807,106 @@
   }
 }
 
+/* ===== LIGHT MODE OVERRIDES ===== */
+:root[data-theme='light'] .terrain-context-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .terrain-stat-box {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .terrain-route-tag {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+:root[data-theme='light'] .ai-loading-container {
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .road-conditions-card {
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .road-bar-track {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme='light'] .recommendation-card {
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .recommendation-card:hover {
+  border-color: var(--accent);
+}
+
+:root[data-theme='light'] .rec-card-img {
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .suitability-bar {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme='light'] .rec-card-best-for {
+  background: var(--bg-glass);
+  color: var(--text-primary);
+}
+
+:root[data-theme='light'] .tips-card {
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .tip-item {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .matched-vehicle-card {
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .matched-vehicle-card:hover {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme='light'] .followup-section {
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .followup-messages::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+:root[data-theme='light'] .followup-msg.bot {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .followup-input {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+:root[data-theme='light'] .followup-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+:root[data-theme='light'] .recommend-cta-btn.secondary {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+:root[data-theme='light'] .recommend-cta-btn.secondary:hover {
+  background: var(--bg-glass-hover);
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .terrain-context-card {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowRight, Mail } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Mail, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import {
   getEmailError,
@@ -83,6 +83,7 @@ export default function LoginPage() {
       await signInWithGoogle();
       // Browser is being redirected to Google; nothing else to do here.
     } catch (err) {
+      console.error('[Google OAuth] error:', err?.message, err?.status, err);
       setError(getFriendlyAuthError(err, 'Could not start Google sign-in. Please try again.'));
       setIsGoogleLoading(false);
     }
@@ -246,7 +247,11 @@ export default function LoginPage() {
           )}
           {resendStatus && <div className="auth-alert auth-alert-success">{resendStatus}</div>}
           {resendError && <div className="auth-alert">{resendError}</div>}
-          {success && <div className="auth-alert auth-alert-success">{success}</div>}
+          {success && (
+            <div className="auth-alert auth-alert-success">
+              <CheckCircle size={16} /> {success}
+            </div>
+          )}
 
           {step === 'login' ? (
             <>

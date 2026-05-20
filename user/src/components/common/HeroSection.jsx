@@ -52,8 +52,14 @@ export default function HeroSection() {
         // Overlay: subtle gradient shift for lighting effect
         const lightX = 50 + x * 15
         const lightY = 40 + y * 15
-        overlayRef.current.style.background =
-          `radial-gradient(ellipse at ${lightX}% ${lightY}%, rgba(10,10,10,0.15) 0%, rgba(10,10,10,0.5) 40%, rgba(10,10,10,0.85) 75%, rgba(10,10,10,1) 100%)`
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+        if (isLight) {
+          overlayRef.current.style.background =
+            `radial-gradient(ellipse at ${lightX}% ${lightY}%, rgba(10,10,10,0.02) 0%, rgba(10,10,10,0.28) 40%, rgba(10,10,10,0.58) 75%, rgba(10,10,10,0.80) 100%)`
+        } else {
+          overlayRef.current.style.background =
+            `radial-gradient(ellipse at ${lightX}% ${lightY}%, rgba(10,10,10,0.15) 0%, rgba(10,10,10,0.5) 40%, rgba(10,10,10,0.85) 75%, rgba(10,10,10,1) 100%)`
+        }
       }
 
       animFrame.current = requestAnimationFrame(animate)
