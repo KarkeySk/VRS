@@ -5,7 +5,10 @@ import {
   initializeChatSession,
   clearChatHistory,
   getProviderStatus,
+  injectFleetData,
+  resetProviderState,
 } from "./chatbotService";
+import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
 import "./ChatBot.css";
 
 let nextMessageId = 1;
@@ -22,15 +25,35 @@ const ChatBot = () => {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [providerInfo, setProviderInfo] = useState(null);
+  // Lazy-initialize so the badge reflects the real status on the very first render
+  const [providerInfo, setProviderInfo] = useState(() => getProviderStatus());
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Initialize chat session
+  // Initialize chat session and inject live fleet data
   useEffect(() => {
     initializeChatSession();
     setProviderInfo(getProviderStatus());
+
+    // Fetch all available vehicles and inject into Gemini's system prompt
+    vehicleService.getAll()
+      .then((vehicles) => {
+        if (vehicles?.length) {
+          injectFleetData(vehicles);
+          setProviderInfo(getProviderStatus());
+        }
+      })
+      .catch((err) => console.warn("[ChatBot] Could not load fleet for AI context:", err?.message));
   }, []);
+
+  // When the chat window opens, reset any previous failure state so Gemini
+  // gets another chance — module-level failures persist otherwise
+  useEffect(() => {
+    if (isOpen) {
+      resetProviderState();
+      setProviderInfo(getProviderStatus());
+    }
+  }, [isOpen]);
 
   // Auto-scroll to bottom
   useEffect(() => {

@@ -98,8 +98,8 @@ export default function CalendarPanel() {
       style={{
         background: "var(--bg-card)",
         border: "1px solid var(--border)",
-        borderRadius: "22px",
-        padding: "28px",
+        borderRadius: "16px",
+        padding: "20px",
       }}
     >
       {/* Header */}
@@ -193,7 +193,7 @@ export default function CalendarPanel() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: "24px",
+          marginBottom: "16px",
         }}
       >
         <p
@@ -325,13 +325,13 @@ export default function CalendarPanel() {
                     bottom: "calc(100% + 6px)",
                     left: "50%",
                     transform: "translateX(-50%)",
-                    background: "#1a1a1a",
+                    background: "var(--bg-card)",
                     border: "1px solid var(--border)",
                     borderRadius: "8px",
                     padding: "8px 12px",
                     whiteSpace: "nowrap",
                     zIndex: 20,
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
                   }}
                 >
                   {cell.bookings.map((b, j) => (
@@ -353,7 +353,7 @@ export default function CalendarPanel() {
                       </span>
                       <span
                         style={{
-                          color: "#888",
+                          color: "var(--text-muted)",
                           marginLeft: "6px",
                         }}
                       >
