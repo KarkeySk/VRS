@@ -361,13 +361,303 @@
   }
 }
 
+/* ===== ROUTE LOCATION INPUTS ===== */
+.chat-route-form {
+  padding: 10px 16px 8px;
+  background: var(--bg-secondary);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-route-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.chat-route-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.chat-route-field:first-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.route-icon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.from-icon {
+  color: #4ade80;
+}
+
+.to-icon {
+  color: var(--accent, #d3742f);
+}
+
+.chat-route-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  min-width: 0;
+}
+
+.chat-route-input::placeholder {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.chat-route-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-swap-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-card-hover);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 1;
+}
+
+.chat-swap-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.chat-route-btn {
+  background: var(--brand-gradient);
+  border: none;
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px var(--accent-glow);
+  letter-spacing: 0.01em;
+}
+
+.chat-route-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.chat-route-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.chat-route-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+:root[data-theme='light'] .chat-route-form {
+  background: var(--bg-secondary);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+:root[data-theme='light'] .chat-route-inputs {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme='light'] .chat-route-field:first-child {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+:root[data-theme='light'] .chat-swap-btn {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.12);
+}
+
+/* ===== LOCATION PICKER DROPDOWN ===== */
+.loc-picker {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 2px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+  max-height: 260px;
+}
+
+:root[data-theme='light'] .loc-picker {
+  border-color: rgba(0,0,0,0.1);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.loc-search-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+:root[data-theme='light'] .loc-search-row {
+  border-bottom-color: rgba(0,0,0,0.07);
+}
+
+.loc-search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.loc-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.loc-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.loc-clear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+}
+
+.loc-clear-btn:hover { color: var(--text-primary); }
+
+.loc-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+:root[data-theme='light'] .loc-breadcrumb {
+  border-bottom-color: rgba(0,0,0,0.07);
+}
+
+.loc-crumb {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  transition: color 0.15s;
+}
+
+.loc-crumb:hover, .loc-crumb.active { color: var(--accent); }
+.loc-crumb.active { cursor: default; }
+
+.loc-crumb-sep { color: var(--text-muted); flex-shrink: 0; }
+
+.loc-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.loc-list::-webkit-scrollbar { width: 4px; }
+.loc-list::-webkit-scrollbar-track { background: transparent; }
+.loc-list::-webkit-scrollbar-thumb { background: var(--bg-card-hover); border-radius: 2px; }
+
+.loc-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  font-family: 'Inter', sans-serif;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+:root[data-theme='light'] .loc-item {
+  border-bottom-color: rgba(0,0,0,0.04);
+}
+
+.loc-item:hover { background: var(--bg-card-hover); }
+.loc-item:last-child { border-bottom: none; }
+
+.loc-item-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.loc-item-icon.place { color: var(--accent); }
+
+.loc-item-label {
+  flex: 1;
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.loc-item-arrow { color: var(--text-muted); flex-shrink: 0; }
+
+.loc-empty {
+  padding: 16px 12px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 /* ===== INPUT FORM ===== */
 .chat-input-form {
   display: flex;
   gap: 8px;
-  padding: 14px 16px;
+  padding: 8px 16px 14px;
   background: var(--bg-secondary);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0 0 16px 16px;
 }
 
