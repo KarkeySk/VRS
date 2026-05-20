@@ -59,6 +59,9 @@ export const getFriendlyAuthError = (error, fallback = 'Something went wrong. Pl
     if (/invalid token|expired|otp|link is invalid|link.*expired/i.test(combined)) {
         return 'This link is invalid or has expired. Please request a new one.'
     }
+    if (/unsupported provider|provider is not enabled/i.test(combined)) {
+        return 'Google sign-in is not available right now. Please use email and password.'
+    }
     if (/supabase is not configured|missing.*supabase/i.test(combined)) {
         return 'Authentication is temporarily unavailable. Please try again later.'
     }
