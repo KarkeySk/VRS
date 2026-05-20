@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Mountain, ArrowRight, Navigation, Thermometer, Wind } from 'lucide-react';
 import nepalProvincePaths from '../../data/nepalProvincePaths.json';
+import { useTheme } from '../../context/ThemeContext';
 
 const provinceImages = {
     koshi: [
@@ -52,7 +53,6 @@ const regions = [
         routes: ['Everest Base Camp', 'Kanchenjunga Trek', 'Namche Bazaar'],
         desc: 'Home to Mt. Everest. Very high roads with snow and rough tracks.',
         color: '#60a5fa',
-        // Eastern section
         path: 'M748,132 L785,90 L850,115 L885,150 L875,188 L850,220 L825,245 L840,272 L810,305 L752,322 L742,238 L760,205 L742,170 Z',
     },
     {
@@ -131,12 +131,24 @@ const regions = [
 
 export default function TerrainSelect() {
     const navigate = useNavigate();
+    const { isDark } = useTheme();
     const [hovered, setHovered] = useState(null);
     const [selected, setSelected] = useState(null);
     const [wheelType, setWheelType] = useState('all');
 
     const activeRegion = regions.find((r) => r.id === (selected || hovered));
     const activeImages = activeRegion ? (provinceImages[activeRegion.id] || []) : [];
+
+    // Theme-aware SVG values
+    const svgOutlineStroke = isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.2)';
+    const svgFillInactive = isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.04)';
+    const svgStrokeInactive = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.15)';
+    const svgShadeStop1 = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)';
+    const svgShadeStop2 = isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)';
+    const labelFillActive = isDark ? '#fff' : '#111';
+    const labelFillInactive = isDark ? '#888' : '#555';
+    const compassColor = isDark ? '#888' : '#555';
+    const compassLineStroke = isDark ? '#666' : '#999';
 
     const handleSelect = (regionId) => {
         setSelected(regionId);
@@ -177,7 +189,7 @@ export default function TerrainSelect() {
 
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(232,115,42,0.1)', padding: '6px 16px', borderRadius: '30px', fontSize: '0.65rem', fontWeight: '700', letterSpacing: '2px', color: '#e8732a', marginBottom: '16px', border: '1px solid rgba(232,115,42,0.15)' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--accent-subtle)', padding: '6px 16px', borderRadius: '30px', fontSize: '0.65rem', fontWeight: '700', letterSpacing: '2px', color: 'var(--accent)', marginBottom: '16px', border: '1px solid var(--accent-subtle)' }}>
                         <MapPin size={12} /> PICK YOUR AREA
                     </div>
                     <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '10px' }}>
@@ -193,19 +205,18 @@ export default function TerrainSelect() {
                     {/* Map */}
                     <div style={{ flex: '1 1 55%', minWidth: '350px' }}>
                         <div style={{
-                            background: '#0c0c0c', borderRadius: '24px', padding: '24px',
+                            background: 'var(--bg-card)', borderRadius: '24px', padding: '24px',
                             border: '1px solid var(--border)', position: 'relative',
                         }}>
                             <svg viewBox="0 0 900 380" style={{ width: '100%', height: 'auto' }}>
-                                {/* Nepal outline glow */}
                                 <defs>
                                     <filter id="glow">
                                         <feGaussianBlur stdDeviation="3" result="blur" />
                                         <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                                     </filter>
                                     <linearGradient id="nepalMapShade" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stopColor="rgba(255,255,255,0.07)" />
-                                        <stop offset="100%" stopColor="rgba(255,255,255,0.01)" />
+                                        <stop offset="0%" style={{ stopColor: svgShadeStop1 }} />
+                                        <stop offset="100%" style={{ stopColor: svgShadeStop2 }} />
                                     </linearGradient>
                                 </defs>
 
@@ -213,7 +224,7 @@ export default function TerrainSelect() {
                                 <path
                                     d={nepalProvincePaths.outline}
                                     fill="url(#nepalMapShade)"
-                                    stroke="rgba(255,255,255,0.22)"
+                                    stroke={svgOutlineStroke}
                                     strokeWidth="1.3"
                                 />
 
@@ -226,8 +237,8 @@ export default function TerrainSelect() {
                                         <g key={region.id}>
                                             <path
                                                 d={nepalProvincePaths.paths[region.id] || region.path}
-                                                fill={isActive ? region.color + '28' : 'rgba(255,255,255,0.025)'}
-                                                stroke={isActive ? region.color : 'rgba(255,255,255,0.12)'}
+                                                fill={isActive ? region.color + '28' : svgFillInactive}
+                                                stroke={isActive ? region.color : svgStrokeInactive}
                                                 strokeWidth={isActive ? 2.5 : 1}
                                                 style={{ cursor: 'pointer', transition: 'all 0.3s ease', filter: isActive ? 'url(#glow)' : 'none' }}
                                                 onMouseEnter={() => setHovered(region.id)}
@@ -243,12 +254,10 @@ export default function TerrainSelect() {
                                     const isActive = hovered === region.id || selected === region.id;
                                     const [cx, cy] = provinceCenters[region.id];
                                     return (
-                                        <g key={region.id + '-label'}
-                                            style={{ pointerEvents: 'none' }}>
-                                            {/* Province name */}
+                                        <g key={region.id + '-label'} style={{ pointerEvents: 'none' }}>
                                             <text x={cx} y={cy + 6}
                                                 textAnchor="middle"
-                                                fill={isActive ? '#fff' : '#666'}
+                                                fill={isActive ? labelFillActive : labelFillInactive}
                                                 fontSize={isActive ? '11' : '9'}
                                                 fontWeight={isActive ? '700' : '500'}
                                                 fontFamily="Inter, sans-serif"
@@ -261,9 +270,9 @@ export default function TerrainSelect() {
 
                                 {/* Compass indicator */}
                                 <g transform="translate(860, 346)">
-                                    <text textAnchor="middle" fill="#444" fontSize="9" fontWeight="600" fontFamily="Inter, sans-serif">N</text>
-                                    <line x1="0" y1="5" x2="0" y2="18" stroke="#333" strokeWidth="1" />
-                                    <polygon points="0,5 -3,12 3,12" fill="#444" />
+                                    <text textAnchor="middle" fill={compassColor} fontSize="9" fontWeight="600" fontFamily="Inter, sans-serif">N</text>
+                                    <line x1="0" y1="5" x2="0" y2="18" stroke={compassLineStroke} strokeWidth="1" />
+                                    <polygon points="0,5 -3,12 3,12" fill={compassColor} />
                                 </g>
                             </svg>
                         </div>
@@ -310,7 +319,7 @@ export default function TerrainSelect() {
                                     </div>
                                 </div>
 
-                                <p style={{ color: '#999', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '24px' }}>
+                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '24px' }}>
                                     {activeRegion.desc}
                                 </p>
 
@@ -351,18 +360,18 @@ export default function TerrainSelect() {
 
                                 {/* Stats */}
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
-                                        <Navigation size={14} color="#888" style={{ marginBottom: '6px' }} />
+                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center', border: '1px solid var(--border)' }}>
+                                        <Navigation size={14} color="var(--text-muted)" style={{ marginBottom: '6px' }} />
                                         <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Height</div>
                                         <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeRegion.altitude}</div>
                                     </div>
-                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
-                                        <Thermometer size={14} color="#888" style={{ marginBottom: '6px' }} />
+                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center', border: '1px solid var(--border)' }}>
+                                        <Thermometer size={14} color="var(--text-muted)" style={{ marginBottom: '6px' }} />
                                         <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Temp</div>
                                         <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeRegion.temp}</div>
                                     </div>
-                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
-                                        <Wind size={14} color="#888" style={{ marginBottom: '6px' }} />
+                                    <div style={{ background: 'var(--bg-glass)', borderRadius: '14px', padding: '14px', textAlign: 'center', border: '1px solid var(--border)' }}>
+                                        <Wind size={14} color="var(--text-muted)" style={{ marginBottom: '6px' }} />
                                         <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Routes</div>
                                         <div style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>{activeRegion.routes.length}</div>
                                     </div>
@@ -377,10 +386,10 @@ export default function TerrainSelect() {
                                                 display: 'flex', alignItems: 'center', gap: '10px',
                                                 padding: '10px 14px', borderRadius: '12px',
                                                 background: 'var(--bg-glass)',
-                                                border: '1px solid rgba(255,255,255,0.04)',
+                                                border: '1px solid var(--border)',
                                             }}>
                                                 <MapPin size={13} color={activeRegion.color} />
-                                                <span style={{ color: '#ccc', fontSize: '0.8rem', fontWeight: '500' }}>{route}</span>
+                                                <span style={{ color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: '500' }}>{route}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -400,9 +409,9 @@ export default function TerrainSelect() {
                                                 style={{
                                                     padding: '8px 12px',
                                                     borderRadius: '999px',
-                                                    border: wheelType === item.id ? `1px solid ${activeRegion.color}` : '1px solid rgba(255,255,255,0.12)',
+                                                    border: wheelType === item.id ? `1px solid ${activeRegion.color}` : '1px solid var(--border)',
                                                     background: wheelType === item.id ? `${activeRegion.color}20` : 'transparent',
-                                                    color: wheelType === item.id ? activeRegion.color : '#ccc',
+                                                    color: wheelType === item.id ? activeRegion.color : 'var(--text-secondary)',
                                                     fontSize: '0.72rem',
                                                     fontWeight: '700',
                                                     cursor: 'pointer',
@@ -430,15 +439,15 @@ export default function TerrainSelect() {
                                 </button>
 
                                 <button onClick={handleAIRecommend} style={{
-                                    width: '100%', padding: '16px', border: '1px solid rgba(232,115,42,0.3)', borderRadius: '14px',
-                                    background: 'linear-gradient(135deg, rgba(232,115,42,0.12), rgba(123,129,255,0.08))',
-                                    color: '#e8732a', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
+                                    width: '100%', padding: '16px', border: '1px solid var(--accent-subtle)', borderRadius: '14px',
+                                    background: 'var(--accent-subtle)',
+                                    color: 'var(--accent)', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                     marginTop: '10px',
-                                    transition: 'transform 0.2s, box-shadow 0.2s, background 0.3s',
+                                    transition: 'transform 0.2s, opacity 0.2s',
                                 }}
-                                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = 'linear-gradient(135deg, rgba(232,115,42,0.2), rgba(123,129,255,0.12))'; }}
-                                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'linear-gradient(135deg, rgba(232,115,42,0.12), rgba(123,129,255,0.08))'; }}
+                                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.opacity = '0.85'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.opacity = '1'; }}
                                 >
                                     ✦ Get AI Recommendation
                                 </button>
@@ -454,7 +463,7 @@ export default function TerrainSelect() {
                                     alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
                                     border: '1px solid var(--border)',
                                 }}>
-                                    <MapPin size={28} color="#444" />
+                                    <MapPin size={28} color="var(--text-muted)" />
                                 </div>
                                 <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '8px' }}>
                                     Pick a Province
@@ -471,9 +480,10 @@ export default function TerrainSelect() {
                                 background: 'transparent', border: '1px solid var(--border)',
                                 color: 'var(--text-secondary)', padding: '10px 24px', borderRadius: '999px',
                                 fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer',
+                                transition: 'color 0.2s',
                             }}
-                            onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
-                            onMouseOut={(e) => e.currentTarget.style.color = '#888'}
+                            onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                            onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
                             >
                                 Skip - See All Vehicles
                             </button>
