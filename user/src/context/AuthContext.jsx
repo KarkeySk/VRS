@@ -27,7 +27,10 @@ export function AuthProvider({ children }) {
         // Listen for auth changes
         try {
             const result = authService.onAuthStateChange((_event, s) => {
-                const isVerified = Boolean(s?.user?.email_confirmed_at || s?.user?.confirmed_at)
+                const provider = s?.user?.app_metadata?.provider
+                const isVerified = s?.user
+                    ? (provider && provider !== 'email') || Boolean(s.user.email_confirmed_at || s.user.confirmed_at)
+                    : false
                 setSession(isVerified ? s : null)
                 setUser(isVerified ? s?.user ?? null : null)
             })
@@ -42,6 +45,7 @@ export function AuthProvider({ children }) {
         }
     }, [])
 
+    console.log('[AuthContext] authService.signInWithGoogle:', typeof authService?.signInWithGoogle, authService)
     const value = {
         user,
         session,

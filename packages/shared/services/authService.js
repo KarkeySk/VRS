@@ -19,7 +19,13 @@ const getEmailRedirectTo = () => {
     return undefined
 }
 
-const isEmailVerified = (user) => Boolean(user?.email_confirmed_at || user?.confirmed_at)
+const isEmailVerified = (user) => {
+    if (!user) return false
+    // OAuth providers (google, github, etc.) verify email on their end — always trusted
+    const provider = user.app_metadata?.provider
+    if (provider && provider !== 'email') return true
+    return Boolean(user.email_confirmed_at || user.confirmed_at)
+}
 
 const getOAuthRedirectTo = () => {
     const configuredAppUrl = trimTrailingSlash(

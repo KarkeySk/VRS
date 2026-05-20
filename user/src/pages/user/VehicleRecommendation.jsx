@@ -196,23 +196,23 @@ export default function VehicleRecommendation() {
             </div>
           </div>
 
-          <p style={{ color: '#999', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '24px' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, marginBottom: '24px' }}>
             {terrainContext.description}
           </p>
 
           <div className="terrain-stats-row">
             <div className="terrain-stat-box">
-              <Navigation size={14} color="#888" style={{ marginBottom: '6px' }} />
+              <Navigation size={14} color="var(--text-muted)" style={{ marginBottom: '6px' }} />
               <div className="terrain-stat-label">Altitude</div>
               <div className="terrain-stat-value">{terrainContext.altitude}</div>
             </div>
             <div className="terrain-stat-box">
-              <Thermometer size={14} color="#888" style={{ marginBottom: '6px' }} />
+              <Thermometer size={14} color="var(--text-muted)" style={{ marginBottom: '6px' }} />
               <div className="terrain-stat-label">Temperature</div>
               <div className="terrain-stat-value">{terrainContext.temp}</div>
             </div>
             <div className="terrain-stat-box">
-              <Wind size={14} color="#888" style={{ marginBottom: '6px' }} />
+              <Wind size={14} color="var(--text-muted)" style={{ marginBottom: '6px' }} />
               <div className="terrain-stat-label">Routes</div>
               <div className="terrain-stat-value">{terrainContext.routes.length}</div>
             </div>
@@ -274,7 +274,7 @@ export default function VehicleRecommendation() {
             {/* AI Summary */}
             <div className="ai-summary-card">
               <div className="ai-summary-header">
-                <Bot size={18} color="#e8732a" />
+                <Bot size={18} color="var(--accent)" />
                 <span className="ai-summary-label">AI Analysis</span>
                 <span className={`ai-provider-tag ${recommendation.provider}`}>
                   {recommendation.provider === 'gemini' ? '✦ Gemini AI' : '⚡ Smart Match'}
