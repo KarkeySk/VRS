@@ -1,36 +1,110 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap');
+/* Brand fonts: Inter (body) + Space Grotesk (display fallback for TT Lakes Neue) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+/*
+  TT Lakes Neue (primary display font — purchase license at typeType.ru)
+  When font files are available, add them here:
+
+  @font-face {
+    font-family: 'TT Lakes Neue';
+    src: url('/fonts/TTLakesNeue-Light.woff2') format('woff2');
+    font-weight: 300; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'TT Lakes Neue';
+    src: url('/fonts/TTLakesNeue-Regular.woff2') format('woff2');
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'TT Lakes Neue';
+    src: url('/fonts/TTLakesNeue-SemiBold.woff2') format('woff2');
+    font-weight: 600; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'TT Lakes Neue';
+    src: url('/fonts/TTLakesNeue-Bold.woff2') format('woff2');
+    font-weight: 700; font-style: normal; font-display: swap;
+  }
+*/
+
+/* ===== KEYFRAMES ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
+  50%       { opacity: 1;   transform: scaleY(1); }
+}
+
+@keyframes wheelSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes verifyProgress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+@keyframes driftLights {
+  from { transform: translateX(-50px) translateY(-50px); }
+  to   { transform: translateX(50px) translateY(50px); }
+}
+
+@keyframes roadDash {
+  from { transform: translateX(80px); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes bikeRun {
+  0%   { left: -128px; }
+  100% { left: 100%; }
+}
 
 /* ===== CSS VARIABLES ===== */
+/* Brand palette: Pantone 715 C (#FF5723) · Pantone Black 3 C (#272827) · Pantone 7527 C (#E8E2D9) */
 :root {
-  --bg-primary: #0a0c10;
-  --bg-secondary: #11141a;
-  --bg-card: #171b23;
-  --bg-card-hover: #1e2430;
-  --bg-glass: rgba(255, 255, 255, 0.025);
-  --bg-glass-hover: rgba(255, 255, 255, 0.065);
+  --bg-primary: #1a1b1a;
+  --bg-secondary: #202120;
+  --bg-card: #272827;
+  --bg-card-hover: #2e302e;
+  --bg-glass: rgba(255, 255, 255, 0.04);
+  --bg-glass-hover: rgba(255, 255, 255, 0.08);
 
-  --text-primary: #ece7dc;
-  --text-secondary: #b8b3a7;
-  --text-muted: #8f8a80;
+  --text-primary: #E8E2D9;
+  --text-secondary: #b0a99e;
+  --text-muted: #7e7870;
 
-  /* Travel palette: vehicle steel + forest + sky + sunrise road */
+  /* Brand tones */
   --tone-vehicle: #3f5268;
   --tone-nature: #4f7a5b;
   --tone-city: #6e8298;
-  --tone-sunrise: #b88a44;
-  --tone-sand: #d9c1a1;
+  --tone-sunrise: #FF5723;
+  --tone-sand: #E8E2D9;
 
   --accent: var(--tone-sunrise);
-  --accent-hover: #c29b5f;
-  --accent-ink: #121012;
+  --accent-hover: #FF6F40;
+  --accent-ink: #1a0800;
   --accent-cool: var(--tone-city);
-  --brand-gradient: linear-gradient(125deg, #d7b684 0%, #b88a44 48%, #4b6077 100%);
-  --brand-soft-gradient: linear-gradient(130deg, rgba(184, 138, 68, 0.2), rgba(110, 130, 152, 0.16));
-  --accent-glow: rgba(184, 138, 68, 0.3);
-  --accent-subtle: rgba(184, 138, 68, 0.12);
+  --brand-gradient: linear-gradient(125deg, #FF8C5A 0%, #FF5723 50%, #272827 100%);
+  --brand-soft-gradient: linear-gradient(130deg, rgba(255, 87, 35, 0.18), rgba(39, 40, 39, 0.5));
+  --accent-glow: rgba(255, 87, 35, 0.32);
+  --accent-subtle: rgba(255, 87, 35, 0.12);
 
-  --border: rgba(183, 173, 155, 0.2);
-  --border-hover: rgba(202, 193, 177, 0.34);
+  --border: rgba(232, 226, 217, 0.14);
+  --border-hover: rgba(232, 226, 217, 0.28);
 
   /* Semantic status colors — used for booking states, alerts, success feedback */
   --status-success: #34d399;
@@ -64,44 +138,44 @@
   --transition-base: 0.3s ease;
   --transition-slow: 0.5s ease;
 
-  --font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --nav-bg: rgba(10, 12, 16, 0.82);
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'TT Lakes Neue', 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --nav-bg: rgba(26, 27, 26, 0.88);
   --page-bg:
-    radial-gradient(1100px 480px at 8% -12%, rgba(184, 138, 68, 0.18), transparent 60%),
-    radial-gradient(950px 460px at 105% 105%, rgba(110, 130, 152, 0.14), transparent 60%),
-    #0a0c10;
+    radial-gradient(1100px 480px at 8% -12%, rgba(255, 87, 35, 0.10), transparent 60%),
+    radial-gradient(950px 460px at 105% 105%, rgba(39, 40, 39, 0.6), transparent 60%),
+    #1a1b1a;
 }
 
 :root[data-theme='light'] {
-  --bg-primary: #f2efe7;
-  --bg-secondary: #faf7f0;
-  --bg-card: #fffdf8;
-  --bg-card-hover: #f4efe6;
-  --bg-glass: rgba(58, 87, 109, 0.06);
-  --bg-glass-hover: rgba(58, 87, 109, 0.1);
+  --bg-primary: #E8E2D9;
+  --bg-secondary: #EEE8DF;
+  --bg-card: #F4F0E8;
+  --bg-card-hover: #EAE5DA;
+  --bg-glass: rgba(39, 40, 39, 0.05);
+  --bg-glass-hover: rgba(39, 40, 39, 0.09);
 
-  --text-primary: #1f2e3a;
-  --text-secondary: #546678;
-  --text-muted: #718394;
+  --text-primary: #272827;
+  --text-secondary: #4A4845;
+  --text-muted: #6B6763;
 
   --tone-vehicle: #496174;
   --tone-nature: #5c8868;
   --tone-city: #4a7593;
-  --tone-sunrise: #be6228;
-  --tone-sand: #ddba90;
+  --tone-sunrise: #FF5723;
+  --tone-sand: #E8E2D9;
 
   --accent: var(--tone-sunrise);
-  --accent-hover: #ab5721;
-  --accent-ink: #fff8ef;
+  --accent-hover: #E64D1A;
+  --accent-ink: #ffffff;
   --accent-cool: var(--tone-city);
-  --brand-gradient: linear-gradient(125deg, #eec79f 0%, #c1662c 50%, #4a7593 100%);
-  --brand-soft-gradient: linear-gradient(130deg, rgba(190, 98, 40, 0.16), rgba(92, 136, 104, 0.12));
-  --accent-glow: rgba(190, 98, 40, 0.22);
-  --accent-subtle: rgba(190, 98, 40, 0.1);
+  --brand-gradient: linear-gradient(125deg, #FF8C5A 0%, #FF5723 50%, #272827 100%);
+  --brand-soft-gradient: linear-gradient(130deg, rgba(255, 87, 35, 0.14), rgba(39, 40, 39, 0.08));
+  --accent-glow: rgba(255, 87, 35, 0.25);
+  --accent-subtle: rgba(255, 87, 35, 0.10);
 
-  --border: rgba(78, 103, 125, 0.2);
-  --border-hover: rgba(78, 103, 125, 0.32);
+  --border: rgba(39, 40, 39, 0.14);
+  --border-hover: rgba(39, 40, 39, 0.26);
 
   /* Status colors tuned for light backgrounds (deeper hues, higher contrast) */
   --status-success: #15803d;
@@ -120,65 +194,65 @@
   --status-pay-soft: rgba(63, 140, 44, 0.1);
   --status-pay-border: rgba(63, 140, 44, 0.32);
 
-  --nav-bg: rgba(251, 247, 238, 0.85);
+  --nav-bg: rgba(232, 226, 217, 0.88);
   --page-bg:
-    radial-gradient(1000px 440px at 0% -8%, rgba(190, 98, 40, 0.15), transparent 60%),
-    radial-gradient(900px 420px at 110% 110%, rgba(92, 136, 104, 0.1), transparent 60%),
-    #f2efe7;
+    radial-gradient(1000px 440px at 0% -8%, rgba(255, 87, 35, 0.10), transparent 60%),
+    radial-gradient(900px 420px at 110% 110%, rgba(39, 40, 39, 0.06), transparent 60%),
+    #E8E2D9;
 }
 
-/* ===== Brand Variants ===== */
+/* ===== Brand Variants (all use Pantone 715 C orange as accent) ===== */
 :root[data-brand='mountain-premium'] {
   --tone-vehicle: #2e3f56;
   --tone-nature: #456f5b;
   --tone-city: #5c7fa6;
-  --tone-sunrise: #a86a37;
-  --tone-sand: #cfb597;
+  --tone-sunrise: #FF5723;
+  --tone-sand: #E8E2D9;
 
   --accent: var(--tone-sunrise);
-  --accent-hover: #b97a45;
+  --accent-hover: #FF6F40;
   --accent-cool: var(--tone-city);
-  --brand-gradient: linear-gradient(125deg, #d8c2a6 0%, #a86a37 48%, #4a6f93 100%);
-  --brand-soft-gradient: linear-gradient(130deg, rgba(168, 106, 55, 0.2), rgba(69, 111, 91, 0.16));
-  --accent-glow: rgba(168, 106, 55, 0.35);
-  --accent-subtle: rgba(168, 106, 55, 0.14);
+  --brand-gradient: linear-gradient(125deg, #FF8C5A 0%, #FF5723 50%, #272827 100%);
+  --brand-soft-gradient: linear-gradient(130deg, rgba(255, 87, 35, 0.18), rgba(39, 40, 39, 0.4));
+  --accent-glow: rgba(255, 87, 35, 0.32);
+  --accent-subtle: rgba(255, 87, 35, 0.12);
 
   --page-bg:
-    radial-gradient(1150px 520px at 8% -10%, rgba(168, 106, 55, 0.2), transparent 62%),
-    radial-gradient(900px 450px at 104% 108%, rgba(69, 111, 91, 0.2), transparent 58%),
-    #0f151b;
+    radial-gradient(1150px 520px at 8% -10%, rgba(255, 87, 35, 0.12), transparent 62%),
+    radial-gradient(900px 450px at 104% 108%, rgba(39, 40, 39, 0.5), transparent 58%),
+    #1a1b1a;
 }
 
 :root[data-theme='light'][data-brand='mountain-premium'] {
-  --accent: #9f6030;
-  --accent-hover: #8e5328;
-  --brand-gradient: linear-gradient(125deg, #dcc6ab 0%, #a06535 50%, #557a9e 100%);
-  --brand-soft-gradient: linear-gradient(130deg, rgba(160, 101, 53, 0.16), rgba(80, 120, 98, 0.14));
+  --accent: #FF5723;
+  --accent-hover: #E64D1A;
+  --brand-gradient: linear-gradient(125deg, #FF8C5A 0%, #FF5723 50%, #272827 100%);
+  --brand-soft-gradient: linear-gradient(130deg, rgba(255, 87, 35, 0.14), rgba(39, 40, 39, 0.08));
   --page-bg:
-    radial-gradient(1000px 430px at 3% -8%, rgba(160, 101, 53, 0.14), transparent 60%),
-    radial-gradient(860px 400px at 109% 111%, rgba(80, 120, 98, 0.12), transparent 58%),
-    #f1ece2;
+    radial-gradient(1000px 430px at 3% -8%, rgba(255, 87, 35, 0.10), transparent 60%),
+    radial-gradient(860px 400px at 109% 111%, rgba(39, 40, 39, 0.06), transparent 58%),
+    #E8E2D9;
 }
 
 :root[data-brand='urban-adventure'] {
   --tone-vehicle: #324752;
   --tone-nature: #3e7760;
   --tone-city: #3a6f9a;
-  --tone-sunrise: #cc7040;
-  --tone-sand: #d7b79a;
+  --tone-sunrise: #FF5723;
+  --tone-sand: #E8E2D9;
 
-  --accent: var(--tone-city);
-  --accent-hover: #4a84b4;
-  --accent-cool: #77a9cf;
-  --brand-gradient: linear-gradient(120deg, #debe9f 0%, #cc7040 45%, #3a6f9a 100%);
-  --brand-soft-gradient: linear-gradient(130deg, rgba(58, 111, 154, 0.18), rgba(62, 119, 96, 0.14));
-  --accent-glow: rgba(58, 111, 154, 0.3);
-  --accent-subtle: rgba(58, 111, 154, 0.14);
+  --accent: var(--tone-sunrise);
+  --accent-hover: #FF6F40;
+  --accent-cool: #3a6f9a;
+  --brand-gradient: linear-gradient(125deg, #FF8C5A 0%, #FF5723 50%, #272827 100%);
+  --brand-soft-gradient: linear-gradient(130deg, rgba(255, 87, 35, 0.18), rgba(39, 40, 39, 0.4));
+  --accent-glow: rgba(255, 87, 35, 0.32);
+  --accent-subtle: rgba(255, 87, 35, 0.12);
 
   --page-bg:
-    radial-gradient(1100px 500px at 4% -12%, rgba(204, 112, 64, 0.2), transparent 60%),
-    radial-gradient(880px 430px at 110% 105%, rgba(58, 111, 154, 0.2), transparent 58%),
-    #0d141a;
+    radial-gradient(1100px 500px at 4% -12%, rgba(255, 87, 35, 0.12), transparent 60%),
+    radial-gradient(880px 430px at 110% 105%, rgba(39, 40, 39, 0.5), transparent 58%),
+    #1a1b1a;
 }
 
 :root[data-theme='light'][data-brand='urban-adventure'] {
@@ -1077,6 +1151,11 @@ ol {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: filter 0.4s ease;
+}
+
+:root[data-theme='light'] .hero-bg img {
+  filter: brightness(1.18) saturate(0.85);
 }
 
 .hero-overlay {
@@ -1091,10 +1170,28 @@ ol {
 
 :root[data-theme='light'] .hero-overlay {
   background: linear-gradient(to bottom,
-      rgba(242, 239, 231, 0.06) 0%,
-      rgba(242, 239, 231, 0.2) 40%,
-      rgba(242, 239, 231, 0.48) 80%,
-      rgba(242, 239, 231, 0.7) 100%);
+      rgba(10, 10, 10, 0.08) 0%,
+      rgba(10, 10, 10, 0.32) 40%,
+      rgba(10, 10, 10, 0.62) 80%,
+      rgba(10, 10, 10, 0.80) 100%);
+}
+
+:root[data-theme='light'] .hero-title {
+  color: #ece7dc;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme='light'] .hero-description {
+  color: rgba(236, 231, 220, 0.82);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme='light'] .hero-label {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme='light'] .hero-scroll-indicator span {
+  color: rgba(236, 231, 220, 0.65);
 }
 
 .hero-content {
@@ -2698,6 +2795,11 @@ ol {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: filter 0.4s ease;
+}
+
+:root[data-theme='light'] .hero-bg img {
+  filter: brightness(1.18) saturate(0.85);
 }
 
 .hero-overlay {
@@ -2712,10 +2814,28 @@ ol {
 
 :root[data-theme='light'] .hero-overlay {
   background: linear-gradient(to bottom,
-      rgba(242, 239, 231, 0.06) 0%,
-      rgba(242, 239, 231, 0.2) 40%,
-      rgba(242, 239, 231, 0.48) 80%,
-      rgba(242, 239, 231, 0.7) 100%);
+      rgba(10, 10, 10, 0.08) 0%,
+      rgba(10, 10, 10, 0.32) 40%,
+      rgba(10, 10, 10, 0.62) 80%,
+      rgba(10, 10, 10, 0.80) 100%);
+}
+
+:root[data-theme='light'] .hero-title {
+  color: #ece7dc;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme='light'] .hero-description {
+  color: rgba(236, 231, 220, 0.82);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme='light'] .hero-label {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme='light'] .hero-scroll-indicator span {
+  color: rgba(236, 231, 220, 0.65);
 }
 
 .hero-content {
@@ -4319,6 +4439,11 @@ ol {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: filter 0.4s ease;
+}
+
+:root[data-theme='light'] .hero-bg img {
+  filter: brightness(1.18) saturate(0.85);
 }
 
 .hero-overlay {
@@ -4333,10 +4458,28 @@ ol {
 
 :root[data-theme='light'] .hero-overlay {
   background: linear-gradient(to bottom,
-      rgba(242, 239, 231, 0.06) 0%,
-      rgba(242, 239, 231, 0.2) 40%,
-      rgba(242, 239, 231, 0.48) 80%,
-      rgba(242, 239, 231, 0.7) 100%);
+      rgba(10, 10, 10, 0.08) 0%,
+      rgba(10, 10, 10, 0.32) 40%,
+      rgba(10, 10, 10, 0.62) 80%,
+      rgba(10, 10, 10, 0.80) 100%);
+}
+
+:root[data-theme='light'] .hero-title {
+  color: #ece7dc;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme='light'] .hero-description {
+  color: rgba(236, 231, 220, 0.82);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme='light'] .hero-label {
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme='light'] .hero-scroll-indicator span {
+  color: rgba(236, 231, 220, 0.65);
 }
 
 .hero-content {
