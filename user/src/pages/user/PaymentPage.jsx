@@ -119,7 +119,7 @@ export default function PaymentPage() {
     const canPay = app?.status === 'approved' && app?.payment_status !== 'completed';
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '80px' }}>
+        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '40px' }}>
             <div style={{ maxWidth: '560px', margin: '0 auto', padding: '0 20px' }}>
                 <button onClick={() => navigate(-1)} style={{
                     background: 'none', border: 'none', color: 'var(--text-secondary)',

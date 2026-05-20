@@ -30,7 +30,7 @@ export default function VehiclesPage() {
 
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', paddingBottom: '80px', background: 'var(--bg-primary)' }}>
+        <div style={{ paddingTop: '100px', minHeight: '100vh', paddingBottom: '40px', background: 'var(--bg-primary)' }}>
             <div className="container" style={{ position: 'relative' }}>
                 <div style={{ position: 'absolute', top: '20px', right: '0', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-glass)', padding: '8px 16px', borderRadius: '30px', border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'var(--bg-glass-hover)', borderRadius: '50%', color: 'var(--text-primary)' }}>
