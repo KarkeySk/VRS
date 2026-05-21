@@ -1,0 +1,15 @@
+export const WEATHER_CONFIG = {
+  DEFAULT_LOCATION: {
+    NAME: import.meta.env.VITE_DEFAULT_WEATHER_LOCATION || 'Pokhara',
+    LATITUDE: import.meta.env.VITE_DEFAULT_LAT || 28.2096,
+    LONGITUDE: import.meta.env.VITE_DEFAULT_LON || 83.9856,
+  },
+  VISIBILITY_THRESHOLDS: {
+    EXCELLENT_MIN_M: import.meta.env.VITE_VISIBILITY_EXCELLENT || 10000,
+    GOOD_MIN_M: import.meta.env.VITE_VISIBILITY_GOOD || 5000,
+    MODERATE_MIN_M: import.meta.env.VITE_VISIBILITY_MODERATE || 2000,
+  },
+  WIND_SPEED_THRESHOLDS: {
+    STRONG_WINDS_KMH: import.meta.env.VITE_WIND_STRONG || 30,
+  },
+};

@@ -1,0 +1,17 @@
+export const PRICING_CONFIG = {
+  CURRENCY: import.meta.env.VITE_CURRENCY || 'NPR',
+  VEHICLE_TYPES: {
+    SCOOTER_DAILY: import.meta.env.VITE_SCOOTER_DAILY_PRICE || 800,
+    MOTORCYCLE_DAILY: import.meta.env.VITE_MOTORCYCLE_DAILY_PRICE || 1500,
+    CAR_DAILY: import.meta.env.VITE_CAR_DAILY_PRICE || 3500,
+    SUV_DAILY: import.meta.env.VITE_SUV_DAILY_PRICE || 5000,
+    VAN_DAILY: import.meta.env.VITE_VAN_DAILY_PRICE || 6500,
+  },
+  ADDONS: {
+    PREMIUM_LUGGAGE: import.meta.env.VITE_ADDON_LUGGAGE_PRICE || 2000,
+  },
+  CANCELLATION_POLICY: {
+    FREE_CANCELLATION_HOURS: import.meta.env.VITE_CANCEL_FREE_HOURS || 24,
+    PARTIAL_REFUND_PERCENT: import.meta.env.VITE_CANCEL_PARTIAL_REFUND || 50,
+  },
+};

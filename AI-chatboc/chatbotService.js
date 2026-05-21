@@ -2,24 +2,28 @@
 //  CONFIGURATION
 // ─────────────────────────────────────────────────────────────
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile";
+import { API_CONFIG, SERVICE_CONFIG, UI_CONFIG, STATUS_CONFIG, PRICING_CONFIG } from '../config/index.js';
+
+const GROQ_API_KEY = API_CONFIG.GROQ.API_KEY;
+const GROQ_API_URL = API_CONFIG.GROQ.API_URL;
+const MODEL = API_CONFIG.GROQ.MODEL;
 
 // Conversation state
 let conversationHistory = [];
 let groqAvailable = true;
 let failureCount = 0;
-const MAX_FAILURES_BEFORE_FALLBACK = 3;
+let groqDisabledUntil = 0;
+const MAX_FAILURES_BEFORE_FALLBACK = SERVICE_CONFIG.CHATBOT.MAX_FAILURES_BEFORE_FALLBACK;
+const MAX_RETRIES = SERVICE_CONFIG.CHATBOT.MAX_RETRIES;
+const RATE_LIMIT_WINDOW = SERVICE_CONFIG.CHATBOT.RATE_LIMIT_WINDOW_MS;
+const RATE_LIMIT_BUFFER = SERVICE_CONFIG.CHATBOT.RATE_LIMIT_BUFFER_MS;
+const RETRY_INITIAL_DELAY = SERVICE_CONFIG.CHATBOT.RETRY_INITIAL_DELAY_MS;
+const RETRY_MAX_DELAY = SERVICE_CONFIG.CHATBOT.RETRY_MAX_DELAY_MS;
 
 // ─────────────────────────────────────────────────────────────
 //  SYSTEM PROMPT — defines the AI's personality & scope
 // ─────────────────────────────────────────────────────────────
 
-let _liveFleet = '';
-
-const BASE_SYSTEM_PROMPT = `You are Bhatbhate AI — a focused assistant for the Bhatbhate vehicle rental and travel platform in Nepal.
-// Live fleet data injected at runtime — see injectFleetData()
 let _liveFleet = '';
 
 const BASE_SYSTEM_PROMPT = `You are Bhatbhate AI — a helpful, knowledgeable, general-purpose AI assistant (similar in capability to Google's Gemini) that lives inside the Bhatbhate vehicle rental and travel platform in Nepal.
@@ -292,26 +296,7 @@ const buildSystemPrompt = () =>
   _liveFleet
     ? `${BASE_SYSTEM_PROMPT}\n${FLEET_INSTRUCTIONS}\n\n—\nLIVE FLEET — ACTUAL VEHICLES IN THE DATABASE\n(These are the ONLY real vehicles. Use exact names and prices.)\n—\n${_liveFleet}`
     : BASE_SYSTEM_PROMPT;
-When giving destination/route advice, briefly cover:
-1. Recommended vehicle type and the specific vehicle name(s) from the LIVE FLEET
-2. Best season window (and what to avoid)
-3. One practical safety / logistics tip
 
-Popular destinations to fluently advise on: Kathmandu Valley, Pokhara, Chitwan, Lumbini, Bandipur, Mustang, Rara, Ilam, Janakpur, Everest-view road trips (Salleri/Jiri side), Manang, Ghandruk, Nagarkot, Dhulikhel.`;
-
-// Fleet instructions appended only when live data is available
-const FLEET_INSTRUCTIONS = `
-VEHICLE ANSWER RULES (follow these strictly):
-- When asked "what vehicles do you have", "show me your fleet", "available vehicles", or any variant → list EVERY vehicle from LIVE FLEET below, formatted clearly.
-- When recommending a vehicle for a trip or terrain → pick the best match(es) from LIVE FLEET and explain WHY using their actual specs (engine, drive, capacity, category).
-- Always quote the exact NPR price per day from LIVE FLEET. Never use generic ranges.
-- If a user asks about a vehicle type (SUV, bike, scooter) → filter LIVE FLEET by that type and list matching entries.
-- If LIVE FLEET is empty or not yet loaded → say "Let me check our current fleet — you can also browse all vehicles directly on the Vehicles page."`;
-
-const buildSystemPrompt = () =>
-  _liveFleet
-    ? `${BASE_SYSTEM_PROMPT}\n${FLEET_INSTRUCTIONS}\n\n—\nLIVE FLEET — ACTUAL VEHICLES IN THE DATABASE\n(These are the ONLY real vehicles. Use exact names and prices.)\n—\n${_liveFleet}`
-    : BASE_SYSTEM_PROMPT;
 
 // ─────────────────────────────────────────────────────────────
 //  GROQ PROVIDER
@@ -324,28 +309,6 @@ const buildGroqMessages = (userMessage) => {
   const messages = [{ role: "system", content: buildSystemPrompt() }];
   for (const m of conversationHistory) {
     messages.push({ role: m.role === "assistant" ? "assistant" : "user", content: m.text });
-// Convert internal {role, text} history into the Gemini Content[] format.
-const buildGeminiHistory = () =>
-  conversationHistory.map((m) => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.text }],
-  }));
-
-const initGeminiSession = ({ preserveHistory = false } = {}) => {
-  if (!genAI) return;
-  try {
-    const model = genAI.getGenerativeModel({
-      model: MODEL,
-      systemInstruction: buildSystemPrompt(),
-      safetySettings: SAFETY_SETTINGS,
-    });
-    chatSession = model.startChat({
-      history: preserveHistory ? buildGeminiHistory() : [],
-      generationConfig: GENERATION_CONFIG,
-    });
-  } catch (err) {
-    console.warn("Failed to init Gemini session:", err.message);
-    chatSession = null;
   }
   messages.push({ role: "user", content: userMessage });
   return messages;
@@ -366,9 +329,9 @@ const sendGroqMessage = async (userMessage) => {
         body: JSON.stringify({
           model: MODEL,
           messages: buildGroqMessages(userMessage),
-          max_tokens: 2048,
-          temperature: 0.9,
-          top_p: 0.95,
+          max_tokens: SERVICE_CONFIG.GROQ.CHAT.MAX_TOKENS,
+          temperature: SERVICE_CONFIG.GROQ.CHAT.TEMPERATURE,
+          top_p: SERVICE_CONFIG.GROQ.CHAT.TOP_P,
         }),
       });
 
@@ -377,8 +340,9 @@ const sendGroqMessage = async (userMessage) => {
         const isRateLimit = res.status === 429;
         if (isRateLimit && attempt < MAX_RETRIES) {
           const retryAfter = res.headers.get("retry-after");
-          const delayMs = retryAfter ? Math.min(parseInt(retryAfter) * 1000, 15000) : 3000 * attempt;
+          const delayMs = retryAfter ? parseInt(retryAfter) * 1000 : Math.min(RETRY_INITIAL_DELAY * Math.pow(2, attempt - 1), RETRY_MAX_DELAY);
           console.log(`[Groq] Rate limited. Waiting ${delayMs / 1000}s...`);
+          groqDisabledUntil = Date.now() + delayMs + RATE_LIMIT_BUFFER;
           await sleep(delayMs);
           continue;
         }
@@ -485,14 +449,17 @@ Give me your vehicle recommendations in the JSON format specified.`;
                 { role: "system", content: TERRAIN_RECOMMENDATION_PROMPT },
                 { role: "user", content: userPrompt },
               ],
-              max_tokens: 1024,
-              temperature: 0.3,
+              max_tokens: SERVICE_CONFIG.GROQ.RECOMMENDATIONS.MAX_TOKENS,
+              temperature: SERVICE_CONFIG.GROQ.RECOMMENDATIONS.TEMPERATURE,
             }),
           });
 
           if (!res.ok) {
             if (res.status === 429 && attempt < MAX_RETRIES) {
-              await sleep(3000 * attempt);
+              const retryAfter = res.headers.get("retry-after");
+              const delayMs = retryAfter ? parseInt(retryAfter) * 1000 : Math.min(2000 * Math.pow(2, attempt - 1), 30000);
+              console.log(`[Recommendation] Rate limited. Waiting ${delayMs / 1000}s...`);
+              await sleep(delayMs);
               continue;
             }
             throw new Error(`Groq API error ${res.status}`);
@@ -915,24 +882,27 @@ export const injectFleetData = (vehicles) => {
     .join('\n');
 
   console.log(`[Chatbot] Fleet injected: ${vehicles.length} vehicles`);
-  // Rebuild session so Gemini picks up the new system prompt immediately
-  initGeminiSession({ preserveHistory: true });
 };
 
 export const initializeChatSession = () => {
   conversationHistory = [];
   failureCount = 0;
   groqAvailable = true;
+  groqDisabledUntil = 0;
 };
 
 export const sendChatMessage = async (userMessage) => {
   let assistantMessage = "";
   let usedProvider = "groq";
 
-  if (GROQ_API_KEY && groqAvailable) {
+  const now = Date.now();
+  const isInCooldown = now < groqDisabledUntil;
+
+  if (GROQ_API_KEY && groqAvailable && !isInCooldown) {
     try {
       assistantMessage = await sendGroqMessage(userMessage);
       usedProvider = "groq";
+      failureCount = 0;
     } catch (err) {
       console.warn("[Chatbot] Groq failed:", err.message);
       failureCount++;
@@ -942,6 +912,8 @@ export const sendChatMessage = async (userMessage) => {
       }
       assistantMessage = "";
     }
+  } else if (isInCooldown) {
+    console.log(`[Chatbot] Groq in cooldown. Waiting ${Math.ceil((groqDisabledUntil - now) / 1000)}s...`);
   }
 
   if (!assistantMessage) {
@@ -954,8 +926,8 @@ export const sendChatMessage = async (userMessage) => {
   conversationHistory.push({ role: "user", text: userMessage });
   conversationHistory.push({ role: "assistant", text: assistantMessage });
 
-  if (conversationHistory.length > 20) {
-    conversationHistory = conversationHistory.slice(-20);
+  if (conversationHistory.length > SERVICE_CONFIG.CHATBOT.CONVERSATION_HISTORY_LIMIT) {
+    conversationHistory = conversationHistory.slice(-SERVICE_CONFIG.CHATBOT.CONVERSATION_HISTORY_LIMIT);
   }
 
   return assistantMessage;
@@ -965,6 +937,7 @@ export const clearChatHistory = () => {
   conversationHistory = [];
   failureCount = 0;
   groqAvailable = true;
+  groqDisabledUntil = 0;
 };
 
 export const getConversationHistory = () => conversationHistory;
@@ -972,6 +945,7 @@ export const getConversationHistory = () => conversationHistory;
 export const getProviderStatus = () => ({
   configured: "groq",
   groqAvailable: !!(GROQ_API_KEY && groqAvailable),
+  geminiAvailable: !!(GROQ_API_KEY && groqAvailable),
   fallbackActive: !groqAvailable || !GROQ_API_KEY,
   failureCount,
 });
@@ -979,17 +953,5 @@ export const getProviderStatus = () => ({
 export const resetProviderState = () => {
   failureCount = 0;
   groqAvailable = true;
-};
-
-/**
- * Reset only the failure/availability state without clearing conversation history.
- * Call this when the user reopens the chat window so Gemini gets another chance
- * after a previous failure cycle.
- */
-export const resetProviderState = () => {
-  failureCount = 0;
-  geminiAvailable = true;
-  if (genAI && !chatSession) {
-    initGeminiSession({ preserveHistory: true });
-  }
+  groqDisabledUntil = 0;
 };
