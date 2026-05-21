@@ -19,10 +19,6 @@ const MAX_FAILURES_BEFORE_FALLBACK = 3;
 let _liveFleet = '';
 
 const BASE_SYSTEM_PROMPT = `You are Bhatbhate AI — a focused assistant for the Bhatbhate vehicle rental and travel platform in Nepal.
-// Live fleet data injected at runtime — see injectFleetData()
-let _liveFleet = '';
-
-const BASE_SYSTEM_PROMPT = `You are Bhatbhate AI — a helpful, knowledgeable, general-purpose AI assistant (similar in capability to Google's Gemini) that lives inside the Bhatbhate vehicle rental and travel platform in Nepal.
 
 Identity & tone:
 - Be helpful, friendly, and conversational within your allowed scope.
@@ -45,8 +41,7 @@ What you can do within scope:
 - If a question is ambiguous but could be travel/rental related, ask one short clarifying question.
 
 Reasoning & honesty:
-- Think step-by-step on hard problems before answering. Show working only when it helps the user.
-- If you don't know something or it's outside your knowledge cutoff, say so plainly. Don't fabricate facts, prices, dates, statistics, or quotes.
+- If you don't know something within scope, say so plainly. Don't fabricate facts, prices, dates, or vehicle specs.
 - For live vehicle availability or real-time booking slots, direct the user to the Vehicles page or Bookings page on the platform.
 - Never invent vehicle names, prices, or specs that are not in the LIVE FLEET section below.
 
@@ -60,13 +55,6 @@ Formatting:
 PLATFORM CONTEXT — BHATBHATE
 —
 Bhatbhate is a vehicle rental and travel platform in Nepal.
-
-Fleet & terrain fit:
-- Urban/city loops (Kathmandu, Pokhara, Butwal, Biratnagar): scooters, hatchbacks.
-- Highway intercity (Kathmandu–Pokhara, Kathmandu–Chitwan, East-West corridor): sedans, motorcycles, compact SUVs.
-- Hill/mountain roads (Bandipur, Dhulikhel, Nagarkot, Ghandruk approach, Mustang access): SUVs or 4x4 jeeps, experienced drivers.
-- Family/group tours: vans or jeeps based on luggage and road condition.
-- Monsoon: avoid low-clearance vehicles on hill routes — landslide and slick-road risk.
 
 Payments accepted: eSewa, Khalti, Bank Transfer, Cash on pickup. A refundable deposit may apply.
 
@@ -292,26 +280,6 @@ const buildSystemPrompt = () =>
   _liveFleet
     ? `${BASE_SYSTEM_PROMPT}\n${FLEET_INSTRUCTIONS}\n\n—\nLIVE FLEET — ACTUAL VEHICLES IN THE DATABASE\n(These are the ONLY real vehicles. Use exact names and prices.)\n—\n${_liveFleet}`
     : BASE_SYSTEM_PROMPT;
-When giving destination/route advice, briefly cover:
-1. Recommended vehicle type and the specific vehicle name(s) from the LIVE FLEET
-2. Best season window (and what to avoid)
-3. One practical safety / logistics tip
-
-Popular destinations to fluently advise on: Kathmandu Valley, Pokhara, Chitwan, Lumbini, Bandipur, Mustang, Rara, Ilam, Janakpur, Everest-view road trips (Salleri/Jiri side), Manang, Ghandruk, Nagarkot, Dhulikhel.`;
-
-// Fleet instructions appended only when live data is available
-const FLEET_INSTRUCTIONS = `
-VEHICLE ANSWER RULES (follow these strictly):
-- When asked "what vehicles do you have", "show me your fleet", "available vehicles", or any variant → list EVERY vehicle from LIVE FLEET below, formatted clearly.
-- When recommending a vehicle for a trip or terrain → pick the best match(es) from LIVE FLEET and explain WHY using their actual specs (engine, drive, capacity, category).
-- Always quote the exact NPR price per day from LIVE FLEET. Never use generic ranges.
-- If a user asks about a vehicle type (SUV, bike, scooter) → filter LIVE FLEET by that type and list matching entries.
-- If LIVE FLEET is empty or not yet loaded → say "Let me check our current fleet — you can also browse all vehicles directly on the Vehicles page."`;
-
-const buildSystemPrompt = () =>
-  _liveFleet
-    ? `${BASE_SYSTEM_PROMPT}\n${FLEET_INSTRUCTIONS}\n\n—\nLIVE FLEET — ACTUAL VEHICLES IN THE DATABASE\n(These are the ONLY real vehicles. Use exact names and prices.)\n—\n${_liveFleet}`
-    : BASE_SYSTEM_PROMPT;
 
 // ─────────────────────────────────────────────────────────────
 //  GROQ PROVIDER
@@ -324,28 +292,6 @@ const buildGroqMessages = (userMessage) => {
   const messages = [{ role: "system", content: buildSystemPrompt() }];
   for (const m of conversationHistory) {
     messages.push({ role: m.role === "assistant" ? "assistant" : "user", content: m.text });
-// Convert internal {role, text} history into the Gemini Content[] format.
-const buildGeminiHistory = () =>
-  conversationHistory.map((m) => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.text }],
-  }));
-
-const initGeminiSession = ({ preserveHistory = false } = {}) => {
-  if (!genAI) return;
-  try {
-    const model = genAI.getGenerativeModel({
-      model: MODEL,
-      systemInstruction: buildSystemPrompt(),
-      safetySettings: SAFETY_SETTINGS,
-    });
-    chatSession = model.startChat({
-      history: preserveHistory ? buildGeminiHistory() : [],
-      generationConfig: GENERATION_CONFIG,
-    });
-  } catch (err) {
-    console.warn("Failed to init Gemini session:", err.message);
-    chatSession = null;
   }
   messages.push({ role: "user", content: userMessage });
   return messages;
@@ -878,13 +824,6 @@ const sendLocalMessage = (userMessage) => {
 //  PUBLIC API (used by ChatBot.jsx)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Inject live fleet data from the database into the system prompt.
- * Call this once after fetching vehicles from Supabase.
- * Rebuilds the Gemini session so the AI immediately knows the real fleet.
- *
- * @param {Array} vehicles - raw vehicle rows from vehicleService.getAll()
- */
 export const injectFleetData = (vehicles) => {
   if (!Array.isArray(vehicles) || vehicles.length === 0) return;
 
@@ -915,8 +854,6 @@ export const injectFleetData = (vehicles) => {
     .join('\n');
 
   console.log(`[Chatbot] Fleet injected: ${vehicles.length} vehicles`);
-  // Rebuild session so Gemini picks up the new system prompt immediately
-  initGeminiSession({ preserveHistory: true });
 };
 
 export const initializeChatSession = () => {
@@ -979,17 +916,4 @@ export const getProviderStatus = () => ({
 export const resetProviderState = () => {
   failureCount = 0;
   groqAvailable = true;
-};
-
-/**
- * Reset only the failure/availability state without clearing conversation history.
- * Call this when the user reopens the chat window so Gemini gets another chance
- * after a previous failure cycle.
- */
-export const resetProviderState = () => {
-  failureCount = 0;
-  geminiAvailable = true;
-  if (genAI && !chatSession) {
-    initGeminiSession({ preserveHistory: true });
-  }
 };
