@@ -85,7 +85,7 @@ function AnimatedRoutes() {
         const timer = window.setTimeout(() => {
             setDisplayLocation(location)
             setStage('enter')
-        }, 560)
+        }, 960)
 
         return () => window.clearTimeout(timer)
     }, [displayKey, location, locationKey, navigationType])
