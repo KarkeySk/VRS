@@ -28,13 +28,6 @@ const ChatBot = () => {
   const [fromLocation, setFromLocation] = useState("");
   const [toLocation, setToLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  // Location picker state
-  const [activePicker, setActivePicker] = useState(null); // 'from' | 'to' | null
-  const [pickerProvince, setPickerProvince] = useState(null);
-  const [pickerDistrict, setPickerDistrict] = useState(null);
-  const [pickerSearch, setPickerSearch] = useState("");
-  const pickerRef = useRef(null);
   // Lazy-initialize so the badge reflects the real status on the very first render
   const [providerInfo, setProviderInfo] = useState(() => getProviderStatus());
   const messagesEndRef = useRef(null);
