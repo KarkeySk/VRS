@@ -649,104 +649,97 @@ export default function TerrainSelect() {
                         </div>
                     </div>
 
-                    {/* Info Panel */}
+                    {/* Info Panel — 3-step drill-down */}
                     <div style={{ flex: '1 1 0', minWidth: '280px' }}>
-                        {activeRegion ? (
+
+                        {/* STEP 0 — no province selected */}
+                        {!selected && (
                             <div style={{
-                                background: 'var(--bg-card)', borderRadius: '20px', padding: '20px',
-                                border: `1px solid ${activeRegion.color}25`,
-                                transition: 'all 0.3s',
+                                background: 'var(--bg-card)', borderRadius: '20px', padding: '32px 20px',
+                                border: '1px solid var(--border)', textAlign: 'center',
                             }}>
-                                {/* Region header */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                                    <div style={{
-                                        width: '38px', height: '38px', borderRadius: '12px',
-                                        background: activeRegion.color + '15', display: 'flex',
-                                        alignItems: 'center', justifyContent: 'center',
-                                        border: `1px solid ${activeRegion.color}30`, flexShrink: 0,
+                                <div style={{
+                                    width: '64px', height: '64px', borderRadius: '50%',
+                                    background: 'var(--bg-glass)', display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+                                    border: '1px solid var(--border)',
+                                }}>
+                                    <MapPin size={28} color="var(--text-muted)" />
+                                </div>
+                                <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '8px' }}>
+                                    Step 1 — Pick a Province
+                                </h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                                    Click any province on the map. Then select a district, then a town — and we'll recommend the perfect vehicle.
+                                </p>
+                                {/* Step indicator */}
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '20px' }}>
+                                    {['Province', 'District', 'Vehicle'].map((s, i) => (
+                                        <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <div style={{
+                                                width: '22px', height: '22px', borderRadius: '50%',
+                                                background: i === 0 ? 'var(--accent)' : 'var(--bg-glass)',
+                                                border: `1px solid ${i === 0 ? 'var(--accent)' : 'var(--border)'}`,
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontSize: '0.6rem', fontWeight: '700',
+                                                color: i === 0 ? '#fff' : 'var(--text-muted)',
+                                            }}>{i + 1}</div>
+                                            <span style={{ fontSize: '0.65rem', color: i === 0 ? 'var(--accent)' : 'var(--text-muted)', fontWeight: '600' }}>{s}</span>
+                                            {i < 2 && <ArrowRight size={10} color="var(--text-muted)" />}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* STEP 1 — Province selected, pick district */}
+                        {selected && !selectedDistrict && lockedRegion && (
+                            <div style={{
+                                background: 'var(--bg-card)', borderRadius: '20px', padding: '18px',
+                                border: `1px solid ${lockedRegion.color}25`,
+                            }}>
+                                {/* Header */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                    <button onClick={handleBackToProvinces} style={{
+                                        background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                                        color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
                                     }}>
-                                        <Mountain size={18} color={activeRegion.color} />
+                                        <ArrowLeft size={16} />
+                                    </button>
+                                    <div style={{
+                                        width: '32px', height: '32px', borderRadius: '10px',
+                                        background: lockedRegion.color + '15', display: 'flex',
+                                        alignItems: 'center', justifyContent: 'center',
+                                        border: `1px solid ${lockedRegion.color}30`, flexShrink: 0,
+                                    }}>
+                                        <Mountain size={15} color={lockedRegion.color} />
                                     </div>
                                     <div>
-                                        <h2 style={{ color: 'var(--text-primary)', fontSize: '1.05rem', fontWeight: '800', marginBottom: '2px' }}>{activeRegion.name}</h2>
-                                        <span style={{
-                                            fontSize: '0.58rem', fontWeight: '700', letterSpacing: '1.5px',
-                                            color: activeRegion.color, textTransform: 'uppercase',
-                                        }}>{activeRegion.terrain}</span>
+                                        <h2 style={{ color: 'var(--text-primary)', fontSize: '0.95rem', fontWeight: '800', margin: 0 }}>{lockedRegion.name}</h2>
+                                        <span style={{ fontSize: '0.58rem', fontWeight: '700', letterSpacing: '1px', color: lockedRegion.color, textTransform: 'uppercase' }}>{lockedRegion.terrain}</span>
                                     </div>
                                 </div>
 
-                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, marginBottom: '14px' }}>
-                                    {activeRegion.desc}
-                                </p>
-
+                                {/* Images */}
                                 {activeImages.length > 0 && (
-                                    <div style={{ marginBottom: '14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                                        <img
-                                            src={activeImages[0]}
-                                            alt={`${activeRegion.name} location`}
-                                            loading="lazy"
-                                            style={{
-                                                width: '100%', height: '100px', objectFit: 'cover',
-                                                borderRadius: '10px', border: '1px solid var(--border)',
-                                                gridColumn: '1 / -1',
-                                            }}
-                                        />
-                                        {activeImages.slice(1, 3).map((imageUrl, idx) => (
-                                            <img
-                                                key={imageUrl}
-                                                src={imageUrl}
-                                                alt={`${activeRegion.name} view ${idx + 2}`}
-                                                loading="lazy"
-                                                style={{
-                                                    width: '100%', height: '64px', objectFit: 'cover',
-                                                    borderRadius: '8px', border: '1px solid var(--border)',
-                                                }}
-                                            />
+                                    <div style={{ marginBottom: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', marginTop: '10px' }}>
+                                        <img src={activeImages[0]} alt="" loading="lazy" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border)', gridColumn: '1 / -1' }} />
+                                        {activeImages.slice(1, 3).map((url, i) => (
+                                            <img key={i} src={url} alt="" loading="lazy" style={{ width: '100%', height: '52px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)' }} />
                                         ))}
                                     </div>
                                 )}
 
-                                {/* Stats */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px' }}>
-                                    {[
-                                        { Icon: Navigation, label: 'Height', value: activeRegion.altitude },
-                                        { Icon: Thermometer, label: 'Temp', value: activeRegion.temp },
-                                        { Icon: Wind, label: 'Routes', value: activeRegion.routes.length },
-                                    ].map(({ Icon, label, value }) => (
-                                        <div key={label} style={{ background: 'var(--bg-glass)', borderRadius: '10px', padding: '10px 8px', textAlign: 'center', border: '1px solid var(--border)' }}>
-                                            <Icon size={13} color="var(--text-muted)" style={{ marginBottom: '4px' }} />
-                                            <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '2px' }}>{label}</div>
-                                            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-primary)' }}>{value}</div>
-                                        </div>
-                                    ))}
+                                {/* Step 2 instruction */}
+                                <div style={{ padding: '10px 12px', borderRadius: '10px', background: lockedRegion.color + '10', border: `1px dashed ${lockedRegion.color}50`, marginBottom: '10px', marginTop: '8px', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                                    <span style={{ color: lockedRegion.color, fontWeight: '700' }}>Step 2 —</span> Click a district label on the map, or pick from the list below.
                                 </div>
 
-                                {/* Popular routes */}
-                                <div style={{ marginBottom: '14px' }}>
-                                    <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>Top Routes</div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                        {activeRegion.routes.map((route) => (
-                                            <div key={route} style={{
-                                                display: 'flex', alignItems: 'center', gap: '8px',
-                                                padding: '8px 12px', borderRadius: '10px',
-                                                background: 'var(--bg-glass)', border: '1px solid var(--border)',
-                                            }}>
-                                                <MapPin size={12} color={activeRegion.color} />
-                                                <span style={{ color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: '500' }}>{route}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div style={{ marginBottom: '14px' }}>
-                                    <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>Vehicle Kind</div>
-                                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                        {[
-                                            { id: 'all', label: 'All' },
-                                            { id: 'four', label: 'Four Wheeler' },
-                                            { id: 'two', label: 'Two Wheeler' },
-                                        ].map((item) => (
+                                {/* District grid */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '260px', overflowY: 'auto', paddingRight: '2px' }}>
+                                    {districtList.map((dist) => {
+                                        const hint = getVehicleHint(dist);
+                                        return (
                                             <button
                                                 key={dist}
                                                 onClick={() => setSelectedDistrict(dist)}
@@ -810,19 +803,18 @@ export default function TerrainSelect() {
                                     </div>
                                 </div>
 
-                                {/* CTA */}
-                                <button onClick={handleProceed} style={{
-                                    width: '100%', padding: '13px', border: 'none', borderRadius: '12px',
-                                    background: `linear-gradient(135deg, ${activeRegion.color}cc, ${activeRegion.color})`,
-                                    color: 'var(--accent-ink)', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
+                                <button onClick={handleAIRecommend} style={{
+                                    width: '100%', padding: '14px', border: 'none', borderRadius: '12px',
+                                    background: `linear-gradient(135deg, ${lockedRegion.color}cc, ${lockedRegion.color})`,
+                                    color: '#fff', fontSize: '0.88rem', fontWeight: '700', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    boxShadow: `0 6px 18px ${activeRegion.color}30`,
+                                    boxShadow: `0 6px 20px ${lockedRegion.color}40`, fontFamily: "'Inter', sans-serif",
                                     transition: 'transform 0.2s',
                                 }}
                                 onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                                 >
-                                    See Vehicles in {activeRegion.name.replace(' Province', '')} <ArrowRight size={15} />
+                                    ✦ Get AI Vehicle Recommendation <ArrowRight size={15} />
                                 </button>
                             </div>
                         )}
@@ -908,15 +900,15 @@ export default function TerrainSelect() {
 
                                 {/* CTA — AI Recommend */}
                                 <button onClick={handleAIRecommend} style={{
-                                    width: '100%', padding: '11px', border: '1px solid var(--accent-subtle)', borderRadius: '12px',
-                                    background: 'var(--accent-subtle)',
-                                    color: 'var(--accent)', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer',
+                                    width: '100%', padding: '13px', border: 'none', borderRadius: '12px',
+                                    background: `linear-gradient(135deg, ${lockedRegion.color}cc, ${lockedRegion.color})`,
+                                    color: '#fff', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    marginTop: '8px',
-                                    transition: 'opacity 0.2s',
+                                    boxShadow: `0 6px 18px ${lockedRegion.color}35`,
+                                    transition: 'transform 0.2s, box-shadow 0.2s', fontFamily: "'Inter', sans-serif",
                                 }}
-                                onMouseOver={(e) => { e.currentTarget.style.opacity = '0.8'; }}
-                                onMouseOut={(e) => { e.currentTarget.style.opacity = '1'; }}
+                                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 10px 24px ${lockedRegion.color}45`; }}
+                                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 6px 18px ${lockedRegion.color}35`; }}
                                 >
                                     ✦ Get AI Vehicle Recommendation <ArrowRight size={15} />
                                 </button>
@@ -935,26 +927,6 @@ export default function TerrainSelect() {
                                 >
                                     Browse All Vehicles <ArrowRight size={14} />
                                 </button>
-                            </div>
-                        ) : (
-                            <div style={{
-                                background: 'var(--bg-card)', borderRadius: '20px', padding: '32px 20px',
-                                border: '1px solid var(--border)', textAlign: 'center',
-                            }}>
-                                <div style={{
-                                    width: '64px', height: '64px', borderRadius: '50%',
-                                    background: 'var(--bg-glass)', display: 'flex',
-                                    alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
-                                    border: '1px solid var(--border)',
-                                }}>
-                                    <MapPin size={28} color="var(--text-muted)" />
-                                </div>
-                                <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '8px' }}>
-                                    Pick a Province
-                                </h3>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
-                                    Click any province on the map to see routes, road info, and suggested vehicles.
-                                </p>
                             </div>
                         )}
 

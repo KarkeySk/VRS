@@ -10,6 +10,7 @@ import {
 } from "./chatbotService";
 import { NEPAL_LOCATIONS } from "./nepalLocations";
 import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
+import { UI_CONFIG, SERVICE_CONFIG } from "../config/index.js";
 import "./ChatBot.css";
 
 let nextMessageId = 1;
@@ -19,7 +20,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([
     {
       id: nextMessageId++,
-      text: "Hello! 👋 I'm your Bhatbhate assistant. Enter your **From** and **To** location below to get a vehicle recommendation for your route — or ask me anything about bookings, pricing, or Nepal travel!",
+      text: UI_CONFIG.CHATBOT.GREETING,
       sender: "bot",
       timestamp: new Date(),
     },
@@ -30,8 +31,13 @@ const ChatBot = () => {
   const [isLoading, setIsLoading] = useState(false);
   // Lazy-initialize so the badge reflects the real status on the very first render
   const [providerInfo, setProviderInfo] = useState(() => getProviderStatus());
+  const [activePicker, setActivePicker] = useState(null);
+  const [pickerProvince, setPickerProvince] = useState(null);
+  const [pickerDistrict, setPickerDistrict] = useState(null);
+  const [pickerSearch, setPickerSearch] = useState("");
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const pickerRef = useRef(null);
 
   // Initialize chat session and inject live fleet data
   useEffect(() => {
@@ -182,7 +188,7 @@ const ChatBot = () => {
         }
       }
     }
-    return results.slice(0, 20);
+    return results.slice(0, SERVICE_CONFIG.SEARCH.RESULTS_LIMIT);
   })();
 
   const provinces = Object.keys(NEPAL_LOCATIONS);
@@ -243,7 +249,7 @@ const ChatBot = () => {
     setMessages([
       {
         id: nextMessageId++,
-        text: "Hello! 👋 I'm your Bhatbhate assistant. Ask me anything — about vehicles, bookings, pricing, or just say hi!",
+        text: UI_CONFIG.CHATBOT.RESET_GREETING,
         sender: "bot",
         timestamp: new Date(),
       },
@@ -452,7 +458,7 @@ const ChatBot = () => {
                   <input
                     autoFocus
                     className="loc-search-input"
-                    placeholder="Search any place in Nepal..."
+                    placeholder={UI_CONFIG.CHATBOT.SEARCH_PLACEHOLDER}
                     value={pickerSearch}
                     onChange={(e) => {
                       setPickerSearch(e.target.value);
@@ -584,7 +590,7 @@ const ChatBot = () => {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Or ask anything about bookings, pricing..."
+              placeholder={UI_CONFIG.CHATBOT.DEFAULT_MESSAGE}
               disabled={isLoading}
               className="chat-input"
             />
