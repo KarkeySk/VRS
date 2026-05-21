@@ -42,6 +42,46 @@
   to   { opacity: 1; transform: translateY(0)      scale(1);    }
 }
 
+/* ─── Bike overlay sweep (with gear-shift Y kicks) ──────── */
+@keyframes bike-sweep-ltr {
+  0%   { transform: translateX(-160%) translateY(0px);    }
+  22%  { transform: translateX(10vw)  translateY(0px);    }  /* gear 1 cruise */
+  30%  { transform: translateX(22vw)  translateY(3px);    }  /* shift 1→2: dip */
+  38%  { transform: translateX(40vw)  translateY(-5px);   }  /* gear 2 kick */
+  48%  { transform: translateX(58vw)  translateY(0px);    }  /* settle */
+  63%  { transform: translateX(83vw)  translateY(0px);    }  /* gear 2 cruise */
+  70%  { transform: translateX(95vw)  translateY(3px);    }  /* shift 2→3: dip */
+  78%  { transform: translateX(114vw) translateY(-5px);   }  /* gear 3 kick */
+  88%  { transform: translateX(137vw) translateY(0px);    }  /* settle, full speed */
+  100% { transform: translateX(160vw) translateY(0px);    }
+}
+@keyframes bike-sweep-rtl {
+  0%   { transform: translateX(160vw)  scaleX(-1) translateY(0px);   }
+  22%  { transform: translateX(145vw)  scaleX(-1) translateY(0px);   }
+  30%  { transform: translateX(133vw)  scaleX(-1) translateY(3px);   }
+  38%  { transform: translateX(115vw)  scaleX(-1) translateY(-5px);  }
+  48%  { transform: translateX(97vw)   scaleX(-1) translateY(0px);   }
+  63%  { transform: translateX(72vw)   scaleX(-1) translateY(0px);   }
+  70%  { transform: translateX(60vw)   scaleX(-1) translateY(3px);   }
+  78%  { transform: translateX(41vw)   scaleX(-1) translateY(-5px);  }
+  88%  { transform: translateX(18vw)   scaleX(-1) translateY(0px);   }
+  100% { transform: translateX(-160%)  scaleX(-1) translateY(0px);   }
+}
+/* ─── Wheel spin with gear-speed changes ────────────────── */
+/* Gear 1 (slow) → clutch pause → Gear 2 (medium) → clutch pause → Gear 3 (fast) */
+@keyframes bike-wheel-gears {
+  0%   { transform: rotate(0deg);    }  /* gear 1 start */
+  30%  { transform: rotate(200deg);  }  /* gear 1 end   — slow ~2.5 rev/s */
+  35%  { transform: rotate(205deg);  }  /* clutch in    — near stop */
+  68%  { transform: rotate(760deg);  }  /* gear 2 end   — medium ~5.5 rev/s */
+  73%  { transform: rotate(765deg);  }  /* clutch in    — near stop */
+  100% { transform: rotate(1700deg); }  /* gear 3 end   — fast ~10 rev/s */
+}
+/* ─── Exhaust puff on each gear shift ───────────────────── */
+@keyframes exhaust-puff {
+  0%,  26%, 34%, 66%, 74%, 100% { opacity: 0; transform: translateX(0) scale(0.6); }
+  30%  { opacity: 0.65; transform: translateX(-10px) translateY(-3px) scale(1.4); }
+  70%  { opacity: 0.65; transform: translateX(-10px) translateY(-3px) scale(1.4); }
 /* ─── Bike overlay sweep ─────────────────────────────────── */
 @keyframes bike-sweep-ltr {
   from { transform: translateX(-160%);             }
