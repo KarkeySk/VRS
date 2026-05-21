@@ -82,6 +82,14 @@
   0%,  26%, 34%, 66%, 74%, 100% { opacity: 0; transform: translateX(0) scale(0.6); }
   30%  { opacity: 0.65; transform: translateX(-10px) translateY(-3px) scale(1.4); }
   70%  { opacity: 0.65; transform: translateX(-10px) translateY(-3px) scale(1.4); }
+/* ─── Bike overlay sweep ─────────────────────────────────── */
+@keyframes bike-sweep-ltr {
+  from { transform: translateX(-160%);             }
+  to   { transform: translateX(160vw);             }
+}
+@keyframes bike-sweep-rtl {
+  from { transform: translateX(160vw)  scaleX(-1); }
+  to   { transform: translateX(-160%)  scaleX(-1); }
 }
 @keyframes overlay-in  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
@@ -128,8 +136,8 @@
   overflow: hidden;
   background: rgba(26, 27, 26, 0.92);
   animation:
-    overlay-in  0.15s ease-out          forwards,
-    overlay-out 0.20s ease-in  0.76s    forwards;
+    overlay-in  0.13s ease-out          forwards,
+    overlay-out 0.16s ease-in  0.38s    forwards;
 }
 :root[data-theme='light'] .transition-bike-overlay {
   background: rgba(232, 226, 217, 0.93);
@@ -152,29 +160,18 @@
   margin-top: -40px;
   width: 180px;
   height: 80px;
-  animation: bike-sweep-ltr 0.88s linear forwards;
+  animation: bike-sweep-ltr 0.52s cubic-bezier(0.45, 0, 0.2, 1) forwards;
 }
 .transition-bike-overlay.rtl .transition-bike-shape {
-  animation: bike-sweep-rtl 0.88s linear forwards;
+  animation: bike-sweep-rtl 0.52s cubic-bezier(0.45, 0, 0.2, 1) forwards;
 }
 
-/* Wheels — speed changes through 3 gears */
+/* Wheels */
 .transition-bike-wheel {
   position: absolute;
   border-radius: 50%;
   border: 5px solid var(--accent);
-  animation: bike-wheel-gears 0.88s linear forwards;
-}
-/* Spoke so spin speed is visually clear */
-.transition-bike-wheel::before {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 2px; height: 65%;
-  background: var(--accent);
-  transform: translate(-50%, -50%);
-  border-radius: 1px;
-  opacity: 0.7;
+  animation: wheelSpin 0.28s linear infinite;
 }
 .transition-bike-wheel-back  { width: 46px; height: 46px; bottom: 0; left: 12px;  }
 .transition-bike-wheel-front { width: 46px; height: 46px; bottom: 0; right: 12px; }
@@ -217,17 +214,6 @@
   background: var(--accent);
   border-radius: 2px 0 0 3px;
   transform: skewY(-4deg);
-}
-/* Exhaust smoke puffs on gear shifts */
-.transition-bike-tail::before {
-  content: '';
-  position: absolute;
-  left: -4px; top: 0px;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  background: rgba(200, 185, 155, 0.55);
-  filter: blur(4px);
-  animation: exhaust-puff 0.88s ease-out forwards;
 }
 .transition-bike-handle {
   position: absolute;
