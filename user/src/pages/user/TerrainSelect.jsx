@@ -301,7 +301,8 @@ export default function TerrainSelect() {
     const [wheelType, setWheelType] = useState('all');
 
     const lockedRegion = regions.find((r) => r.id === selected);
-    const activeImages = lockedRegion ? (provinceImages[lockedRegion.id] || []) : [];
+    const activeRegion = lockedRegion || regions.find((r) => r.id === hovered);
+    const activeImages = activeRegion ? (provinceImages[activeRegion.id] || []) : [];
 
     const districtMap = lockedRegion ? (NEPAL_LOCATIONS[lockedRegion.name] ?? {}) : {};
     const districtList = Object.keys(districtMap);
@@ -351,6 +352,12 @@ export default function TerrainSelect() {
     const handleBackToProvinces = () => { setSelected(null); setSelectedDistrict(null); setSelectedTown(null); };
     const handleBackToDistricts = () => { setSelectedDistrict(null); setSelectedTown(null); };
     const handleBackToTowns    = () => { setSelectedTown(null); };
+
+    const handleProceed = () => {
+        if (!lockedRegion) return;
+        const region = selectedTown || selectedDistrict || '';
+        navigate(`/vehicles?terrain=${encodeURIComponent(lockedRegion.terrain)}&region=${encodeURIComponent(region)}&wheels=${wheelType}`);
+    };
 
     const handleAIRecommend = () => {
         if (!lockedRegion) return;
@@ -651,7 +658,7 @@ export default function TerrainSelect() {
 
                     {/* Info Panel */}
                     <div style={{ flex: '1 1 0', minWidth: '280px' }}>
-                        {activeRegion ? (
+                        {activeRegion && !selectedDistrict && (
                             <div style={{
                                 background: 'var(--bg-card)', borderRadius: '20px', padding: '20px',
                                 border: `1px solid ${activeRegion.color}25`,
@@ -739,36 +746,42 @@ export default function TerrainSelect() {
                                     </div>
                                 </div>
 
-                                <div style={{ marginBottom: '14px' }}>
-                                    <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>Vehicle Kind</div>
-                                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                        {[
-                                            { id: 'all', label: 'All' },
-                                            { id: 'four', label: 'Four Wheeler' },
-                                            { id: 'two', label: 'Two Wheeler' },
-                                        ].map((item) => (
-                                            <button
-                                                key={dist}
-                                                onClick={() => setSelectedDistrict(dist)}
-                                                style={{
-                                                    display: 'flex', alignItems: 'center', gap: '8px',
-                                                    padding: '8px 12px', borderRadius: '10px',
-                                                    background: 'var(--bg-glass)', border: '1px solid var(--border)',
-                                                    cursor: 'pointer', width: '100%', textAlign: 'left',
-                                                    transition: 'background 0.15s, border-color 0.15s',
-                                                    fontFamily: "'Inter', sans-serif",
-                                                }}
-                                                onMouseOver={(e) => { e.currentTarget.style.background = lockedRegion.color + '12'; e.currentTarget.style.borderColor = lockedRegion.color + '50'; }}
-                                                onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-glass)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-                                            >
-                                                <MapPin size={12} color={lockedRegion.color} style={{ flexShrink: 0 }} />
-                                                <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: '500' }}>{dist}</span>
-                                                <span style={{ fontSize: '0.6rem', fontWeight: '700', color: hint.color, background: hint.color + '15', padding: '2px 6px', borderRadius: '6px', whiteSpace: 'nowrap' }}>{hint.icon}</span>
-                                                <ArrowRight size={11} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                                {/* Step 2 instruction */}
+                                {lockedRegion && (
+                                    <div style={{ padding: '10px 12px', borderRadius: '10px', background: lockedRegion.color + '10', border: `1px dashed ${lockedRegion.color}50`, marginBottom: '10px', marginTop: '8px', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                                        <span style={{ color: lockedRegion.color, fontWeight: '700' }}>Step 2 —</span> Click a district label on the map, or pick from the list below.
+                                    </div>
+                                )}
+
+                                {/* District grid */}
+                                {lockedRegion && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '260px', overflowY: 'auto', paddingRight: '2px' }}>
+                                        {districtList.map((dist) => {
+                                            const hint = getVehicleHint(dist);
+                                            return (
+                                                <button
+                                                    key={dist}
+                                                    onClick={() => setSelectedDistrict(dist)}
+                                                    style={{
+                                                        display: 'flex', alignItems: 'center', gap: '8px',
+                                                        padding: '8px 12px', borderRadius: '10px',
+                                                        background: 'var(--bg-glass)', border: '1px solid var(--border)',
+                                                        cursor: 'pointer', width: '100%', textAlign: 'left',
+                                                        transition: 'background 0.15s, border-color 0.15s',
+                                                        fontFamily: "'Inter', sans-serif",
+                                                    }}
+                                                    onMouseOver={(e) => { e.currentTarget.style.background = lockedRegion.color + '12'; e.currentTarget.style.borderColor = lockedRegion.color + '50'; }}
+                                                    onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-glass)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                                                >
+                                                    <MapPin size={12} color={lockedRegion.color} style={{ flexShrink: 0 }} />
+                                                    <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: '500' }}>{dist}</span>
+                                                    <span style={{ fontSize: '0.6rem', fontWeight: '700', color: hint.color, background: hint.color + '15', padding: '2px 6px', borderRadius: '6px', whiteSpace: 'nowrap' }}>{hint.icon}</span>
+                                                    <ArrowRight size={11} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -936,7 +949,9 @@ export default function TerrainSelect() {
                                     Browse All Vehicles <ArrowRight size={14} />
                                 </button>
                             </div>
-                        ) : (
+                        )}
+
+                        {!activeRegion && (
                             <div style={{
                                 background: 'var(--bg-card)', borderRadius: '20px', padding: '32px 20px',
                                 border: '1px solid var(--border)', textAlign: 'center',

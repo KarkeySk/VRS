@@ -82,6 +82,7 @@
   0%,  26%, 34%, 66%, 74%, 100% { opacity: 0; transform: translateX(0) scale(0.6); }
   30%  { opacity: 0.65; transform: translateX(-10px) translateY(-3px) scale(1.4); }
   70%  { opacity: 0.65; transform: translateX(-10px) translateY(-3px) scale(1.4); }
+}
 /* ─── Bike overlay sweep ─────────────────────────────────── */
 @keyframes bike-sweep-ltr {
   from { transform: translateX(-160%);             }
