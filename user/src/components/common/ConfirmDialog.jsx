@@ -1,86 +1,58 @@
-import { useEffect, useRef } from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, AlertTriangle } from 'lucide-react';
+import '../styles/ConfirmDialog.css';
+
+const iconMap = {
+  danger: AlertCircle,
+  success: CheckCircle,
+  info: Info,
+  warning: AlertTriangle,
+};
 
 export default function ConfirmDialog({
-    open,
-    title = 'Are you sure?',
-    description,
-    confirmLabel = 'Confirm',
-    cancelLabel = 'Cancel',
-    tone = 'danger',
-    busy = false,
-    onConfirm,
-    onCancel,
+  isOpen,
+  title,
+  message,
+  type = 'info',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  onConfirm,
+  onCancel,
+  isDangerous = false,
 }) {
-    const dialogRef = useRef(null);
-    const previousFocus = useRef(null);
+  if (!isOpen) return null;
 
-    useEffect(() => {
-        if (!open) return;
-        previousFocus.current = document.activeElement;
-        const handleKey = (e) => {
-            if (e.key === 'Escape' && !busy) onCancel?.();
-        };
-        document.addEventListener('keydown', handleKey);
-        const button = dialogRef.current?.querySelector('[data-autofocus]');
-        button?.focus();
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        return () => {
-            document.removeEventListener('keydown', handleKey);
-            document.body.style.overflow = previousOverflow;
-            previousFocus.current?.focus?.();
-        };
-    }, [open, busy, onCancel]);
+  const Icon = iconMap[type] || Info;
 
-    if (!open) return null;
-
-    return (
-        <div
-            className="confirm-overlay"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="confirm-title"
-            onClick={(e) => {
-                if (e.target === e.currentTarget && !busy) onCancel?.();
-            }}
-        >
-            <div className="confirm-card" ref={dialogRef}>
-                <button
-                    type="button"
-                    className="confirm-close"
-                    onClick={() => !busy && onCancel?.()}
-                    aria-label="Close dialog"
-                    disabled={busy}
-                >
-                    <X size={16} />
-                </button>
-                <div className={`confirm-icon confirm-icon-${tone}`} aria-hidden="true">
-                    <AlertTriangle size={22} />
-                </div>
-                <h2 id="confirm-title" className="confirm-title">{title}</h2>
-                {description && <p className="confirm-description">{description}</p>}
-                <div className="confirm-actions">
-                    <button
-                        type="button"
-                        className="confirm-btn confirm-btn-cancel"
-                        onClick={onCancel}
-                        disabled={busy}
-                    >
-                        {cancelLabel}
-                    </button>
-                    <button
-                        type="button"
-                        data-autofocus
-                        className={`confirm-btn confirm-btn-${tone}`}
-                        onClick={onConfirm}
-                        disabled={busy}
-                        aria-busy={busy}
-                    >
-                        {busy ? 'Working...' : confirmLabel}
-                    </button>
-                </div>
-            </div>
+  return (
+    <div className="confirm-dialog-overlay" onClick={onCancel}>
+      <div
+        className={`confirm-dialog ${isDangerous ? 'dangerous' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={`confirm-dialog-icon confirm-icon-${type}`}>
+          <Icon size={32} />
         </div>
-    );
+
+        <h2 className="confirm-dialog-title">{title}</h2>
+
+        <p className="confirm-dialog-message">{message}</p>
+
+        <div className="confirm-dialog-actions">
+          <button
+            className="confirm-btn cancel-btn"
+            onClick={onCancel}
+            autoFocus
+          >
+            {cancelText}
+          </button>
+          <button
+            className={`confirm-btn action-btn ${isDangerous ? 'danger-btn' : 'primary-btn'}`}
+            onClick={onConfirm}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

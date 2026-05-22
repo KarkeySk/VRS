@@ -302,7 +302,6 @@ const buildSystemPrompt = () =>
 //  GROQ PROVIDER
 // ─────────────────────────────────────────────────────────────
 
-const MAX_RETRIES = 2;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const buildGroqMessages = (userMessage) => {
