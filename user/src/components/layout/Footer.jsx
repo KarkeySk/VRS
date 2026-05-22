@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import logo from '../../assets/logo.png';
+import CookiesConsent from '../common/CookiesConsent';
 
 export default function Footer() {
   return (
-    <footer className="footer footer-pro" id="site-footer">
+    <>
+      <footer className="footer footer-pro" id="site-footer">
       <div className="container footer-pro-grid">
         <div className="footer-brand">
           <Link to="/" className="footer-logo" id="footer-logo">
@@ -92,5 +94,7 @@ export default function Footer() {
         </span>
       </div>
     </footer>
+    <CookiesConsent />
+    </>
   )
 }
