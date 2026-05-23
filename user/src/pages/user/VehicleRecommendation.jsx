@@ -5,8 +5,7 @@ import {
   ArrowRight, ArrowLeft, Send, Bot, Sparkles, AlertTriangle,
   CheckCircle, Shield, Lightbulb
 } from 'lucide-react';
-import { getTerrainRecommendation } from '../../../../AI-chatboc/chatbotService';
-import { sendChatMessage } from '../../../../AI-chatboc/chatbotService';
+import { getTerrainRecommendation, sendChatMessage } from '../../../../AI-chatboc/chatbotService';
 import { useVehicles } from '../../hooks/useVehicles';
 import { normalizeVehicle } from '../../utils/vehicleMapper';
 import './VehicleRecommendation.css';
@@ -95,8 +94,7 @@ export default function VehicleRecommendation() {
         if (mounted) {
           setRecommendation(result);
         }
-      } catch (err) {
-        console.error('[Recommendation] Error:', err);
+      } catch {
         if (mounted) {
           setError('Failed to get recommendation. Please try again.');
         }

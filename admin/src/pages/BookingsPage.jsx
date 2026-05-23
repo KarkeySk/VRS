@@ -316,7 +316,7 @@ export default function BookingsPage({ onNavigate }) {
             title: 'Booking Rejected',
             message: `Your booking for ${row.vehicleName || 'a vehicle'} was not approved. Contact us for details.`,
             applicationId: applicationId,
-          }).catch((err) => console.warn('Notification failed:', err))
+          }).catch(() => {})
         }
       }
 

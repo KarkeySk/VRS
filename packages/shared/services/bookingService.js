@@ -1,3 +1,14 @@
+/**
+ * bookingService — operates on the `bookings` table (admin-only workflow).
+ *
+ * WORKFLOW CONTEXT:
+ *   User journey:  inquiry → booking_application → (approval) → payment
+ *   Admin journey: bookingService manages the `bookings` table, used in the
+ *                  admin panel to track confirmed/active trips.
+ *
+ * Do NOT use this for user-facing booking requests — use applicationService
+ * (booking_applications table) for those.
+ */
 import { supabase } from '../lib/supabase'
 import { profileService } from './profileService'
 

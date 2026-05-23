@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { LogIn, LogOut, Moon, Sun } from 'lucide-react';
+import { LogIn, LogOut, Moon, Sun, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { getFriendlyAuthError } from '@bhatbhati/shared/utils/authFeedback.js';
@@ -14,17 +14,21 @@ export default function Navbar() {
     const { isDark, toggleTheme } = useTheme();
     const [isSigningOut, setIsSigningOut] = useState(false);
     const [logoutError, setLogoutError] = useState('');
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const navLinks = [
         { label: 'Dashboard', to: '/dashboard' },
         { label: 'Terrain', to: '/terrain' },
         { label: 'Fleet', to: '/vehicles' },
         { label: 'Bookings', to: '/bookings' },
+        { label: 'Profile', to: '/profile' },
     ];
 
     if (location.pathname.startsWith('/auth/')) {
         return null;
     }
+
+    const closeMenu = () => setMenuOpen(false);
 
     const handleLogout = async () => {
         setLogoutError('');
@@ -40,7 +44,19 @@ export default function Navbar() {
     };
 
     return (
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50, padding: '10px 20px' }}>
+        <>
+        <style>{`
+            @media (max-width: 768px) {
+                .nav-desktop-links { display: none !important; }
+                .nav-desktop-actions { display: none !important; }
+                .nav-hamburger { display: flex !important; }
+            }
+            @media (min-width: 769px) {
+                .nav-hamburger { display: none !important; }
+                .nav-mobile-overlay { display: none !important; }
+            }
+        `}</style>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, padding: '10px 20px' }}>
             <nav style={{
                 background: 'var(--nav-bg)',
                 backdropFilter: 'blur(20px)',
@@ -77,8 +93,8 @@ export default function Navbar() {
                     </span>
                 </Link>
 
-                {/* NAV LINKS */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '40px', fontSize: '0.875rem', fontWeight: '500' }}>
+                {/* NAV LINKS — hidden on mobile */}
+                <div className="nav-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: '40px', fontSize: '0.875rem', fontWeight: '500' }}>
                     {navLinks.map((link) => {
                         const isActive = location.pathname === link.to;
                         return (
@@ -112,8 +128,8 @@ export default function Navbar() {
                     })}
                 </div>
 
-                {/* RIGHT SIDE — TOGGLES + BOOK NOW */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                {/* RIGHT SIDE — TOGGLES + BOOK NOW — hidden on mobile */}
+                <div className="nav-desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                     <button
                         onClick={toggleTheme}
                         title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -211,7 +227,115 @@ export default function Navbar() {
                         </Link>
                     )}
                 </div>
+
+                {/* HAMBURGER — visible only on mobile */}
+                <button
+                    className="nav-hamburger"
+                    onClick={() => setMenuOpen((o) => !o)}
+                    aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                    style={{
+                        display: 'none',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '38px',
+                        height: '38px',
+                        background: 'var(--bg-glass)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--text-primary)',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    {menuOpen ? <X size={18} /> : <Menu size={18} />}
+                </button>
             </nav>
+
+            {/* MOBILE MENU OVERLAY */}
+            {menuOpen && (
+                <div
+                    className="nav-mobile-overlay"
+                    style={{
+                        marginTop: '8px',
+                        background: 'var(--nav-bg)',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '24px',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px',
+                    }}
+                >
+                    {navLinks.map((link) => {
+                        const isActive = location.pathname === link.to;
+                        return (
+                            <Link
+                                key={link.label}
+                                to={link.to}
+                                onClick={closeMenu}
+                                style={{
+                                    textDecoration: 'none',
+                                    padding: '12px 16px',
+                                    borderRadius: '14px',
+                                    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                                    fontWeight: isActive ? '700' : '500',
+                                    fontSize: '0.9rem',
+                                    background: isActive ? 'var(--accent-subtle)' : 'transparent',
+                                    display: 'block',
+                                }}
+                            >
+                                {link.label}
+                            </Link>
+                        );
+                    })}
+                    <div style={{ borderTop: '1px solid var(--border)', marginTop: '8px', paddingTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button
+                            onClick={() => { toggleTheme(); closeMenu(); }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                background: 'var(--bg-glass)', border: '1px solid var(--border)',
+                                color: 'var(--text-primary)', padding: '10px 16px', borderRadius: '999px',
+                                fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer',
+                            }}
+                        >
+                            {isDark ? <><Sun size={14} /> Light</> : <><Moon size={14} /> Dark</>}
+                        </button>
+                        {user ? (
+                            <>
+                                <Link to="/terrain" onClick={closeMenu} style={{
+                                    textDecoration: 'none', background: 'var(--brand-gradient)',
+                                    color: 'var(--accent-ink)', fontWeight: '700', fontSize: '0.8rem',
+                                    padding: '10px 18px', borderRadius: '999px',
+                                }}>
+                                    Book Now
+                                </Link>
+                                <button
+                                    onClick={() => { handleLogout(); closeMenu(); }}
+                                    disabled={isSigningOut}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        background: 'var(--bg-glass)', border: '1px solid var(--border)',
+                                        color: 'var(--text-primary)', fontWeight: '600', fontSize: '0.8rem',
+                                        padding: '10px 16px', borderRadius: '999px', cursor: 'pointer',
+                                    }}
+                                >
+                                    <LogOut size={14} /> {isSigningOut ? 'Signing out...' : 'Logout'}
+                                </button>
+                            </>
+                        ) : (
+                            <Link to="/auth/login" onClick={closeMenu} style={{
+                                textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px',
+                                background: 'var(--brand-gradient)', color: 'var(--accent-ink)',
+                                fontWeight: '700', fontSize: '0.8rem', padding: '10px 18px', borderRadius: '999px',
+                            }}>
+                                <LogIn size={14} /> Login
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {logoutError && (
                 <div style={{
                     maxWidth: '420px',
@@ -229,5 +353,6 @@ export default function Navbar() {
                 </div>
             )}
         </div>
+        </>
     );
 }

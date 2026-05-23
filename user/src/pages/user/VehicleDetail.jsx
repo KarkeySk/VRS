@@ -8,10 +8,11 @@ import {
     RefreshCw, Briefcase, Star, Wind, Snowflake, Map as MapIcon, Shield, Activity, ArrowLeft
 } from 'lucide-react';
 
+import { DRIVER_FEE_PER_DAY } from '@bhatbhati/shared/utils/constants.js';
+
 const icons = {
     Wind, Snowflake, Map: MapIcon, Shield, Activity, Settings, Unlock, Lock, Navigation, Droplet, RefreshCw, Briefcase
 };
-const DRIVER_FEE_PER_DAY = 2000
 
 export default function VehicleDetail() {
     const { id } = useParams();
@@ -259,7 +260,7 @@ export default function VehicleDetail() {
                                                     </div>
                                                     <span style={{ fontSize: '0.875rem', color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{addon.name}</span>
                                                 </div>
-                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--accent)' }}>+${addon.price}</span>
+                                                <span style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--accent)' }}>+NPR {Number(addon.price).toLocaleString()}</span>
                                             </div>
                                         )
                                     })}
@@ -304,7 +305,7 @@ export default function VehicleDetail() {
                                 <div style={{ padding: '0 8px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                                         <h3 style={{ fontSize: '1.125rem', fontWeight: 700, margin: 0 }}>{v.name}</h3>
-                                        <div style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--accent)' }}>${v.price}</div>
+                                        <div style={{ fontSize: '1.125rem', fontWeight: 800, color: 'var(--accent)' }}>NPR {Number(v.price).toLocaleString()}</div>
                                     </div>
                                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem', marginBottom: '16px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.subtitle}</p>
                                 </div>
