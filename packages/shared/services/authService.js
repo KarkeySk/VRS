@@ -160,6 +160,9 @@ export const authService = {
         if (error) throw error
         return data
     },
+    resendVerificationEmail: async (email) => {
+        return authService.resendConfirmation(email)
+    },
 
     /** Verify OTP for password recovery (SCRUM-70: Generate/verify token) */
     verifyOtp: async (email, token) => {
