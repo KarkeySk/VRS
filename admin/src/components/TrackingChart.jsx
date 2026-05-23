@@ -1,36 +1,20 @@
 import { MapPin } from "lucide-react";
 
-/*
-  TrackingChart notes:
-  - Renders a static SVG chart.
-  - activeUnits controls the summary line.
-  - No live data is plotted yet.
-  - Uses CSS classes for styling.
-  - Designed as a visual placeholder.
-  - Safe to replace with a real chart later.
-  - No state or side effects.
-  - Map pin is decorative.
-  - Works in dark theme only.
-  - Expects parent to provide sizing.
-*/
-
-export default function TrackingChart({ activeUnits = 0 }) {
-  // Simple static chart with a live badge.
-  // activeUnits is displayed above the chart.
+export default function TrackingChart() {
   return (
     <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
       <div className="flex items-center gap-3 mb-2">
-        <h3 className="text-base font-semibold m-0">Live Tracking</h3>
+        <h3 className="text-base font-semibold m-0">Real-time Tracking</h3>
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-status-green/20 text-status-green text-xs font-bold rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-status-green animate-pulse" />
           LIVE
         </span>
       </div>
       <p className="text-[13px] text-txt-secondary mb-6 m-0">
-        Watching {activeUnits} active vehicles.
+        Monitoring 18 active units across the valley.
       </p>
 
-      {/* Chart Area (static SVG for demo UI) */}
+      {/* Chart Area */}
       <div className="tracking-chart bg-dark-deeper rounded-lg border border-dark-border relative">
         <div className="chart-gradient" />
         <svg className="w-full h-full relative z-10" viewBox="0 0 700 200" preserveAspectRatio="none">

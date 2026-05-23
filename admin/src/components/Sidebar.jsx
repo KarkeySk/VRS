@@ -1,4 +1,3 @@
-import { useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutGrid,
   FileText,
@@ -7,32 +6,24 @@ import {
   Settings as SettingsIcon,
   Cog,
   User,
-} from 'lucide-react'
+} from "lucide-react";
 
 const navItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/dashboard' },
-  { id: 'fleet',     label: 'Fleet',     icon: FileText,   path: '/dashboard/fleet' },
-  { id: 'bookings',  label: 'Bookings',  icon: CalendarDays, path: '/dashboard/bookings' },
-  { id: 'compliance', label: 'Checks',   icon: CheckCircle, path: '/dashboard/compliance' },
-  { id: 'operations', label: 'Operations', icon: Cog,       path: '/dashboard/operations' },
-  { id: 'settings',  label: 'Settings',  icon: SettingsIcon, path: '/dashboard/settings' },
-]
+  { id: "dashboard", label: "Dashboard", icon: LayoutGrid },
+  { id: "fleet", label: "Fleet Management", icon: FileText },
+  { id: "bookings", label: "Bookings", icon: CalendarDays },
+  { id: "compliance", label: "Compliance", icon: CheckCircle },
+  { id: "operations", label: "Operations", icon: Cog },
+  { id: "settings", label: "Settings", icon: SettingsIcon },
+];
 
-export default function Sidebar() {
-  const navigate = useNavigate()
-  const location = useLocation()
-
-  const isActive = (item) =>
-    item.id === 'dashboard'
-      ? location.pathname === '/dashboard'
-      : location.pathname.startsWith(`/dashboard/${item.id}`)
-
+export default function Sidebar({ activePage, onNavigate }) {
   return (
     <aside className="w-[207px] bg-dark-deeper border-r border-dark-border flex flex-col shrink-0">
       {/* Logo */}
       <div className="px-4 py-6 border-b border-dark-border">
         <p className="text-[13px] text-txt-secondary uppercase tracking-wider font-semibold m-0">
-          Bhatbhate
+          Bhatbhati
         </p>
         <p className="text-base font-bold text-txt-primary mt-1 m-0 tracking-wide">
           HIMALAYAN FLEET
@@ -42,36 +33,39 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-1">
         {navItems.map((item) => {
-          const active = isActive(item)
-          const Icon = item.icon
+          const isActive = activePage === item.id;
+          const Icon = item.icon;
           return (
-            <button
+            <a
               key={item.id}
-              type="button"
-              onClick={() => navigate(item.path)}
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate(item.id);
+              }}
               className={`nav-link flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all duration-200 ${
-                active
-                  ? 'nav-active bg-brand-orange text-dark font-semibold'
-                  : 'text-txt-secondary'
+                isActive
+                  ? "nav-active bg-brand-orange text-dark font-semibold"
+                  : "text-txt-secondary"
               }`}
             >
               <Icon className="w-5 h-5" />
               {item.label}
-            </button>
-          )
+            </a>
+          );
         })}
       </nav>
 
       {/* Footer */}
       <div className="px-4 py-4 border-t border-dark-border">
         <button
-          onClick={() => navigate('/dashboard/add-vehicle')}
+          onClick={() => onNavigate("add-vehicle")}
           className="btn-action w-full py-3 text-[13px] mb-4"
         >
           + Add New Vehicle
         </button>
         <div
-          onClick={() => navigate('/dashboard/admin-profile')}
+          onClick={() => onNavigate("admin-profile")}
           className="flex items-center gap-3 px-2 cursor-pointer rounded-lg py-2 hover:bg-[rgba(255,143,63,0.1)] transition-all duration-200"
         >
           <div className="w-8 h-8 rounded-md bg-brand-orange flex items-center justify-center font-bold text-xs text-dark">
@@ -84,5 +78,5 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
-  )
+  );
 }

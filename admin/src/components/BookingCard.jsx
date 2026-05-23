@@ -1,6 +1,5 @@
 import { CalendarDays } from "lucide-react";
 
-// Status style map used by the booking chip.
 const STATUS_STYLES = {
   ACTIVE:    { dot: "bg-status-green",  text: "text-status-green" },
   PARTIAL:   { dot: "bg-status-yellow", text: "text-status-yellow" },
@@ -8,45 +7,23 @@ const STATUS_STYLES = {
   COMPLETED: { dot: "bg-status-green",  text: "text-status-green" },
 };
 
-// Type label styling for the booking tag.
 const TYPE_STYLES = {
   "SELF-DRIVE":  { bg: "bg-[rgba(100,150,200,0.2)]", text: "text-[#64d4ff]" },
   "WITH DRIVER": { bg: "bg-[rgba(139,92,246,0.2)]",  text: "text-[#a78bfa]" },
 };
 
-/*
-  BookingCard notes:
-  - booking includes vehicle, dates, status, price.
-  - onManage is fired when the CTA is clicked.
-  - Uses fallback styles for unknown status/type.
-  - Purely presentational.
-  - Image area can be empty.
-  - Expects preformatted price and dates.
-  - Works inside lists or grids.
-  - No local state.
-  - Status dot uses theme colors.
-  - CTA text is short and consistent.
-*/
-export default function BookingCard({ booking, onManage = () => {} }) {
-  // Normalize status to a known style.
-  // Map unknown statuses/types to sensible defaults.
-  const status = STATUS_STYLES[booking.status] || STATUS_STYLES.PARTIAL;
-  // Normalize booking type for the pill.
-  const type = TYPE_STYLES[booking.type] || TYPE_STYLES["SELF-DRIVE"];
+export default function BookingCard({ booking }) {
+  const status = STATUS_STYLES[booking.status];
+  const type = TYPE_STYLES[booking.type];
 
-  // Render a compact booking summary card.
   return (
     <div className="booking-card flex gap-4 p-4 bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-lg transition-all duration-200">
       {/* Vehicle image */}
-      {booking.image ? (
-        <img
-          src={booking.image}
-          alt={booking.vehicle}
-          className="w-[100px] h-[70px] rounded-md object-cover flex-shrink-0"
-        />
-      ) : (
-        <div className="w-[100px] h-[70px] rounded-md bg-dark-border flex-shrink-0" />
-      )}
+      <img
+        src={booking.image}
+        alt={booking.vehicle}
+        className="w-[100px] h-[70px] rounded-md object-cover flex-shrink-0"
+      />
 
       {/* Details */}
       <div className="flex-1 min-w-0">
@@ -73,13 +50,9 @@ export default function BookingCard({ booking, onManage = () => {} }) {
           <span className={`text-xs ${status.text} font-bold`}>{booking.status}</span>
         </div>
         <p className="text-base font-bold m-0">{booking.price}</p>
-        <button
-          type="button"
-          onClick={() => onManage(booking)}
-          className="text-xs text-brand-orange cursor-pointer mt-1 m-0 hover:text-brand-orange-dark transition-colors bg-transparent border-none p-0"
-        >
+        <p className="text-xs text-brand-orange cursor-pointer mt-1 m-0 hover:text-brand-orange-dark transition-colors">
           Manage Details
-        </button>
+        </p>
       </div>
     </div>
   );
