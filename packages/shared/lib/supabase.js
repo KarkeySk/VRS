@@ -13,6 +13,32 @@ if (!supabaseUrl || !supabaseAnonKey || !hasValidSupabaseUrl || !hasValidSupabas
     )
 }
 
+const authLockQueues = new Map()
+
+async function localAuthLock(name, _acquireTimeout, fn) {
+    const previous = authLockQueues.get(name) || Promise.resolve()
+    let releaseCurrent
+    const current = new Promise((resolve) => {
+        releaseCurrent = resolve
+    })
+    const queued = previous.catch(() => null).then(() => current)
+    authLockQueues.set(name, queued)
+
+    await previous.catch(() => null)
+    try {
+        return await fn()
+    } finally {
+        releaseCurrent()
+        if (authLockQueues.get(name) === queued) {
+            authLockQueues.delete(name)
+        }
+    }
+}
+
 export const supabase = supabaseUrl && supabaseAnonKey && hasValidSupabaseUrl && hasValidSupabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+            lock: localAuthLock,
+        },
+    })
     : null
