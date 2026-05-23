@@ -11,5 +11,8 @@ export default defineConfig({
   envDir: path.resolve(__dirname, '../..'),
   resolve: {
     preserveSymlinks: true,
+    alias: {
+      '@bhatbhati/shared': path.resolve(__dirname, '../../packages/shared'),
+    },
   },
 })

@@ -13,6 +13,7 @@ export default defineConfig({
     preserveSymlinks: true,
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@bhatbhati/shared': path.resolve(__dirname, '../../packages/shared'),
     },
   },
   server: {
