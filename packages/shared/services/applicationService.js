@@ -80,6 +80,15 @@ export const applicationService = {
         return data
     },
 
+    delete: async (id) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { error } = await supabase
+            .from('booking_applications')
+            .delete()
+            .eq('id', id)
+        if (error) throw error
+    },
+
     /** Generate temporary signed URL for private document bucket */
     getDocumentUrl: async (path, expiresIn = 3600) => {
         if (!supabase) throw new Error('Supabase is not configured')

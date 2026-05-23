@@ -238,6 +238,22 @@ export default function BookingsPage({ onNavigate }) {
     }
   }
 
+  const handleDeleteApplication = async (applicationId) => {
+    const ok = window.confirm('Delete this request permanently?')
+    if (!ok) return
+
+    const key = `application:${applicationId}`
+    setBusyKey(key)
+    try {
+      await applicationService.delete(applicationId)
+      await loadRows()
+    } catch (err) {
+      setError(err.message || 'Failed to delete request')
+    } finally {
+      setBusyKey('')
+    }
+  }
+
   const createQuickBooking = async (e) => {
     e.preventDefault()
     setError('')
@@ -514,6 +530,15 @@ export default function BookingsPage({ onNavigate }) {
                         >
                           <XCircle className="w-3.5 h-3.5" />
                           Reject
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busyKey === row.key}
+                          onClick={() => handleDeleteApplication(row.id)}
+                          className="px-2 py-1 text-xs rounded border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Delete
                         </button>
                       </div>
                     )}
