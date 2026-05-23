@@ -105,3 +105,15 @@ create policy "Admins can update any booking"
     to authenticated
     using (public.is_admin())
     with check (public.is_admin());
+
+-- Users can delete their own bookings
+create policy "Users can delete own bookings"
+    on public.bookings for delete
+    to authenticated
+    using (auth.uid() = user_id);
+
+-- Admins can delete any booking
+create policy "Admins can delete any booking"
+    on public.bookings for delete
+    to authenticated
+    using (public.is_admin());
