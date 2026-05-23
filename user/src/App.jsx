@@ -74,20 +74,30 @@ function AnimatedRoutes() {
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
         if (locationKey === displayKey) return undefined
 
-        if (reduceMotion) {
-            setDisplayLocation(location)
-            setStage('enter')
-            return undefined
+        const timers = []
+        const schedule = (callback, delay) => {
+            const timer = window.setTimeout(callback, delay)
+            timers.push(timer)
         }
 
-        setExitDirection(navigationType === 'POP' ? 'rtl' : 'ltr')
-        setStage('exit')
-        const timer = window.setTimeout(() => {
+        if (reduceMotion) {
+            schedule(() => {
+                setDisplayLocation(location)
+                setStage('enter')
+            }, 0)
+            return () => timers.forEach((timer) => window.clearTimeout(timer))
+        }
+
+        schedule(() => {
+            setExitDirection(navigationType === 'POP' ? 'rtl' : 'ltr')
+            setStage('exit')
+        }, 0)
+        schedule(() => {
             setDisplayLocation(location)
             setStage('enter')
         }, 560)
 
-        return () => window.clearTimeout(timer)
+        return () => timers.forEach((timer) => window.clearTimeout(timer))
     }, [displayKey, location, locationKey, navigationType])
 
     return (

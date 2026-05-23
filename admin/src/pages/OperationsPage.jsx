@@ -47,7 +47,10 @@ export default function OperationsPage() {
 
   useEffect(() => {
     // Initial data load.
-    load();
+    const timer = window.setTimeout(() => {
+      load();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Build a short telemetry list for the UI.

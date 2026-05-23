@@ -139,7 +139,10 @@ export default function BookingsPage({ onNavigate }) {
 
   useEffect(() => {
     // Initial data fetch.
-    loadRows()
+    const timer = window.setTimeout(() => {
+      loadRows()
+    }, 0)
+    return () => window.clearTimeout(timer)
   }, [])
 
   useEffect(() => {

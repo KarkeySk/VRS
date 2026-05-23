@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js';
 import { buildEsewaPayload, generateTransactionUuid, getEsewaConfig } from '@bhatbhati/shared/utils/esewaConfig.js';
 import { ArrowLeft, Shield, CreditCard, CheckCircle, AlertCircle } from 'lucide-react';
@@ -8,7 +7,6 @@ import { ArrowLeft, Shield, CreditCard, CheckCircle, AlertCircle } from 'lucide-
 export default function PaymentPage() {
     const { applicationId } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
 
     const [app, setApp] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -90,9 +88,13 @@ export default function PaymentPage() {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         if (params.get('failed') === 'true') {
-            setError('Payment was cancelled or failed. Please try again.');
+            const timer = window.setTimeout(() => {
+                setError('Payment was cancelled or failed. Please try again.');
+            }, 0);
             window.history.replaceState({}, '', window.location.pathname);
+            return () => window.clearTimeout(timer);
         }
+        return undefined;
     }, []);
 
     if (loading) {

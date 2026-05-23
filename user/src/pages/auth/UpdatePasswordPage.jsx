@@ -45,10 +45,11 @@ export default function UpdatePasswordPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [checkingSession, setCheckingSession] = useState(true);
-  const { updatePassword, session } = useAuth();
+  const [recoveryCheckExpired, setRecoveryCheckExpired] = useState(false);
+  const { updatePassword, signOut, session } = useAuth();
   const navigate = useNavigate();
   const sessionReady = Boolean(session);
+  const checkingSession = !sessionReady && !recoveryCheckExpired && !successMessage;
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % fleetSlides.length);
@@ -61,15 +62,15 @@ export default function UpdatePasswordPage() {
 
   // Wait for the recovery session to be established from the URL token
   useEffect(() => {
-    if (session) return undefined;
+    if (sessionReady) return undefined;
 
     // Give Supabase time to process the recovery token from the URL hash
     const timeout = setTimeout(() => {
-      setCheckingSession(false);
+      setRecoveryCheckExpired(true);
     }, 5000);
 
     return () => clearTimeout(timeout);
-  }, [session]);
+  }, [sessionReady]);
 
   const updateField = (name, value) => {
     if (name === 'password') setPassword(value);
@@ -105,6 +106,11 @@ export default function UpdatePasswordPage() {
     setIsLoading(true);
     try {
       await updatePassword(password);
+      try {
+        await signOut();
+      } catch (signOutErr) {
+        console.warn('Password updated, but recovery session sign-out failed:', signOutErr);
+      }
       setSuccessMessage('Password updated successfully! Redirecting to login...');
       setTimeout(() => {
         navigate('/auth/login');

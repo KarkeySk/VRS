@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cloud, MapPin, Search, X } from "lucide-react";
-import { weatherService } from "@bhatbhati/shared/services/weatherService.js";
 
 // Common Nepal locations for quick access
 const PRESET_LOCATIONS = [
@@ -25,7 +24,6 @@ export default function WeatherPanel() {
     lat: 28.2096,
     lon: 83.9856,
   });
-  const [filteredLocations, setFilteredLocations] = useState([]);
 
   // Fetch weather when location changes
   useEffect(() => {
@@ -98,18 +96,15 @@ export default function WeatherPanel() {
     };
   }, [selectedLocation]);
 
-  // Filter locations based on search input
-  useEffect(() => {
+  const filteredLocations = useMemo(() => {
     if (!searchInput.trim()) {
-      setFilteredLocations([]);
-      return;
+      return [];
     }
 
     const query = searchInput.toLowerCase();
-    const filtered = PRESET_LOCATIONS.filter((loc) =>
+    return PRESET_LOCATIONS.filter((loc) =>
       loc.name.toLowerCase().includes(query)
     );
-    setFilteredLocations(filtered);
   }, [searchInput]);
 
   const updatedLabel = useMemo(() => {
@@ -120,7 +115,7 @@ export default function WeatherPanel() {
       hour: "2-digit",
       minute: "2-digit",
     })}`;
-  }, [weather?.updatedAt]);
+  }, [weather]);
 
   const handleSelectLocation = (location) => {
     setSelectedLocation(location);

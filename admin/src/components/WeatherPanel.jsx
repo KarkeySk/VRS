@@ -49,7 +49,7 @@ export default function WeatherPanel() {
     const date = new Date(weather.updatedAt);
     if (Number.isNaN(date.getTime())) return "";
     return `Updated ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-  }, [weather?.updatedAt]);
+  }, [weather]);
 
   return (
     <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">

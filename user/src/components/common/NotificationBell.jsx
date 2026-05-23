@@ -72,12 +72,15 @@ export default function NotificationBell() {
         setUnreadCount(0);
     };
 
-    const timeAgo = (date) => {
-        const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-        if (s < 60) return 'just now';
-        if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-        if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-        return `${Math.floor(s / 86400)}d ago`;
+    const formatNotificationTime = (date) => {
+        const createdAt = new Date(date);
+        if (Number.isNaN(createdAt.getTime())) return '';
+        return createdAt.toLocaleString([], {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
     };
 
     if (!user) return null;
@@ -183,7 +186,7 @@ export default function NotificationBell() {
                                             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                                         }}>{n.message}</p>
                                         <span style={{ color: 'var(--text-muted)', fontSize: '0.6rem', marginTop: '4px', display: 'block' }}>
-                                            {timeAgo(n.created_at)}
+                                            {formatNotificationTime(n.created_at)}
                                         </span>
                                     </div>
                                 </div>

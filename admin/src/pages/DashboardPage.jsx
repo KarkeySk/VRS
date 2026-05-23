@@ -151,7 +151,10 @@ export default function DashboardPage({ onNavigate = () => {} }) {
 
   useEffect(() => {
     // Initial data load.
-    load();
+    const timer = window.setTimeout(() => {
+      load();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const activeCount = bookings.filter((b) => b.status === "active" || b.status === "confirmed").length;

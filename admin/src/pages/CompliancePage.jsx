@@ -55,7 +55,10 @@ export default function CompliancePage() {
   }
 
   useEffect(() => {
-    loadApplications()
+    const timer = window.setTimeout(() => {
+      loadApplications()
+    }, 0)
+    return () => window.clearTimeout(timer)
   }, [])
 
   // Filter list based on the selected status.

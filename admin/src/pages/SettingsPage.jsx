@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Map, User, Cog, Edit, AlertTriangle } from 'lucide-react'
 
 // localStorage key for admin settings.
@@ -27,15 +27,10 @@ function readSavedSettings() {
 
 export default function SettingsPage() {
   // Settings form state.
-  const [settings, setSettings] = useState(defaultSettings)
+  const [settings, setSettings] = useState(readSavedSettings)
   // Inline feedback states.
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
-
-  useEffect(() => {
-    // Load saved settings on mount.
-    setSettings(readSavedSettings())
-  }, [])
 
   // Update a single setting key.
   const update = (key, value) => {

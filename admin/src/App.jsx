@@ -33,7 +33,8 @@ function App() {
     // Write the marker before showing the overlay.
     sessionStorage.setItem('admin_fleet_intro_seen', '1')
     // Trigger the overlay animation.
-    setShowIntro(true)
+    const timer = window.setTimeout(() => setShowIntro(true), 0)
+    return () => window.clearTimeout(timer)
   }, [])
 
   return (

@@ -44,7 +44,7 @@ export default function Sidebar({ activePage, onNavigate }) {
             <button
               key={item.id}
               type="button"
-              onClick={(e) => {
+              onClick={() => {
                 // Switch the main view when clicked.
                 onNavigate(item.id);
               }}

@@ -79,7 +79,10 @@ export default function FleetPage() {
 
   useEffect(() => {
     // Initial data load.
-    loadVehicles()
+    const timer = window.setTimeout(() => {
+      loadVehicles()
+    }, 0)
+    return () => window.clearTimeout(timer)
   }, [])
 
   // Filter vehicles by name or type.
