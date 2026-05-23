@@ -108,6 +108,14 @@ create policy "Admins can update any application"
     on public.booking_applications for update to authenticated
     using (public.is_admin()) with check (public.is_admin());
 
+create policy "Users can delete own applications"
+    on public.booking_applications for delete to authenticated
+    using (auth.uid() = user_id);
+
+create policy "Admins can delete any application"
+    on public.booking_applications for delete to authenticated
+    using (public.is_admin());
+
 -- ============================================================
 -- Storage bucket for booking documents
 -- ============================================================
