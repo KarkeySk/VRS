@@ -67,8 +67,8 @@ export default function RoutesSection() {
           map[asset.asset_key] = asset.image_url
         }
         setRouteImageMap(map)
-      } catch (error) {
-        console.error('Failed to load route images from ui_assets:', error)
+      } catch {
+        // ui_assets are optional — fall back to bundled images
       }
     }
 

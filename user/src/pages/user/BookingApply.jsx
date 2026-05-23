@@ -5,8 +5,7 @@ import { inquiryService } from '@bhatbhati/shared/services/inquiryService.js';
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js';
 import { profileService } from '@bhatbhati/shared/services/profileService.js';
 import { ArrowLeft, Upload, FileText, CheckCircle } from 'lucide-react';
-
-const DRIVER_FEE_PER_DAY = 2000
+import { DRIVER_FEE_PER_DAY } from '@bhatbhati/shared/utils/constants.js';
 
 export default function BookingApply() {
     const { inquiryId } = useParams();
@@ -154,8 +153,8 @@ export default function BookingApply() {
                 {/* Step indicators */}
                 <div style={{ display: 'flex', gap: '12px', marginBottom: '36px' }}>
                     {['Dates & Docs', 'Questions'].map((s, i) => (
-                        <div key={i} onClick={() => setStep(i + 1)} style={{
-                            flex: 1, padding: '14px 12px', borderRadius: '12px', textAlign: 'center', cursor: 'pointer',
+                        <div key={i} style={{
+                            flex: 1, padding: '14px 12px', borderRadius: '12px', textAlign: 'center',
                             background: step === i + 1 ? 'var(--accent-subtle)' : 'var(--bg-glass)',
                             border: `1px solid ${step === i + 1 ? 'var(--accent)' : 'var(--border)'}`,
                             color: step === i + 1 ? 'var(--accent)' : 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '600',
@@ -208,6 +207,7 @@ export default function BookingApply() {
                                     <input
                                         type="date"
                                         value={startDate}
+                                        min={new Date().toISOString().split('T')[0]}
                                         onChange={(e) => {
                                             const nextStart = e.target.value;
                                             setStartDate(nextStart);
@@ -305,7 +305,7 @@ export default function BookingApply() {
 
                             <div style={{ marginBottom: '24px' }}>
                                 <label style={labelStyle}>Trip Purpose</label>
-                                <select value={purpose} onChange={(e) => setPurpose(e.target.value)} required style={{ ...inputStyle, appearance: 'none', cursor: 'pointer', color: purpose ? '#fff' : '#555' }}>
+                                <select value={purpose} onChange={(e) => setPurpose(e.target.value)} required style={{ ...inputStyle, appearance: 'none', cursor: 'pointer', color: purpose ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                                     <option value="" disabled>Select purpose</option>
                                     <option value="tourism">Tourism / Sightseeing</option>
                                     <option value="trekking">Trekking Base Camp Transfer</option>
