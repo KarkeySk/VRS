@@ -132,9 +132,11 @@ export default function PaymentPage() {
                 <h1 style={{ color: 'var(--text-primary)', fontSize: '1.8rem', fontWeight: '800', marginBottom: '8px' }}>
                     Complete Payment
                 </h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '32px' }}>
-                    Your booking has been approved! Pay to confirm your reservation.
-                </p>
+                {canPay && (
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '32px' }}>
+                        Your booking has been approved! Pay to confirm your reservation.
+                    </p>
+                )}
 
                 {error && (
                     <div style={{

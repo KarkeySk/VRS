@@ -1,60 +1,63 @@
-import { useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import AdminLogin from './pages/auth/AdminLogin'
-import Dashboard from './pages/dashboard/Dashboard'
+import AdminShell from './pages/AdminShell'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
 import FleetIntroOverlay from './components/FleetIntroOverlay'
+import DashboardPage from './pages/DashboardPage'
+import FleetPage from './pages/FleetPage'
+import BookingsPage from './pages/BookingsPage'
+import CompliancePage from './pages/CompliancePage'
+import OperationsPage from './pages/OperationsPage'
+import SettingsPage from './pages/SettingsPage'
+import AddVehiclePage from './pages/AddVehiclePage'
+import NewBookingPage from './pages/NewBookingPage'
+import AdminProfilePage from './pages/AdminProfilePage'
 
-/*
-  App notes:
-  - Owns the router for admin pages.
-  - Shows a one-time intro overlay.
-  - Protects dashboard behind auth.
-  - Redirects unknown routes to login.
-  - Keeps state minimal.
-  - No data fetching here.
-  - Uses sessionStorage for intro flag.
-  - Layout lives in Dashboard shell.
-  - Easy to extend with more routes.
-  - Pure client-side routing.
-*/
+// Wrapper that injects a URL-based onNavigate prop into pages that need it.
+function AdminPage({ component: Component }) {
+  const navigate = useNavigate()
+  const onNavigate = useCallback(
+    (id) => navigate(id === 'dashboard' ? '/dashboard' : `/dashboard/${id}`),
+    [navigate]
+  )
+  return <Component onNavigate={onNavigate} />
+}
 
 function App() {
-  // Toggle for the short intro overlay.
   const [showIntro, setShowIntro] = useState(false)
 
-  // App-level side effects are kept minimal.
-
   useEffect(() => {
-    // Show the intro overlay once per browser session.
     const seen = sessionStorage.getItem('admin_fleet_intro_seen')
-    // Skip if it already ran in this session.
     if (seen) return
-    // Write the marker before showing the overlay.
     sessionStorage.setItem('admin_fleet_intro_seen', '1')
-    // Trigger the overlay animation.
     setShowIntro(true)
   }, [])
 
   return (
     <>
-      {/* Intro overlay is optional and short-lived. */}
       {showIntro && <FleetIntroOverlay onDone={() => setShowIntro(false)} />}
-      {/* Router wrapper for admin routes. */}
       <BrowserRouter>
         <Routes>
-          {/* Public login route. */}
           <Route path="/login" element={<AdminLogin />} />
-          {/* Protected dashboard route. */}
           <Route
             path="/dashboard"
-            element={(
+            element={
               <AdminProtectedRoute>
-                <Dashboard />
+                <AdminShell />
               </AdminProtectedRoute>
-            )}
-          />
-          {/* Catch-all redirect back to login. */}
+            }
+          >
+            <Route index element={<AdminPage component={DashboardPage} />} />
+            <Route path="fleet" element={<FleetPage />} />
+            <Route path="bookings" element={<AdminPage component={BookingsPage} />} />
+            <Route path="compliance" element={<CompliancePage />} />
+            <Route path="operations" element={<OperationsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="add-vehicle" element={<AdminPage component={AddVehiclePage} />} />
+            <Route path="new-booking" element={<AdminPage component={NewBookingPage} />} />
+            <Route path="admin-profile" element={<AdminPage component={AdminProfilePage} />} />
+          </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

@@ -21,9 +21,7 @@ export default function WeatherPanel() {
         if (!isMounted) return;
         setWeather(data);
         setError("");
-      } catch (err) {
-        // Swallow errors and show a gentle message.
-        console.error("Failed to load weather:", err);
+      } catch {
         if (!isMounted) return;
         setError("Live weather unavailable");
       } finally {

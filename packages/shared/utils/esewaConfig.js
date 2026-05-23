@@ -10,6 +10,9 @@ const ESEWA_TEST_SECRET_KEY = '8gBm/:&EnhH.1/q'
 const ESEWA_TEST_PAYMENT_URL = 'https://rc-epay.esewa.com.np/api/epay/main/v2/form'
 
 export function getEsewaConfig() {
+    if (import.meta.env.PROD && !import.meta.env.VITE_ESEWA_SECRET_KEY) {
+        throw new Error('VITE_ESEWA_SECRET_KEY is required in production. Set it in your environment variables.')
+    }
     return {
         merchantCode: import.meta.env.VITE_ESEWA_MERCHANT_CODE || ESEWA_TEST_MERCHANT_CODE,
         secretKey: import.meta.env.VITE_ESEWA_SECRET_KEY || ESEWA_TEST_SECRET_KEY,

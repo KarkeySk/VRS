@@ -38,7 +38,6 @@ export default function OperationsPage() {
       setForecastImage(assetMap.get("admin_operations_forecast") || "");
       setGridImage(assetMap.get("admin_operations_grid") || "");
     } catch (err) {
-      console.error("Failed to load operations:", err);
       setError(err.message || "Failed to load operations data.");
     } finally {
       setIsLoading(false);
