@@ -64,6 +64,7 @@ export default function BookingsPage({ onNavigate }) {
   const [isCreating, setIsCreating] = useState(false)
   const [showQuickForm, setShowQuickForm] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [busyKey, setBusyKey] = useState('')
   const [quickForm, setQuickForm] = useState({
     customerName: '',
@@ -183,27 +184,35 @@ export default function BookingsPage({ onNavigate }) {
   }, [rows, query, status])
 
   // Update booking status in-place.
-  const setBookingStatus = async (bookingId, nextStatus) => {
+  const setBookingStatus = async (bookingId, nextStatus, successMessage = 'Booking status updated.') => {
     const key = `booking:${bookingId}`
     setBusyKey(key)
+    setError('')
+    setSuccess('')
     try {
       const row = rows.find((item) => item.kind === 'booking' && item.id === bookingId)
       const shouldSendConfirmationEmail = nextStatus === 'confirmed' && row?.status !== 'confirmed' && !row?.emailSent
       const booking = await bookingService.update(bookingId, { status: nextStatus })
 
+      let emailWarning = ''
       if (shouldSendConfirmationEmail && row?.customerEmail) {
-        await emailService.sendBookingApprovalEmail({
-          userEmail: row?.customerEmail,
-          bookingId,
-          startDate: booking?.start_date || row?.startDate,
-          endDate: booking?.end_date || row?.endDate,
-          subject: 'Booking confirmed',
-          message: `Your booking for ${row?.vehicleName || 'your selected vehicle'} has been confirmed.`,
-        })
-        await recordApprovalEmailSent(bookingId)
+        try {
+          await emailService.sendBookingApprovalEmail({
+            userEmail: row?.customerEmail,
+            bookingId,
+            startDate: booking?.start_date || row?.startDate,
+            endDate: booking?.end_date || row?.endDate,
+            subject: 'Booking approved',
+            message: `Your booking for ${row?.vehicleName || 'your selected vehicle'} has been approved.`,
+          })
+          await recordApprovalEmailSent(bookingId)
+        } catch (err) {
+          emailWarning = ` Email was not sent: ${err.message || 'unknown error'}.`
+        }
       }
 
       await loadRows()
+      setSuccess(`${successMessage}${emailWarning}`)
     } catch (err) {
       setError(err.message || 'Failed to update booking status')
     } finally {
@@ -211,10 +220,15 @@ export default function BookingsPage({ onNavigate }) {
     }
   }
 
+  const approveBooking = async (row) => {
+    await setBookingStatus(row.id, 'confirmed', 'Booking approved.')
+  }
+
   const resendBookingConfirmation = async (row) => {
     const key = `booking:${row.id}:resend`
     setBusyKey(key)
     setError('')
+    setSuccess('')
     try {
       if (!row.customerEmail) {
         throw new Error('This booking has no customer email.')
@@ -230,6 +244,7 @@ export default function BookingsPage({ onNavigate }) {
       })
 
       await loadRows()
+      setSuccess('Confirmation email resent.')
     } catch (err) {
       setError(err.message || 'Failed to resend confirmation email')
     } finally {
@@ -241,6 +256,8 @@ export default function BookingsPage({ onNavigate }) {
   const approveApplication = async (app) => {
     const key = `application:${app.id}`
     setBusyKey(key)
+    setError('')
+    setSuccess('')
     try {
       const existing = await bookingService.findMatchingTrip({
         userId: app.user_id,
@@ -270,9 +287,15 @@ export default function BookingsPage({ onNavigate }) {
         })
         booking = await getBookingEmailDetails(createdBooking.id)
       } else {
+        if (existing.status === 'pending') {
+          await bookingService.update(existing.id, { status: 'confirmed' })
+        }
         booking = await getBookingEmailDetails(existing.id)
       }
 
+      await applicationService.updateStatus(app.id, 'approved')
+
+      let emailWarning = ''
       const shouldEmail = shouldSendApprovalEmail({
         currentStatus: app.status,
         nextStatus: 'approved',
@@ -280,10 +303,13 @@ export default function BookingsPage({ onNavigate }) {
       })
 
       if (shouldEmail) {
-        await sendBookingApprovalEmail(booking)
-        await recordApprovalEmailSent(booking.id)
+        try {
+          await sendBookingApprovalEmail(booking)
+          await recordApprovalEmailSent(booking.id)
+        } catch (err) {
+          emailWarning = ` Email was not sent: ${err.message || 'unknown error'}.`
+        }
       }
-      await applicationService.updateStatus(app.id, 'approved')
 
       // Send notification to user
       await notificationService.create({
@@ -295,6 +321,7 @@ export default function BookingsPage({ onNavigate }) {
       }).catch((err) => console.warn('Notification failed:', err))
 
       await loadRows()
+      setSuccess(`Booking request approved.${emailWarning}`)
     } catch (err) {
       setError(err.message || 'Failed to approve request')
     } finally {
@@ -306,6 +333,8 @@ export default function BookingsPage({ onNavigate }) {
   const setApplicationStatus = async (applicationId, nextStatus) => {
     const key = `application:${applicationId}`
     setBusyKey(key)
+    setError('')
+    setSuccess('')
     try {
       await applicationService.updateStatus(applicationId, nextStatus)
 
@@ -324,6 +353,7 @@ export default function BookingsPage({ onNavigate }) {
       }
 
       await loadRows()
+      setSuccess(nextStatus === 'rejected' ? 'Booking request rejected.' : 'Request status updated.')
     } catch (err) {
       setError(err.message || 'Failed to update request status')
     } finally {
@@ -338,9 +368,12 @@ export default function BookingsPage({ onNavigate }) {
 
     const key = `booking:${bookingId}`
     setBusyKey(key)
+    setError('')
+    setSuccess('')
     try {
       await bookingService.delete(bookingId)
       await loadRows()
+      setSuccess('Booking deleted.')
     } catch (err) {
       setError(err.message || 'Failed to delete booking')
     } finally {
@@ -352,6 +385,7 @@ export default function BookingsPage({ onNavigate }) {
   const createQuickBooking = async (e) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
 
     if (!adminUserId) {
       setError('Admin login session missing. Please sign in again.')
@@ -414,6 +448,7 @@ export default function BookingsPage({ onNavigate }) {
       })
       setShowQuickForm(false)
       await loadRows()
+      setSuccess('Booking created.')
     } catch (err) {
       setError(err.message || 'Failed to create booking')
     } finally {
@@ -543,6 +578,11 @@ export default function BookingsPage({ onNavigate }) {
           {error}
         </div>
       )}
+      {success && (
+        <div className="mb-4 rounded-md border border-status-green/30 bg-status-green/10 px-3 py-2 text-xs text-status-green">
+          {success}
+        </div>
+      )}
 
       <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
         {isLoading ? (
@@ -594,15 +634,28 @@ export default function BookingsPage({ onNavigate }) {
                   <td>
                     {row.kind === 'booking' ? (
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={busyKey === row.key}
-                          onClick={() => setBookingStatus(row.id, row.status === 'confirmed' ? 'active' : 'confirmed')}
-                          className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          {row.status === 'confirmed' ? 'Activate' : 'Confirm'}
-                        </button>
+                        {row.status === 'pending' && (
+                          <button
+                            type="button"
+                            disabled={busyKey === row.key}
+                            onClick={() => approveBooking(row)}
+                            className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Approve
+                          </button>
+                        )}
+                        {row.status === 'confirmed' && (
+                          <button
+                            type="button"
+                            disabled={busyKey === row.key}
+                            onClick={() => setBookingStatus(row.id, 'active', 'Booking activated.')}
+                            className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Activate
+                          </button>
+                        )}
                         {row.status === 'confirmed' && (
                           <button
                             type="button"
@@ -616,7 +669,7 @@ export default function BookingsPage({ onNavigate }) {
                         <button
                           type="button"
                           disabled={busyKey === row.key}
-                          onClick={() => setBookingStatus(row.id, 'cancelled')}
+                          onClick={() => setBookingStatus(row.id, 'cancelled', 'Booking cancelled.')}
                           className="px-2 py-1 text-xs rounded border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1"
                         >
                           <XCircle className="w-3.5 h-3.5" />
@@ -634,24 +687,28 @@ export default function BookingsPage({ onNavigate }) {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={busyKey === row.key}
-                          onClick={() => approveApplication(row.raw)}
-                          className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          disabled={busyKey === row.key}
-                          onClick={() => setApplicationStatus(row.id, 'rejected')}
-                          className="px-2 py-1 text-xs rounded border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1"
-                        >
-                          <XCircle className="w-3.5 h-3.5" />
-                          Reject
-                        </button>
+                        {!['approved', 'confirmed', 'cancelled'].includes(row.status) && (
+                          <button
+                            type="button"
+                            disabled={busyKey === row.key}
+                            onClick={() => approveApplication(row.raw)}
+                            className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Approve
+                          </button>
+                        )}
+                        {!['approved', 'rejected', 'confirmed', 'cancelled'].includes(row.status) && (
+                          <button
+                            type="button"
+                            disabled={busyKey === row.key}
+                            onClick={() => setApplicationStatus(row.id, 'rejected')}
+                            className="px-2 py-1 text-xs rounded border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            Reject
+                          </button>
+                        )}
                       </div>
                     )}
                   </td>

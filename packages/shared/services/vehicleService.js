@@ -64,8 +64,9 @@ export const vehicleService = {
             .update(updates)
             .eq('id', id)
             .select()
+            .single()
         if (error) throw error
-        return data[0]
+        return data
     },
 
     /** Delete a vehicle (admin) */

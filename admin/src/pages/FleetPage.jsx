@@ -33,6 +33,11 @@ function splitName(name) {
   return { make: make || '', model: rest.join(' ') }
 }
 
+function dateInputValue(value) {
+  const text = String(value || '').trim()
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : ''
+}
+
 export default function FleetPage() {
   // Full fleet list from Supabase.
   const [vehicles, setVehicles] = useState([])
@@ -41,6 +46,7 @@ export default function FleetPage() {
   // Loading/error state for fetch and actions.
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   // Guard to disable row actions.
   const [busyId, setBusyId] = useState('')
 
@@ -103,9 +109,12 @@ export default function FleetPage() {
   // Toggle availability for a single vehicle.
   const handleToggleAvailability = async (vehicle) => {
     setBusyId(vehicle.id)
+    setError('')
+    setSuccess('')
     try {
       await vehicleService.update(vehicle.id, { is_available: !vehicle.is_available })
       await loadVehicles()
+      setSuccess(`${vehicle.name} is now ${vehicle.is_available ? 'unavailable' : 'available'}.`)
     } catch (err) {
       setError(err.message || 'Failed to update vehicle')
     } finally {
@@ -119,9 +128,12 @@ export default function FleetPage() {
     if (!ok) return
 
     setBusyId(vehicle.id)
+    setError('')
+    setSuccess('')
     try {
       await vehicleService.delete(vehicle.id)
       await loadVehicles()
+      setSuccess('Vehicle deleted.')
     } catch (err) {
       setError(err.message || 'Failed to delete vehicle')
     } finally {
@@ -144,11 +156,13 @@ export default function FleetPage() {
       engine: vehicle.engine || '',
       pricePerDay: String(vehicle.price_per_day ?? ''),
       notes: vehicle.notes || '',
-      bluebookExpiry: getSpecValue(vehicle.technical_specs, 'Bluebook Expiry'),
-      insuranceExpiry: getSpecValue(vehicle.technical_specs, 'Insurance Expiry'),
+      bluebookExpiry: dateInputValue(getSpecValue(vehicle.technical_specs, 'Bluebook Expiry')),
+      insuranceExpiry: dateInputValue(getSpecValue(vehicle.technical_specs, 'Insurance Expiry')),
       imageUrl: vehicle.image || '',
       isAvailable: Boolean(vehicle.is_available),
     })
+    setError('')
+    setSuccess('')
   }
 
   // Reset the inline edit form.
@@ -184,6 +198,7 @@ export default function FleetPage() {
 
     setIsSavingEdit(true)
     setError('')
+    setSuccess('')
     try {
       let imageUrl = editForm.imageUrl.trim()
       if (editImageFile) {
@@ -207,8 +222,10 @@ export default function FleetPage() {
         ],
       })
 
+      const savedName = fleetName
       cancelEdit()
       await loadVehicles()
+      setSuccess(`${savedName} updated successfully.`)
     } catch (err) {
       setError(err.message || 'Failed to update vehicle details')
     } finally {
@@ -257,6 +274,11 @@ export default function FleetPage() {
             {error}
           </div>
         )}
+        {success && (
+          <div className="mb-4 rounded-md border border-status-green/30 bg-status-green/10 px-3 py-2 text-xs text-status-green">
+            {success}
+          </div>
+        )}
 
         {editVehicleId && (
           <form onSubmit={saveEdit} className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-5 mb-5">
@@ -301,7 +323,7 @@ export default function FleetPage() {
               </div>
               <div>
                 <label className="text-xs text-txt-secondary mb-1.5 block">Daily Rental (NPR)</label>
-                <input value={editForm.pricePerDay} onChange={(e) => setEditForm((p) => ({ ...p, pricePerDay: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
+                <input type="number" min="0" step="1" value={editForm.pricePerDay} onChange={(e) => setEditForm((p) => ({ ...p, pricePerDay: e.target.value }))} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm" />
               </div>
               <div className="flex items-end gap-2">
                 <input id="fleet-edit-available" type="checkbox" checked={editForm.isAvailable} onChange={(e) => setEditForm((p) => ({ ...p, isAvailable: e.target.checked }))} />
@@ -336,7 +358,7 @@ export default function FleetPage() {
             </div>
 
             <div className="mb-4">
-              <label className="text-xs text-txt-secondary mb-1.5 block">Notes</label>
+              <label className="text-xs text-txt-secondary mb-1.5 block">Description / Notes</label>
               <textarea value={editForm.notes} onChange={(e) => setEditForm((p) => ({ ...p, notes: e.target.value }))} rows={3} className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2.5 text-sm resize-none" />
             </div>
 
