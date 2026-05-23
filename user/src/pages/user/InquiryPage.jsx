@@ -6,8 +6,7 @@ import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js';
 import { inquiryService } from '@bhatbhati/shared/services/inquiryService.js';
 import { Star, Send, ArrowLeft } from 'lucide-react';
 import { normalizeVehicle } from '../../utils/vehicleMapper';
-
-const DRIVER_FEE_PER_DAY = 2000
+import { DRIVER_FEE_PER_DAY } from '@bhatbhati/shared/utils/constants.js';
 
 export default function InquiryPage() {
     const { id } = useParams();
@@ -175,7 +174,7 @@ export default function InquiryPage() {
                                             </div>
                                             <span style={{ color: sel ? 'var(--text-primary)' : 'var(--text-secondary)', fontSize: '0.85rem' }}>{addon.name}</span>
                                         </div>
-                                        <span style={{ color: 'var(--accent)', fontSize: '0.85rem', fontWeight: '600' }}>+${addon.price}</span>
+                                        <span style={{ color: 'var(--accent)', fontSize: '0.85rem', fontWeight: '600' }}>+NPR {Number(addon.price).toLocaleString()}</span>
                                     </div>
                                 );
                             })}

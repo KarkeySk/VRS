@@ -29,8 +29,8 @@ export function ProtectedRoute() {
             if (expiresAt > 0 && Date.now() > expiresAt) {
                 try {
                     await authService.signOut()
-                } catch (e) {
-                    console.error('Failed to sign out expired session:', e)
+                } catch {
+                    // sign-out failure is non-fatal; redirect handles cleanup
                 }
                 if (mounted) {
                     setIsAllowed(false)
