@@ -18,6 +18,14 @@ export default function PaymentSuccess() {
         const verify = async () => {
             const data = searchParams.get('data');
 
+            // Diagnostic: log what we actually received so the failure is debuggable.
+            console.log('[PaymentSuccess] callback params:', {
+                fullUrl: window.location.href,
+                applicationId: appId,
+                hasData: Boolean(data),
+                dataPreview: data ? `${data.slice(0, 24)}...` : null,
+            });
+
             if (!appId) {
                 setStatus('error');
                 setMessage('This page is for the payment gateway redirect. Open a booking from your bookings list to pay.');

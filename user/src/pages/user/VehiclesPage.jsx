@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Users, Shield, CloudRain } from 'lucide-react';
 import { useVehicles } from '../../hooks/useVehicles';
@@ -11,10 +11,6 @@ export default function VehiclesPage() {
     const wheelsParam = searchParams.get('wheels') || 'all';
     const [filter, setFilter] = useState(terrainParam || 'All Terrain');
     const [wheelsFilter, setWheelsFilter] = useState(wheelsParam);
-
-    useEffect(() => {
-        setFilter(terrainParam || 'All Terrain');
-    }, [terrainParam]);
     const [sortHighToLow, setSortHighToLow] = useState(false);
     const [showFilters, setShowFilters] = useState(true);
     const { vehicles: dbVehicles, loading } = useVehicles();

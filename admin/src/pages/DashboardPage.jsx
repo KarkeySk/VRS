@@ -142,6 +142,7 @@ export default function DashboardPage({ onNavigate = () => {} }) {
       const assetMap = new Map((assets ?? []).map((a) => [a.asset_key, a.image_url]));
       setBookingFallbackImage(assetMap.get("admin_booking_fallback") || "");
     } catch (err) {
+      console.error("Failed to load dashboard data:", err);
       setError(err.message || "Failed to load dashboard data");
     } finally {
       setIsLoading(false);

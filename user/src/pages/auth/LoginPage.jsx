@@ -83,6 +83,7 @@ export default function LoginPage() {
       await signInWithGoogle();
       // Browser is being redirected to Google; nothing else to do here.
     } catch (err) {
+      console.error('[Google OAuth] error:', err?.message, err?.status, err);
       setError(getFriendlyAuthError(err, 'Could not start Google sign-in. Please try again.'));
       setIsGoogleLoading(false);
     }

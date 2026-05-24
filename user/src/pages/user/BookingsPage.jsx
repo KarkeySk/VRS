@@ -22,7 +22,9 @@ export default function BookingsPage() {
         if (!user) return;
         applicationService.getMyApplications(user.id)
             .then(setApplications)
-            .catch(() => {})
+            .catch((err) => {
+                console.warn('Failed to load bookings:', err?.message || err);
+            })
             .finally(() => setLoading(false));
     }, [user]);
 
@@ -30,8 +32,8 @@ export default function BookingsPage() {
         try {
             await applicationService.cancel(id);
             setApplications((prev) => prev.map((a) => a.id === id ? { ...a, status: 'cancelled' } : a));
-        } catch {
-            // cancel errors are silent — UI already shows the current state
+        } catch (err) {
+            console.warn('Failed to cancel booking:', err?.message || err);
         }
     };
 
@@ -84,7 +86,7 @@ export default function BookingsPage() {
 
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                         <div style={{ textAlign: 'right' }}>
-                                            <div style={{ color: 'var(--accent)', fontSize: '1.2rem', fontWeight: '800' }}>NPR {Number(app.total_price).toLocaleString()}</div>
+                                            <div style={{ color: 'var(--accent)', fontSize: '1.2rem', fontWeight: '800' }}>${app.total_price}</div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
                                                 <StatusIcon size={14} color={status.color} />
                                                 <span style={{ color: status.color, fontSize: '0.75rem', fontWeight: '600' }}>{status.label}</span>

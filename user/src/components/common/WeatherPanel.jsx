@@ -78,7 +78,8 @@ export default function WeatherPanel() {
           });
           setError("");
         }
-      } catch {
+      } catch (err) {
+        console.error("Failed to load weather:", err);
         if (isMounted) {
           setError("Unable to load weather");
         }

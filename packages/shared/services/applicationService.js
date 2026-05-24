@@ -1,13 +1,3 @@
-/**
- * applicationService — operates on the `booking_applications` table (user-facing workflow).
- *
- * WORKFLOW CONTEXT:
- *   User journey:  inquiry → booking_application → (admin approval) → payment → confirmed
- *   This service handles every step of that journey for users.
- *
- * Do NOT confuse with bookingService which manages the separate `bookings` table
- * used by the admin panel for confirmed/active trips.
- */
 import { supabase } from '../lib/supabase'
 import { profileService } from './profileService'
 

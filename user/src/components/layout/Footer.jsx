@@ -56,8 +56,8 @@ export default function Footer() {
         <div className="footer-col">
           <h4>Support</h4>
           <div className="footer-links">
-            <Link to="/auth/login">Login</Link>
-            <Link to="/auth/register">Register</Link>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
             <a href="#cta">Help Center</a>
             <a href="#cta">Terms & Privacy</a>
           </div>
