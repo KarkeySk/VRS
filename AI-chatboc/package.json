@@ -1,0 +1,12 @@
+{
+  "name": "@bhatbhati/ai-chatbot",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "AI Chatbot module for Bhatbhati vehicle rental platform",
+  "main": "ChatBot.jsx",
+  "dependencies": {
+"lucide-react": "^1.7.0",
+    "react": "^19.2.4"
+  }
+}

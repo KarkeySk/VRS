@@ -1,0 +1,23 @@
+{
+  "name": "bhatbhati",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "workspaces": [
+    "user",
+    "admin",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:user": "npm run dev --workspace @bhatbhati/user",
+    "dev:admin": "npm run dev --workspace @bhatbhati/admin",
+    "build:user": "npm run build --workspace @bhatbhati/user",
+    "build:admin": "npm run build --workspace @bhatbhati/admin",
+    "dev": "concurrently -n user,admin -c blue,magenta \"npm:dev:user\" \"npm:dev:admin\"",
+    "capture:wireframes": "node scripts/capture-wireframes.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "playwright": "^1.59.1"
+  }
+}
