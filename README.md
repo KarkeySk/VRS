@@ -196,4 +196,4 @@ You're hitting the eSewa sandbox. Use the sandbox test login: ID `9806800001`, p
 
 ## Project status
 
-See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) for implemented features, current architecture, and the production-readiness checklist. Other docs live in [`docs/`](docs/) — the [user manual](docs/USER_MANUAL.md), [chatbot setup](docs/chatbot/SETUP.md), and [testing notes](docs/TESTING_ISSUES.md).
+See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) for implemented features, current architecture, and the production-readiness checklist. Other docs live in [`docs/`](docs/) — the [deployment guide](docs/DEPLOYMENT.md) (shipping user + admin to separate domains), [user manual](docs/USER_MANUAL.md), [chatbot setup](docs/chatbot/SETUP.md), and [testing notes](docs/TESTING_ISSUES.md).
