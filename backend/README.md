@@ -63,8 +63,9 @@ VITE_AUTH_REDIRECT_URL=https://your-deployed-user-app.com/auth/verify
 ## Booking confirmation email function
 
 The admin app sends booking confirmation emails through the Supabase Edge
-Function at `functions/send-booking-approval-email`. This is application email,
-not Supabase Auth email.
+Function at `supabase/functions/send-booking-approval-email` (repo root,
+alongside the other Edge Functions and `config.toml`). This is application
+email, not Supabase Auth email.
 
 Deploy it for each Supabase project used by the app:
 

@@ -7,10 +7,13 @@ Monorepo containing two React + Vite frontends and a Supabase backend.
 ```
 .
 ├── user/             Customer-facing React app  (port 5173)
+│   └── src/features/chatbot/   AI assistant (client) + its config
 ├── admin/            Internal admin React app   (port 5174)
-├── backend/          Supabase: SQL migrations, seed data, Edge Functions
+├── backend/          Supabase SQL: migrations + seed data
+├── supabase/         Supabase CLI project: config.toml + Edge Functions
 ├── packages/
 │   └── shared/       Shared services + utils used by both apps
+├── docs/             Project docs (status, user manual, chatbot, testing)
 ├── scripts/          One-off scripts (wireframe capture, etc.)
 └── package.json      npm workspaces root
 ```
@@ -61,7 +64,7 @@ VITE_WEATHER_LON=85.3240
 
 See [`backend/README.md`](backend/README.md) for the full migration order. Quick version:
 
-1. In your Supabase dashboard → **SQL Editor**, run each file in `backend/migrations/` in numeric order (001 → 010).
+1. In your Supabase dashboard → **SQL Editor**, run each file in `backend/migrations/` in numeric order (001 → 013).
 2. Run each seed file in `backend/seed/` in numeric order to populate vehicles, an admin user, and UI assets.
 3. (Optional) Toggle **Confirm Email OFF** in Authentication → Providers → Email for local dev.
 
@@ -202,4 +205,4 @@ You're hitting the eSewa sandbox. Use the sandbox test login: ID `9806800001`, p
 
 ## Project status
 
-See [`PROJECT_STATUS.md`](PROJECT_STATUS.md) for implemented features, current architecture, and the production-readiness checklist.
+See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) for implemented features, current architecture, and the production-readiness checklist. Other docs live in [`docs/`](docs/) — the [user manual](docs/USER_MANUAL.md), [chatbot setup](docs/chatbot/SETUP.md), and [testing notes](docs/TESTING_ISSUES.md).

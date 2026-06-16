@@ -10,7 +10,7 @@ import {
 } from "./chatbotService";
 import { NEPAL_LOCATIONS } from "./nepalLocations";
 import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
-import { UI_CONFIG, SERVICE_CONFIG } from "../config/index.js";
+import { UI_CONFIG, SERVICE_CONFIG } from "./config/index.js";
 import "./ChatBot.css";
 
 let nextMessageId = 1;
