@@ -268,8 +268,8 @@ Fix:
 Issue 17 — [HIGH] Two migration files share the same number 011
 ------------------------------------------------------------------------
 Files:
-  backend/migrations/011_booking_email_notifications.sql
-  backend/migrations/011_add_payment_and_notifications.sql
+  supabase/migrations/011_booking_email_notifications.sql
+  supabase/migrations/011_add_payment_and_notifications.sql
 
 Problem:
   Both files start with 011_. Migration runners (including Supabase CLI)

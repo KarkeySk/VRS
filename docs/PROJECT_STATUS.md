@@ -9,7 +9,7 @@ This is an npm workspaces monorepo for a vehicle rental web application with two
 - User app (customer-facing): `user`
 - Admin app (operations-facing): `admin`
 - Shared services and Supabase client: `packages/shared`
-- Database schema, policies, storage rules, and seed data: `backend`
+- Database schema, policies, storage rules, and seed data: `supabase`
 
 ## 2) Current Architecture
 
@@ -216,9 +216,9 @@ Use this as final go-live gate:
   - `packages/shared/lib/supabase.js`
   - `packages/shared/services/*.js`
 - Backend (Supabase):
-  - `backend/migrations/*.sql`
-  - `backend/seed/*.sql`
-  - `backend/README.md`
+  - `supabase/migrations/*.sql`
+  - `supabase/seed/*.sql`
+  - `supabase/README.md`
 
 ---
 

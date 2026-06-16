@@ -14,8 +14,9 @@ Go to your Supabase dashboard **SQL Editor** and run each file **in order**:
 8. `migrations/008_create_ui_assets.sql` - UI image asset table
 9. `migrations/009_fix_missing_profiles.sql` - Backfill missing profiles
 10. `migrations/010_profile_identity_fields.sql` - Add profile identity fields
-11. `migrations/011_booking_email_notifications.sql` - Booking email tracking
-12. `migrations/011_add_payment_and_notifications.sql` - Payment and notification data
+11. `migrations/011_add_payment_and_notifications.sql` - Payment and notification data
+12. `migrations/012_add_vehicle_notes.sql` - Vehicle notes field
+13. `migrations/013_booking_email_notifications.sql` - Booking email notification tracking
 
 ## Seed data
 
