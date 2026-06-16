@@ -10,7 +10,6 @@ This is an npm workspaces monorepo for a vehicle rental web application with two
 - Admin app (operations-facing): `admin`
 - Shared services and Supabase client: `packages/shared`
 - Database schema, policies, storage rules, and seed data: `backend`
-- Utility script for page capture/wireframe output: `scripts/capture-wireframes.mjs`
 
 ## 2) Current Architecture
 
@@ -111,15 +110,6 @@ This is an npm workspaces monorepo for a vehicle rental web application with two
 - Shared UI asset service implemented
 - Admin/user pages can read seeded asset URLs from database
 
-### Wireframe Capture Automation
-
-- `scripts/capture-wireframes.mjs` uses Playwright to:
-  - Boot both apps
-  - Login/register flows for capture context
-  - Capture raw full-page screenshots
-  - Capture wireframe-styled screenshots
-  - Emit manifest to `artifacts/page-captures/manifest.json`
-
 ## 4) Recent Development Progress (Based on Recent Commits)
 
 - Added profile identity fields migration and sync behavior
@@ -128,7 +118,6 @@ This is an npm workspaces monorepo for a vehicle rental web application with two
 - Hardened shared services and profile migration behavior
 - Refined booking apply flow
 - Improved admin dashboard styling/layout and UX polish
-- Added/updated page capture and wireframe workflow scripts
 
 ## 5) Current Local Working State (Not Yet Fully Finalized)
 
@@ -139,7 +128,6 @@ At the time of review, local workspace showed uncommitted/untracked work includi
   - `package.json`
   - `package-lock.json`
 - Untracked/new:
-  - `scripts/capture-wireframes.mjs`
   - `artifacts/` capture outputs
 
 ## 6) Gaps and Pending Work for Professional Deployment
@@ -214,9 +202,8 @@ Use this as final go-live gate:
 
 ## 8) Key File Map (Reference)
 
-- Root scripts/workspace:
+- Root workspace:
   - `package.json` (npm workspaces)
-  - `scripts/capture-wireframes.mjs`
 - User app:
   - `user/src/App.jsx`
   - `user/src/context/AuthContext.jsx`

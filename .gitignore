@@ -16,6 +16,3 @@ build/
 # Supabase CLI temp/cache
 **/.temp/
 .branches
-
-# Tooling
-.githooks

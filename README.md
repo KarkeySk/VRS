@@ -14,7 +14,6 @@ Monorepo containing two React + Vite frontends and a Supabase backend.
 ├── packages/
 │   └── shared/       Shared services + utils used by both apps
 ├── docs/             Project docs (status, user manual, chatbot, testing)
-├── scripts/          One-off scripts (wireframe capture, etc.)
 └── package.json      npm workspaces root
 ```
 
@@ -130,7 +129,6 @@ Run all of these from the repo root (`VRS/`):
 | `npm run dev:admin` | Start only the admin app on :5174 |
 | `npm run build:user` | Production build of the user app → `user/dist/` |
 | `npm run build:admin` | Production build of the admin app → `admin/dist/` |
-| `npm run capture:wireframes` | Playwright script that captures page screenshots |
 
 ### Working on the backend (database)
 
