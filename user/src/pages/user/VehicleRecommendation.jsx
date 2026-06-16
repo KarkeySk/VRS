@@ -5,7 +5,7 @@ import {
   ArrowRight, ArrowLeft, Send, Bot, Sparkles, AlertTriangle,
   CheckCircle, Shield, Lightbulb
 } from 'lucide-react';
-import { getTerrainRecommendation, sendChatMessage } from '../../../../AI-chatboc/chatbotService';
+import { getTerrainRecommendation, sendChatMessage } from '../../features/chatbot/chatbotService';
 import { useVehicles } from '../../hooks/useVehicles';
 import { normalizeVehicle } from '../../utils/vehicleMapper';
 import './VehicleRecommendation.css';

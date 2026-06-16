@@ -6,7 +6,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { ToastProvider } from './components/common/Toast'
 import ScrollToTop from './components/common/ScrollToTop'
 import Navbar from './components/layout/Navbar'
-import ChatBot from '../../AI-chatboc/ChatBot.jsx'
+import ChatBot from './features/chatbot/ChatBot.jsx'
 
 // Pages
 import HomePage from './pages/HomePage'

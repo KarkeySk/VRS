@@ -2,7 +2,7 @@
 //  CONFIGURATION
 // ─────────────────────────────────────────────────────────────
 
-import { API_CONFIG, SERVICE_CONFIG, UI_CONFIG, STATUS_CONFIG, PRICING_CONFIG } from '../config/index.js';
+import { API_CONFIG, SERVICE_CONFIG, UI_CONFIG, STATUS_CONFIG, PRICING_CONFIG } from './config/index.js';
 
 const GROQ_API_KEY = API_CONFIG.GROQ.API_KEY;
 const GROQ_API_URL = API_CONFIG.GROQ.API_URL;

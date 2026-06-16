@@ -32,5 +32,5 @@ See `SETUP.md` for the full Supabase deploy steps. TL;DR:
 Already mounted in `user/src/App.jsx`. To embed elsewhere:
 
 ```jsx
-import ChatBot from '../../AI-chatboc/ChatBot.jsx'
+import ChatBot from './features/chatbot/ChatBot.jsx'
 ```

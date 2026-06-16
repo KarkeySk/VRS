@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapPin, Mountain, ArrowRight, ArrowLeft, Navigation, Thermometer, Wind } from 'lucide-react';
 import nepalProvincePaths from '../../data/nepalProvincePaths.json';
 import { useTheme } from '../../context/ThemeContext';
-import { NEPAL_LOCATIONS } from '../../../../AI-chatboc/nepalLocations';
+import { NEPAL_LOCATIONS } from '../../features/chatbot/nepalLocations';
 
 // District → terrain class (1=urban, 2=mid-hill, 3=high-hill, 4=mountain/extreme)
 const DISTRICT_TERRAIN = {
