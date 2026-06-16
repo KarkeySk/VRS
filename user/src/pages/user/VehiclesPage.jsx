@@ -3,8 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Users, Shield, CloudRain } from 'lucide-react';
 import { useVehicles } from '../../hooks/useVehicles';
 import { normalizeVehicle } from '../../utils/vehicleMapper';
+import { useIsMobile } from '../../hooks/useViewport';
 export default function VehiclesPage() {
     const navigate = useNavigate();
+    const isMobile = useIsMobile();
     const [searchParams] = useSearchParams();
     const searchQuery = searchParams.get('search') || '';
     const terrainParam = searchParams.get('terrain') || '';
@@ -36,6 +38,7 @@ export default function VehiclesPage() {
     return (
         <div style={{ paddingTop: '100px', minHeight: '100vh', paddingBottom: '40px', background: 'var(--bg-primary)' }}>
             <div className="container" style={{ position: 'relative' }}>
+                {!isMobile && (
                 <div style={{ position: 'absolute', top: '20px', right: '0', display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-glass)', padding: '8px 16px', borderRadius: '30px', border: '1px solid var(--border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', background: 'var(--bg-glass-hover)', borderRadius: '50%', color: 'var(--text-primary)' }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
@@ -45,6 +48,7 @@ export default function VehiclesPage() {
                         <div style={{ fontSize: '0.875rem', fontWeight: '700', color: 'var(--text-primary)' }}>5,364m</div>
                     </div>
                 </div>
+                )}
 
                 <div className="section-label" style={{ color: 'var(--accent)', letterSpacing: '2px', fontWeight: '600' }}>FLEET DISCOVERY</div>
                 <h1 className="section-title" style={{ marginBottom: '16px', fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: '800', lineHeight: 1 }}>Bhatbhate:<br/>Choose Your Ride</h1>

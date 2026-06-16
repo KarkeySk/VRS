@@ -196,7 +196,7 @@ export default function VehicleDetail() {
                         <div style={{ background: 'var(--bg-card)', padding: '30px', borderRadius: '24px', border: '1px solid var(--border)' }}>
                             {vehicle.technicalSpecs.map((spec, i) => (
                                 <div key={i} style={{ display: 'flex', borderBottom: i !== vehicle.technicalSpecs.length - 1 ? '1px solid var(--border)' : 'none', padding: '16px 0', alignItems: 'center' }}>
-                                    <div style={{ width: '250px', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{spec.label}</div>
+                                    <div style={{ width: '45%', minWidth: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{spec.label}</div>
                                     <div style={{ fontSize: '0.875rem', fontWeight: '600' }}>{spec.value}</div>
                                 </div>
                             ))}
@@ -205,11 +205,11 @@ export default function VehicleDetail() {
 
                     {/* RIGHT COLUMN - BOOKING PANEL */}
                     <div style={{ flex: '1 1 35%', minWidth: '320px' }}>
-                        <div style={{ position: 'sticky', top: '100px', background: 'var(--bg-card)', padding: '40px', borderRadius: '32px', border: '1px solid var(--border)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                        <div style={{ position: 'sticky', top: '100px', background: 'var(--bg-card)', padding: 'clamp(24px, 4vw, 40px)', borderRadius: '32px', border: '1px solid var(--border)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
                             <div style={{ fontSize: '0.625rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', fontWeight: '600' }}>Price From</div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px' }}>
                                 <div>
-                                    <span style={{ fontSize: '3.5rem', fontWeight: '800', color: 'var(--accent)', lineHeight: 1 }}>
+                                    <span style={{ fontSize: 'clamp(2.25rem, 7vw, 3.5rem)', fontWeight: '800', color: 'var(--accent)', lineHeight: 1 }}>
                                         NPR {finalPrice.toLocaleString()}
                                     </span>
                                     <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>/day</span>
