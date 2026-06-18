@@ -367,23 +367,24 @@ const regions = [
 ];
 
 // Spread town labels in a tight grid around the district's geographic center
-const getTownPositions = (districtPos, towns) => {
+// Label sizing (in on-screen SVG units). Markers are counter-scaled by 1/zoom so a
+// place name renders at this constant size at every zoom level — never clipped, never huge.
+const TOWN_FS = 10.5;
+const DISTRICT_FS = 11;
+// Estimated pill width for a name at a given font size (Inter, bold ~0.6em advance) + padding.
+const labelWidth = (name, fs) => name.length * fs * 0.6 + 16;
+
+// Town positions: a grid centred on the district, spaced so the constant-size name pills
+// never overlap. Because the markers stay a fixed screen size while the map is zoomed by
+// `scale`, the required spacing in map units is the on-screen footprint divided by `scale`.
+const getTownPositions = (districtPos, towns, scale = 1) => {
     if (!districtPos || !towns.length) return [];
-    const { x, y, box } = districtPos;
+    const { x, y } = districtPos;
     const cols = Math.ceil(Math.sqrt(towns.length * 1.2));
     const rows = Math.ceil(towns.length / cols);
-    // Default spread: wider horizontally, tighter vertically (matches Nepal's east-west elongation)
-    let sx = 9, sy = 6.5;
-    // Clamp the grid to the district's polygon bounding box so villages stay inside the shape.
-    // Centred on the centroid, the symmetric spread is limited by the nearest box edge.
-    if (box) {
-        const padX = (box.x1 - box.x0) * 0.14;
-        const padY = (box.y1 - box.y0) * 0.14;
-        const halfW = Math.max(0, Math.min(x - box.x0, box.x1 - x) - padX);
-        const halfH = Math.max(0, Math.min(y - box.y0, box.y1 - y) - padY);
-        if (cols > 1) sx = Math.min(sx, (2 * halfW) / (cols - 1));
-        if (rows > 1) sy = Math.min(sy, (2 * halfH) / (rows - 1));
-    }
+    const maxLen = towns.reduce((m, t) => Math.max(m, t.length), 0);
+    const sx = (labelWidth('x'.repeat(maxLen), TOWN_FS) + 10) / scale; // column pitch
+    const sy = (TOWN_FS + 16) / scale;                                 // row pitch
     return towns.map((town, i) => ({
         town,
         x: x - ((cols - 1) * sx) / 2 + (i % cols) * sx,
@@ -408,10 +409,18 @@ export default function TerrainSelect() {
     const placeList = selectedDistrict ? (districtMap[selectedDistrict] ?? []) : [];
     const vehicleHint = selectedDistrict ? getVehicleHint(selectedDistrict) : null;
 
+    // Scale at which towns are laid out (the district-zoom level). Kept independent of
+    // selectedTown so town markers don't shift position when one is picked.
+    const districtZoomScale = selected && PROVINCE_ZOOM[selected]
+        ? PROVINCE_ZOOM[selected].scale * 2.1
+        : 1;
+
     // Computed positions for labels at each zoom level
     const districtPositions = selected ? getDistrictPositions(selected, districtList) : [];
     const selectedDistrictPos = districtPositions.find((d) => d.district === selectedDistrict);
-    const townPositions = selectedDistrictPos ? getTownPositions(selectedDistrictPos, placeList) : [];
+    const townPositions = selectedDistrictPos
+        ? getTownPositions(selectedDistrictPos, placeList, districtZoomScale)
+        : [];
     const selectedTownPos = townPositions.find((t) => t.town === selectedTown);
 
     // Compute SVG zoom transform based on current selection depth.
@@ -437,6 +446,18 @@ export default function TerrainSelect() {
         return zoomTo(selectedTownPos.x, selectedTownPos.y, ts);
     };
     const mapTransform = computeMapTransform();
+
+    // The map group scales everything by `currentScale`; markers counter-scale by `invScale`
+    // (1/currentScale) so pins and name labels keep a constant, crisp on-screen size at any zoom.
+    const currentScale = (() => {
+        if (!selected) return 1;
+        const pz = PROVINCE_ZOOM[selected];
+        if (!selectedDistrict || !selectedDistrictPos) return pz.scale;
+        const ds = pz.scale * 2.1;
+        if (!selectedTown || !selectedTownPos) return ds;
+        return ds * 1.6;
+    })();
+    const invScale = 1 / currentScale;
 
     // Theme-aware SVG values
     const svgOutlineStroke = isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.2)';
@@ -570,87 +591,79 @@ export default function TerrainSelect() {
                                         );
                                     })}
 
-                                    {/* Province labels — always shown; scale adapts to zoom level */}
-                                    {regions.map((region) => {
+                                    {/* Province labels — overview only; once a province is selected the
+                                        breadcrumb names it, so we hide these to avoid clutter/overlap. */}
+                                    {!selected && regions.map((region) => {
                                         const isActive = hovered === region.id;
-                                        const isSelectedProv = selected === region.id;
-                                        // When province is zoomed in, shrink font so it fits inside; hide others
-                                        if (selected && !isSelectedProv) return null;
                                         const [cx, cy] = provinceCenters[region.id];
-                                        // At district zoom the label is very small (inverse of scale)
-                                        const fontSize = selected ? (selectedDistrict ? '3.5' : '6') : (isActive ? '11' : '9');
-                                        const fontWeight = (isActive || isSelectedProv) ? '700' : '500';
-                                        const fill = isSelectedProv ? (lockedRegion?.color ?? labelFillActive) : isActive ? labelFillActive : labelFillInactive;
+                                        const name = region.name.replace(' Province', '');
+                                        const fontSize = isActive ? 12 : 10;
+                                        const fontWeight = isActive ? '700' : '600';
+                                        const fill = isActive ? labelFillActive : labelFillInactive;
                                         return (
                                             <g key={region.id + '-label'} style={{ pointerEvents: 'none' }}>
-                                                {/* Small pill behind label for readability when zoomed */}
-                                                {isSelectedProv && (
-                                                    <rect
-                                                        x={cx - region.name.replace(' Province','').length * (selected ? 1.8 : 3.5) - 4}
-                                                        y={cy - 2}
-                                                        width={region.name.replace(' Province','').length * (selected ? 3.6 : 7) + 8}
-                                                        height={selected ? 8 : 14}
-                                                        rx={selected ? 4 : 7}
-                                                        fill={isDark ? 'rgba(10,10,10,0.55)' : 'rgba(255,255,255,0.65)'}
-                                                    />
-                                                )}
-                                                <text x={cx} y={cy + (selected ? 5 : 6)}
-                                                    textAnchor="middle"
+                                                <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
                                                     fill={fill}
                                                     fontSize={fontSize}
                                                     fontWeight={fontWeight}
                                                     fontFamily="Inter, sans-serif"
+                                                    paintOrder="stroke"
+                                                    stroke={isDark ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.7)'}
+                                                    strokeWidth={2.5}
                                                     style={{ transition: 'all 0.3s' }}>
-                                                    {region.name.replace(' Province', '')}
+                                                    {name}
                                                 </text>
                                             </g>
                                         );
                                     })}
 
-                                    {/* LEVEL 2 — District labels (shown when province is zoomed, no district selected yet) */}
+                                    {/* LEVEL 2 — District markers. Counter-scaled (1/zoom) so the pin and the
+                                        full district name stay a constant, fully-legible size at any zoom. */}
                                     {selected && !selectedDistrict && districtPositions.map(({ district, x, y }) => {
                                         const hint = getVehicleHint(district);
-                                        const lw = Math.min(district.length * 4.8 + 14, 88);
+                                        const pillW = labelWidth(district, DISTRICT_FS);
+                                        const pillH = DISTRICT_FS + 7;
                                         return (
                                             <g key={district} style={{ cursor: 'pointer' }}
                                                 onClick={(e) => { e.stopPropagation(); setSelectedDistrict(district); setSelectedTown(null); }}>
-                                                {/* Pulse ring */}
-                                                <circle cx={x} cy={y} r={4} fill={hint.color + '30'} stroke={hint.color + '60'} strokeWidth={0.8} />
-                                                <circle cx={x} cy={y} r={2} fill={hint.color} />
-                                                {/* Label badge */}
-                                                <rect x={x - lw / 2} y={y + 5} width={lw} height={15} rx={7.5}
-                                                    fill={isDark ? 'rgba(15,15,15,0.88)' : 'rgba(255,255,255,0.93)'}
-                                                    stroke={hint.color + '90'} strokeWidth={0.8} />
-                                                <text x={x} y={y + 15} textAnchor="middle"
-                                                    fill={hint.color} fontSize="5.8" fontWeight="700" fontFamily="Inter, sans-serif"
-                                                    style={{ pointerEvents: 'none', userSelect: 'none' }}>
-                                                    {district.length > 14 ? district.slice(0, 13) + '…' : district}
-                                                </text>
+                                                <g transform={`translate(${x} ${y}) scale(${invScale})`}>
+                                                    <circle r={5} fill={hint.color + '33'} stroke={hint.color} strokeWidth={1} />
+                                                    <circle r={2.4} fill={hint.color} />
+                                                    <rect x={-pillW / 2} y={8} width={pillW} height={pillH} rx={pillH / 2}
+                                                        fill={isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)'}
+                                                        stroke={hint.color + 'cc'} strokeWidth={1} />
+                                                    <text x={0} y={8 + pillH / 2} textAnchor="middle" dominantBaseline="central"
+                                                        fill={hint.color} fontSize={DISTRICT_FS} fontWeight="700" fontFamily="Inter, sans-serif"
+                                                        style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                                                        {district}
+                                                    </text>
+                                                </g>
                                             </g>
                                         );
                                     })}
 
-                                    {/* LEVEL 3 — Town/village labels (shown when district is zoomed) */}
+                                    {/* LEVEL 3 — Town/village markers (district zoomed). Same counter-scaling so
+                                        every village name renders fully and crisply. */}
                                     {selected && selectedDistrict && townPositions.map(({ town, x, y }) => {
                                         const isSelTown = selectedTown === town;
-                                        const tw = Math.min(town.length * 4.2 + 12, 80);
                                         const color = lockedRegion?.color ?? '#e8732a';
+                                        const pillW = labelWidth(town, TOWN_FS);
+                                        const pillH = TOWN_FS + 6;
                                         return (
                                             <g key={town} style={{ cursor: 'pointer' }}
                                                 onClick={(e) => { e.stopPropagation(); setSelectedTown(town); }}>
-                                                {/* Highlight ring for selected town */}
-                                                {isSelTown && <circle cx={x} cy={y} r={5.5} fill={color + '25'} stroke={color} strokeWidth={1} />}
-                                                <circle cx={x} cy={y} r={isSelTown ? 2.8 : 1.8}
-                                                    fill={isSelTown ? color : color + 'aa'} />
-                                                {/* Town label */}
-                                                <rect x={x - tw / 2} y={y + 4} width={tw} height={13} rx={6.5}
-                                                    fill={isSelTown ? color : isDark ? 'rgba(15,15,15,0.88)' : 'rgba(255,255,255,0.93)'}
-                                                    stroke={color + (isSelTown ? 'ff' : '70')} strokeWidth={isSelTown ? 1 : 0.7} />
-                                                <text x={x} y={y + 13} textAnchor="middle"
-                                                    fill={isSelTown ? '#fff' : color} fontSize="4.8" fontWeight="700" fontFamily="Inter, sans-serif"
-                                                    style={{ pointerEvents: 'none', userSelect: 'none' }}>
-                                                    {town.length > 16 ? town.slice(0, 15) + '…' : town}
-                                                </text>
+                                                <g transform={`translate(${x} ${y}) scale(${invScale})`}>
+                                                    {isSelTown && <circle r={7} fill={color + '25'} stroke={color} strokeWidth={1.4} />}
+                                                    <circle r={isSelTown ? 3.2 : 2.2} fill={isSelTown ? color : color + 'cc'} />
+                                                    <rect x={-pillW / 2} y={7} width={pillW} height={pillH} rx={pillH / 2}
+                                                        fill={isSelTown ? color : isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)'}
+                                                        stroke={color + (isSelTown ? 'ff' : 'aa')} strokeWidth={isSelTown ? 1.4 : 1} />
+                                                    <text x={0} y={7 + pillH / 2} textAnchor="middle" dominantBaseline="central"
+                                                        fill={isSelTown ? '#fff' : color} fontSize={TOWN_FS} fontWeight="700" fontFamily="Inter, sans-serif"
+                                                        style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                                                        {town}
+                                                    </text>
+                                                </g>
                                             </g>
                                         );
                                     })}
