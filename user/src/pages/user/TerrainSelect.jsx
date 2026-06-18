@@ -29,114 +29,204 @@ const getVehicleHint = (district) => {
 
 // Per-province zoom: center point + scale factor
 const PROVINCE_ZOOM = {
-    koshi:          { cx: 808, cy: 205, scale: 2.5 },
-    madhesh:        { cx: 560, cy: 283, scale: 3.8 },
-    bagmati:        { cx: 645, cy: 175, scale: 2.6 },
-    gandaki:        { cx: 460, cy: 172, scale: 2.6 },
-    lumbini:        { cx: 258, cy: 282, scale: 3.0 },
-    karnali:        { cx: 268, cy: 175, scale: 2.2 },
-    sudurpashchim:  { cx: 100, cy: 210, scale: 3.0 },
+    koshi:          { cx: 704, cy: 288, scale: 2.2 },
+    madhesh:        { cx: 585, cy: 312, scale: 3.63 },
+    bagmati:        { cx: 543, cy: 253, scale: 2.64 },
+    gandaki:        { cx: 442, cy: 192, scale: 2.05 },
+    lumbini:        { cx: 318, cy: 216, scale: 2.53 },
+    karnali:        { cx: 300, cy: 116, scale: 1.69 },
+    sudurpashchim:  { cx: 185, cy: 105, scale: 1.86 },
 };
 
 // Approximate bounding boxes for each province in SVG coordinates [x, y, w, h]
 const PROVINCE_BBOX = {
-    koshi:          { x: 742, y: 88,  w: 145, h: 237 },
-    madhesh:        { x: 370, y: 236, w: 385, h: 90  },
-    bagmati:        { x: 538, y: 83,  w: 225, h: 180 },
-    gandaki:        { x: 356, y: 78,  w: 197, h: 178 },
-    lumbini:        { x: 124, y: 226, w: 252, h: 105 },
-    karnali:        { x: 126, y: 79,  w: 266, h: 186 },
-    sudurpashchim:  { x: 17,  y: 105, w: 155, h: 210 },
+    koshi:          { x: 619, y: 215, w: 170, h: 147 },
+    madhesh:        { x: 480, y: 269, w: 211, h: 86 },
+    bagmati:        { x: 432, y: 192, w: 221, h: 122 },
+    gandaki:        { x: 346, y: 114, w: 193, h: 157 },
+    lumbini:        { x: 194, y: 152, w: 247, h: 128 },
+    karnali:        { x: 187, y: 20, w: 225, h: 191 },
+    sudurpashchim:  { x: 114, y: 18, w: 143, h: 173 },
 };
 
 // Geographic center of each district in SVG coordinate space (viewBox 0 0 900 380)
 // Derived from actual lat/lon mapped to the hand-drawn SVG province paths
 const DISTRICT_CENTERS = {
     // Koshi Province
-    'Taplejung':        { x: 865, y: 118 },
-    'Sankhuwasabha':    { x: 820, y: 130 },
-    'Panchthar':        { x: 872, y: 175 },
-    'Terhathum':        { x: 845, y: 188 },
-    'Ilam':             { x: 862, y: 242 },
-    'Dhankuta':         { x: 805, y: 200 },
-    'Bhojpur':          { x: 770, y: 202 },
-    'Khotang':          { x: 780, y: 232 },
-    'Solukhumbu':       { x: 755, y: 155 },
-    'Okhaldhunga':      { x: 755, y: 228 },
-    'Jhapa':            { x: 858, y: 298 },
-    'Morang':           { x: 830, y: 287 },
-    'Sunsari':          { x: 792, y: 282 },
-    'Udayapur':         { x: 758, y: 270 },
-    // Madhesh Province (east-to-west Terai strip)
-    'Saptari':          { x: 695, y: 275 },
-    'Siraha':           { x: 638, y: 278 },
-    'Dhanusha':         { x: 590, y: 281 },
-    'Mahottari':        { x: 548, y: 284 },
-    'Sarlahi':          { x: 508, y: 287 },
-    'Rautahat':         { x: 470, y: 290 },
-    'Bara':             { x: 432, y: 293 },
-    'Parsa':            { x: 395, y: 295 },
+    'Taplejung':        { x: 758, y: 259 },
+    'Panchthar':        { x: 754, y: 298 },
+    'Ilam':             { x: 765, y: 317 },
+    'Jhapa':            { x: 766, y: 342 },
+    'Morang':           { x: 728, y: 340 },
+    'Sunsari':          { x: 703, y: 337 },
+    'Dhankuta':         { x: 717, y: 308 },
+    'Terhathum':        { x: 735, y: 295 },
+    'Sankhuwasabha':    { x: 712, y: 259 },
+    'Bhojpur':          { x: 672, y: 294 },
+    'Solukhumbu':       { x: 666, y: 248 },
+    'Okhaldhunga':      { x: 641, y: 280 },
+    'Khotang':          { x: 695, y: 293 },
+    'Udayapur':         { x: 663, y: 316 },
+    // Madhesh Province
+    'Saptari':          { x: 634, y: 329 },
+    'Siraha':           { x: 570, y: 309 },
+    'Dhanusha':         { x: 504, y: 288 },
+    'Mahottari':        { x: 528, y: 299 },
+    'Sarlahi':          { x: 609, y: 322 },
+    'Rautahat':         { x: 591, y: 318 },
+    'Bara':             { x: 668, y: 341 },
+    'Parsa':            { x: 548, y: 307 },
     // Bagmati Province
-    'Rasuwa':           { x: 593, y: 112 },
-    'Sindhupalchok':    { x: 668, y: 120 },
-    'Dolakha':          { x: 715, y: 135 },
-    'Nuwakot':          { x: 568, y: 145 },
-    'Kathmandu':        { x: 622, y: 160 },
-    'Bhaktapur':        { x: 673, y: 167 },
-    'Lalitpur':         { x: 622, y: 180 },
-    'Kavrepalanchok':   { x: 688, y: 190 },
-    'Ramechhap':        { x: 708, y: 207 },
-    'Sindhuli':         { x: 698, y: 233 },
-    'Dhading':          { x: 562, y: 175 },
-    'Makwanpur':        { x: 588, y: 230 },
-    'Chitwan':          { x: 555, y: 247 },
+    'Sindhuli':         { x: 601, y: 291 },
+    'Ramechhap':        { x: 621, y: 265 },
+    'Dolakha':          { x: 622, y: 242 },
+    'Sindhupalchok':    { x: 584, y: 231 },
+    'Kavrepalanchok':   { x: 574, y: 263 },
+    'Lalitpur':         { x: 552, y: 247 },
+    'Bhaktapur':        { x: 559, y: 251 },
+    'Kathmandu':        { x: 542, y: 231 },
+    'Nuwakot':          { x: 519, y: 228 },
+    'Rasuwa':           { x: 557, y: 209 },
+    'Dhading':          { x: 475, y: 259 },
+    'Makwanpur':        { x: 551, y: 263 },
+    'Chitwan':          { x: 529, y: 268 },
     // Gandaki Province
-    'Mustang':          { x: 450, y: 98  },
-    'Manang':           { x: 492, y: 127 },
-    'Gorkha':           { x: 462, y: 153 },
-    'Lamjung':          { x: 512, y: 143 },
-    'Kaski':            { x: 420, y: 180 },
-    'Tanahu':           { x: 462, y: 208 },
-    'Nawalpur':         { x: 484, y: 238 },
-    'Syangja':          { x: 400, y: 215 },
-    'Parbat':           { x: 383, y: 208 },
-    'Myagdi':           { x: 380, y: 180 },
-    'Baglung':          { x: 375, y: 198 },
+    'Gorkha':           { x: 475, y: 200 },
+    'Manang':           { x: 458, y: 168 },
+    'Mustang':          { x: 427, y: 142 },
+    'Myagdi':           { x: 394, y: 178 },
+    'Kaski':            { x: 439, y: 195 },
+    'Lamjung':          { x: 505, y: 198 },
+    'Tanahu':           { x: 460, y: 228 },
+    'Nawalpur':         { x: 444, y: 250 },
+    'Syangja':          { x: 423, y: 222 },
+    'Parbat':           { x: 412, y: 207 },
+    'Baglung':          { x: 377, y: 195 },
     // Lumbini Province
-    'Rukum East':       { x: 358, y: 258 },
-    'Rolpa':            { x: 312, y: 258 },
-    'Pyuthan':          { x: 284, y: 268 },
-    'Gulmi':            { x: 345, y: 265 },
-    'Arghakhanchi':     { x: 340, y: 277 },
-    'Palpa':            { x: 350, y: 282 },
-    'Nawalparasi East': { x: 360, y: 292 },
-    'Nawalparasi West': { x: 328, y: 302 },
-    'Rupandehi':        { x: 285, y: 308 },
-    'Kapilvastu':       { x: 248, y: 308 },
-    'Dang':             { x: 218, y: 278 },
-    'Banke':            { x: 168, y: 300 },
-    'Bardiya':          { x: 145, y: 295 },
+    'Rukum East':       { x: 354, y: 148 },
+    'Rolpa':            { x: 340, y: 168 },
+    'Pyuthan':          { x: 325, y: 196 },
+    'Gulmi':            { x: 344, y: 215 },
+    'Arghakhanchi':     { x: 381, y: 216 },
+    'Palpa':            { x: 362, y: 232 },
+    'Nawalparasi East': { x: 408, y: 239 },
+    'Nawalparasi West': { x: 417, y: 264 },
+    'Rupandehi':        { x: 388, y: 260 },
+    'Kapilvastu':       { x: 354, y: 255 },
+    'Dang':             { x: 222, y: 192 },
+    'Banke':            { x: 307, y: 227 },
+    'Bardiya':          { x: 258, y: 217 },
     // Karnali Province
-    'Humla':            { x: 163, y: 108 },
-    'Mugu':             { x: 218, y: 118 },
-    'Dolpa':            { x: 295, y: 123 },
-    'Jumla':            { x: 228, y: 158 },
-    'Kalikot':          { x: 185, y: 178 },
-    'Rukum West':       { x: 295, y: 202 },
-    'Salyan':           { x: 242, y: 218 },
-    'Jajarkot':         { x: 248, y: 192 },
-    'Dailekh':          { x: 192, y: 192 },
-    'Surkhet':          { x: 175, y: 238 },
+    'Dolpa':            { x: 360, y: 127 },
+    'Mugu':             { x: 303, y: 89 },
+    'Humla':            { x: 262, y: 55 },
+    'Jumla':            { x: 290, y: 118 },
+    'Kalikot':          { x: 252, y: 125 },
+    'Rukum West':       { x: 311, y: 163 },
+    'Salyan':           { x: 284, y: 191 },
+    'Jajarkot':         { x: 286, y: 152 },
+    'Dailekh':          { x: 246, y: 151 },
+    'Surkhet':          { x: 238, y: 171 },
     // Sudurpashchim Province
-    'Darchula':         { x: 78,  y: 120 },
-    'Bajhang':          { x: 98,  y: 133 },
-    'Bajura':           { x: 140, y: 138 },
-    'Baitadi':          { x: 55,  y: 148 },
-    'Dadeldhura':       { x: 53,  y: 168 },
-    'Achham':           { x: 132, y: 168 },
-    'Doti':             { x: 102, y: 178 },
-    'Kailali':          { x: 95,  y: 248 },
-    'Kanchanpur':       { x: 45,  y: 268 },
+    'Bajura':           { x: 236, y: 94 },
+    'Bajhang':          { x: 204, y: 82 },
+    'Achham':           { x: 214, y: 131 },
+    'Doti':             { x: 180, y: 127 },
+    'Kailali':          { x: 179, y: 162 },
+    'Kanchanpur':       { x: 133, y: 152 },
+    'Dadeldhura':       { x: 146, y: 122 },
+    'Baitadi':          { x: 153, y: 98 },
+    'Darchula':         { x: 172, y: 62 },
+};
+
+// Bounding box of each district polygon (viewBox coords) — bounds the town grid so
+// village markers stay inside the district shape.
+const DISTRICT_BBOX = {
+    // Koshi Province
+    'Taplejung':        { x0: 727, y0: 229, x1: 790, y1: 285 },
+    'Panchthar':        { x0: 731, y0: 272, x1: 779, y1: 319 },
+    'Ilam':             { x0: 740, y0: 299, x1: 788, y1: 335 },
+    'Jhapa':            { x0: 743, y0: 324, x1: 788, y1: 360 },
+    'Morang':           { x0: 710, y0: 318, x1: 747, y1: 362 },
+    'Sunsari':          { x0: 681, y0: 318, x1: 719, y1: 357 },
+    'Dhankuta':         { x0: 703, y0: 292, x1: 737, y1: 320 },
+    'Terhathum':        { x0: 722, y0: 283, x1: 752, y1: 310 },
+    'Sankhuwasabha':    { x0: 685, y0: 228, x1: 745, y1: 296 },
+    'Bhojpur':          { x0: 642, y0: 271, x1: 687, y1: 318 },
+    'Solukhumbu':       { x0: 636, y0: 215, x1: 690, y1: 279 },
+    'Okhaldhunga':      { x0: 624, y0: 264, x1: 663, y1: 295 },
+    'Khotang':          { x0: 682, y0: 269, x1: 712, y1: 317 },
+    'Udayapur':         { x0: 619, y0: 293, x1: 703, y1: 334 },
+    // Madhesh Province
+    'Saptari':          { x0: 617, y0: 313, x1: 652, y1: 344 },
+    'Siraha':           { x0: 550, y0: 291, x1: 591, y1: 328 },
+    'Dhanusha':         { x0: 480, y0: 269, x1: 520, y1: 309 },
+    'Mahottari':        { x0: 512, y0: 277, x1: 544, y1: 320 },
+    'Sarlahi':          { x0: 594, y0: 297, x1: 627, y1: 344 },
+    'Rautahat':         { x0: 579, y0: 294, x1: 601, y1: 341 },
+    'Bara':             { x0: 646, y0: 325, x1: 691, y1: 356 },
+    'Parsa':            { x0: 536, y0: 288, x1: 564, y1: 329 },
+    // Bagmati Province
+    'Sindhuli':         { x0: 557, y0: 270, x1: 638, y1: 314 },
+    'Ramechhap':        { x0: 589, y0: 238, x1: 654, y1: 287 },
+    'Dolakha':          { x0: 596, y0: 210, x1: 652, y1: 268 },
+    'Sindhupalchok':    { x0: 559, y0: 207, x1: 611, y1: 257 },
+    'Kavrepalanchok':   { x0: 555, y0: 245, x1: 596, y1: 280 },
+    'Lalitpur':         { x0: 538, y0: 239, x1: 570, y1: 260 },
+    'Bhaktapur':        { x0: 552, y0: 247, x1: 566, y1: 256 },
+    'Kathmandu':        { x0: 522, y0: 217, x1: 564, y1: 244 },
+    'Nuwakot':          { x0: 491, y0: 195, x1: 545, y1: 252 },
+    'Rasuwa':           { x0: 533, y0: 192, x1: 589, y1: 227 },
+    'Dhading':          { x0: 432, y0: 234, x1: 506, y1: 278 },
+    'Makwanpur':        { x0: 542, y0: 250, x1: 560, y1: 274 },
+    'Chitwan':          { x0: 495, y0: 248, x1: 565, y1: 294 },
+    // Gandaki Province
+    'Gorkha':           { x0: 455, y0: 182, x1: 496, y1: 219 },
+    'Manang':           { x0: 423, y0: 149, x1: 486, y1: 187 },
+    'Mustang':          { x0: 396, y0: 114, x1: 460, y1: 177 },
+    'Myagdi':           { x0: 364, y0: 158, x1: 428, y1: 199 },
+    'Kaski':            { x0: 415, y0: 173, x1: 462, y1: 217 },
+    'Lamjung':          { x0: 474, y0: 162, x1: 539, y1: 241 },
+    'Tanahu':           { x0: 434, y0: 213, x1: 485, y1: 245 },
+    'Nawalpur':         { x0: 413, y0: 235, x1: 475, y1: 271 },
+    'Syangja':          { x0: 393, y0: 206, x1: 442, y1: 235 },
+    'Parbat':           { x0: 402, y0: 191, x1: 424, y1: 224 },
+    'Baglung':          { x0: 346, y0: 172, x1: 412, y1: 218 },
+    // Lumbini Province
+    'Rukum East':       { x0: 338, y0: 137, x1: 370, y1: 159 },
+    'Rolpa':            { x0: 313, y0: 152, x1: 368, y1: 184 },
+    'Pyuthan':          { x0: 302, y0: 178, x1: 352, y1: 216 },
+    'Gulmi':            { x0: 322, y0: 194, x1: 364, y1: 234 },
+    'Arghakhanchi':     { x0: 358, y0: 202, x1: 406, y1: 230 },
+    'Palpa':            { x0: 335, y0: 215, x1: 383, y1: 244 },
+    'Nawalparasi East': { x0: 376, y0: 228, x1: 441, y1: 252 },
+    'Nawalparasi West': { x0: 403, y0: 250, x1: 430, y1: 279 },
+    'Rupandehi':        { x0: 373, y0: 244, x1: 408, y1: 280 },
+    'Kapilvastu':       { x0: 330, y0: 239, x1: 375, y1: 272 },
+    'Dang':             { x0: 194, y0: 168, x1: 253, y1: 218 },
+    'Banke':            { x0: 273, y0: 203, x1: 340, y1: 251 },
+    'Bardiya':          { x0: 231, y0: 196, x1: 288, y1: 236 },
+    // Karnali Province
+    'Dolpa':            { x0: 305, y0: 82, x1: 412, y1: 164 },
+    'Mugu':             { x0: 253, y0: 60, x1: 341, y1: 108 },
+    'Humla':            { x0: 211, y0: 20, x1: 314, y1: 90 },
+    'Jumla':            { x0: 260, y0: 98, x1: 322, y1: 143 },
+    'Kalikot':          { x0: 229, y0: 102, x1: 274, y1: 143 },
+    'Rukum West':       { x0: 288, y0: 142, x1: 331, y1: 180 },
+    'Salyan':           { x0: 251, y0: 171, x1: 309, y1: 211 },
+    'Jajarkot':         { x0: 259, y0: 130, x1: 321, y1: 173 },
+    'Dailekh':          { x0: 224, y0: 130, x1: 266, y1: 171 },
+    'Surkhet':          { x0: 187, y0: 143, x1: 275, y1: 196 },
+    // Sudurpashchim Province
+    'Bajura':           { x0: 203, y0: 62, x1: 256, y1: 118 },
+    'Bajhang':          { x0: 168, y0: 53, x1: 236, y1: 108 },
+    'Achham':           { x0: 191, y0: 109, x1: 237, y1: 162 },
+    'Doti':             { x0: 150, y0: 104, x1: 205, y1: 147 },
+    'Kailali':          { x0: 145, y0: 136, x1: 213, y1: 191 },
+    'Kanchanpur':       { x0: 114, y0: 130, x1: 152, y1: 177 },
+    'Dadeldhura':       { x0: 121, y0: 106, x1: 171, y1: 141 },
+    'Baitadi':          { x0: 126, y0: 82, x1: 181, y1: 114 },
+    'Darchula':         { x0: 136, y0: 18, x1: 198, y1: 90 },
 };
 
 // Return district positions using real geographic centers (falls back to bbox center)
@@ -145,7 +235,7 @@ const getDistrictPositions = (provinceId, districts) => {
     if (!districts.length) return [];
     return districts.map((dist) => {
         const center = DISTRICT_CENTERS[dist];
-        if (center) return { district: dist, x: center.x, y: center.y };
+        if (center) return { district: dist, x: center.x, y: center.y, box: DISTRICT_BBOX[dist] };
         // Fallback: province bbox center
         return { district: dist, x: (bbox?.x ?? 450) + (bbox?.w ?? 0) / 2, y: (bbox?.y ?? 190) + (bbox?.h ?? 0) / 2 };
     });
@@ -279,11 +369,21 @@ const regions = [
 // Spread town labels in a tight grid around the district's geographic center
 const getTownPositions = (districtPos, towns) => {
     if (!districtPos || !towns.length) return [];
-    const { x, y } = districtPos;
+    const { x, y, box } = districtPos;
     const cols = Math.ceil(Math.sqrt(towns.length * 1.2));
     const rows = Math.ceil(towns.length / cols);
-    // Wider horizontal spread, tighter vertical — matches Nepal's east-west elongation
-    const sx = 9, sy = 6.5;
+    // Default spread: wider horizontally, tighter vertically (matches Nepal's east-west elongation)
+    let sx = 9, sy = 6.5;
+    // Clamp the grid to the district's polygon bounding box so villages stay inside the shape.
+    // Centred on the centroid, the symmetric spread is limited by the nearest box edge.
+    if (box) {
+        const padX = (box.x1 - box.x0) * 0.14;
+        const padY = (box.y1 - box.y0) * 0.14;
+        const halfW = Math.max(0, Math.min(x - box.x0, box.x1 - x) - padX);
+        const halfH = Math.max(0, Math.min(y - box.y0, box.y1 - y) - padY);
+        if (cols > 1) sx = Math.min(sx, (2 * halfW) / (cols - 1));
+        if (rows > 1) sy = Math.min(sy, (2 * halfH) / (rows - 1));
+    }
     return towns.map((town, i) => ({
         town,
         x: x - ((cols - 1) * sx) / 2 + (i % cols) * sx,
@@ -314,19 +414,27 @@ export default function TerrainSelect() {
     const townPositions = selectedDistrictPos ? getTownPositions(selectedDistrictPos, placeList) : [];
     const selectedTownPos = townPositions.find((t) => t.town === selectedTown);
 
-    // Compute SVG zoom transform based on current selection depth
+    // Compute SVG zoom transform based on current selection depth.
+    // The map centre (450,190) is the viewBox centre; we translate the focus point there
+    // and scale up. Units must be `px` for the CSS `transform` property to be valid in SVG
+    // user space (unitless translate is invalid CSS and would be silently dropped → no zoom).
+    const zoomTo = (cx, cy, scale) =>
+        `translate(${450 - cx * scale}px, ${190 - cy * scale}px) scale(${scale})`;
     const computeMapTransform = () => {
-        if (!selected) return 'translate(0,0) scale(1)';
+        if (!selected) return 'translate(0px, 0px) scale(1)';
         const pz = PROVINCE_ZOOM[selected];
+        // Level 1 — province selected: zoom to the whole province
         if (!selectedDistrict || !selectedDistrictPos) {
-            return `translate(${450 - pz.cx * pz.scale}, ${190 - pz.cy * pz.scale}) scale(${pz.scale})`;
+            return zoomTo(pz.cx, pz.cy, pz.scale);
         }
+        // Level 2 — district selected: zoom further into the district
         const ds = pz.scale * 2.1;
         if (!selectedTown || !selectedTownPos) {
-            return `translate(${450 - selectedDistrictPos.x * ds}, ${190 - selectedDistrictPos.y * ds}) scale(${ds})`;
+            return zoomTo(selectedDistrictPos.x, selectedDistrictPos.y, ds);
         }
+        // Level 3 — town selected: zoom in on the town
         const ts = ds * 1.6;
-        return `translate(${450 - selectedTownPos.x * ts}, ${190 - selectedTownPos.y * ts}) scale(${ts})`;
+        return zoomTo(selectedTownPos.x, selectedTownPos.y, ts);
     };
     const mapTransform = computeMapTransform();
 
@@ -377,13 +485,13 @@ export default function TerrainSelect() {
     };
 
     const provinceCenters = {
-        koshi: [808, 203],
-        madhesh: [560, 300],
-        bagmati: [640, 198],
-        gandaki: [470, 190],
-        lumbini: [255, 298],
-        karnali: [270, 185],
-        sudurpashchim: [105, 225],
+        koshi: [710, 298],
+        madhesh: [579, 311],
+        bagmati: [556, 255],
+        gandaki: [439, 201],
+        lumbini: [328, 222],
+        karnali: [285, 154],
+        sudurpashchim: [176, 81],
     };
 
     return (

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutGrid,
@@ -6,8 +7,10 @@ import {
   CheckCircle,
   Settings as SettingsIcon,
   Cog,
+  MessageSquare,
   User,
 } from 'lucide-react'
+import { supportChatService } from '@bhatbhati/shared/services/supportChatService.js'
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/dashboard' },
@@ -15,12 +18,26 @@ const navItems = [
   { id: 'bookings',  label: 'Bookings',  icon: CalendarDays, path: '/dashboard/bookings' },
   { id: 'compliance', label: 'Checks',   icon: CheckCircle, path: '/dashboard/compliance' },
   { id: 'operations', label: 'Operations', icon: Cog,       path: '/dashboard/operations' },
+  { id: 'messages',  label: 'Messages',  icon: MessageSquare, path: '/dashboard/messages' },
   { id: 'settings',  label: 'Settings',  icon: SettingsIcon, path: '/dashboard/settings' },
 ]
 
 export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [unread, setUnread] = useState(0)
+
+  // Live badge: total messages awaiting an admin reply
+  useEffect(() => {
+    let active = true
+    const refresh = () =>
+      supportChatService.getAdminUnreadTotal()
+        .then((n) => { if (active) setUnread(n) })
+        .catch(() => {})
+    refresh()
+    const unsub = supportChatService.subscribeConversations(refresh)
+    return () => { active = false; unsub() }
+  }, [])
 
   const isActive = (item) =>
     item.id === 'dashboard'
@@ -56,7 +73,14 @@ export default function Sidebar() {
               }`}
             >
               <Icon className="w-5 h-5" />
-              {item.label}
+              <span className="flex-1 text-left">{item.label}</span>
+              {item.id === 'messages' && unread > 0 && (
+                <span className={`min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                  active ? 'bg-dark text-brand-orange' : 'bg-brand-orange text-dark'
+                }`}>
+                  {unread}
+                </span>
+              )}
             </button>
           )
         })}

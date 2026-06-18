@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Send, MessageCircle, X, RotateCcw, Wifi, WifiOff, MapPin, Navigation, ArrowUpDown, ChevronRight, ChevronLeft, Search } from "lucide-react";
+import { Send, MessageCircle, X, RotateCcw, Wifi, WifiOff, MapPin, Navigation, ArrowUpDown, ChevronRight, ChevronLeft, Search, Sparkles, Headset } from "lucide-react";
 import {
   sendChatMessage,
   initializeChatSession,
@@ -11,12 +11,16 @@ import {
 import { NEPAL_LOCATIONS } from "./nepalLocations";
 import { vehicleService } from "@bhatbhati/shared/services/vehicleService.js";
 import { UI_CONFIG, SERVICE_CONFIG } from "./config/index.js";
+import { useAuth } from "../../context/AuthContext";
+import SupportChat from "./SupportChat";
 import "./ChatBot.css";
 
 let nextMessageId = 1;
 
 const ChatBot = () => {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("ai"); // 'ai' | 'support'
   const [messages, setMessages] = useState([
     {
       id: nextMessageId++,
@@ -332,29 +336,39 @@ const ChatBot = () => {
           {/* Header */}
           <div className="chat-header">
             <div className="chat-header-content">
-              <h3 className="chat-header-title">Bhatbhate AI</h3>
+              <h3 className="chat-header-title">
+                {activeTab === "ai" ? "Bhatbhate AI" : "Support"}
+              </h3>
               <p className="chat-header-subtitle">
-                {isOnlineProvider ? (
-                  <span className="provider-badge online">
-                    <Wifi size={11} /> Gemini AI
-                  </span>
+                {activeTab === "ai" ? (
+                  <>
+                    {isOnlineProvider ? (
+                      <span className="provider-badge online">
+                        <Wifi size={11} /> Gemini AI
+                      </span>
+                    ) : (
+                      <span className="provider-badge offline">
+                        <WifiOff size={11} /> Offline Mode
+                      </span>
+                    )}
+                    {" • Ask me anything"}
+                  </>
                 ) : (
-                  <span className="provider-badge offline">
-                    <WifiOff size={11} /> Offline Mode
-                  </span>
+                  "Chat with our team"
                 )}
-                {" • Ask me anything"}
               </p>
             </div>
             <div className="chat-header-actions">
-              <button
-                onClick={handleReset}
-                className="chat-action-btn"
-                title="New conversation"
-                aria-label="Reset chat"
-              >
-                <RotateCcw size={18} />
-              </button>
+              {activeTab === "ai" && (
+                <button
+                  onClick={handleReset}
+                  className="chat-action-btn"
+                  title="New conversation"
+                  aria-label="Reset chat"
+                >
+                  <RotateCcw size={18} />
+                </button>
+              )}
               <button
                 onClick={() => setIsOpen(false)}
                 className="chat-action-btn"
@@ -366,6 +380,32 @@ const ChatBot = () => {
             </div>
           </div>
 
+          {/* Tabs: AI assistant vs human support */}
+          <div className="chat-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "ai"}
+              className={`chat-tab ${activeTab === "ai" ? "active" : ""}`}
+              onClick={() => setActiveTab("ai")}
+            >
+              <Sparkles size={14} /> AI Assistant
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "support"}
+              className={`chat-tab ${activeTab === "support" ? "active" : ""}`}
+              onClick={() => setActiveTab("support")}
+            >
+              <Headset size={14} /> Support
+            </button>
+          </div>
+
+          {activeTab === "support" && <SupportChat user={user} />}
+
+          {activeTab === "ai" && (
+          <>
           {/* Messages Container */}
           <div className="chat-messages">
             {messages.map((message) => (
@@ -602,6 +642,8 @@ const ChatBot = () => {
               <Send size={18} />
             </button>
           </form>
+          </>
+          )}
         </div>
       )}
     </>

@@ -9,12 +9,10 @@ Monorepo containing two React + Vite frontends and a Supabase backend.
 ├── user/             Customer-facing React app  (port 5173)
 │   └── src/features/chatbot/   AI assistant (client) + its config
 ├── admin/            Internal admin React app   (port 5174)
-├── backend/          Supabase SQL: migrations + seed data
-├── supabase/         Supabase CLI project: config.toml + Edge Functions
+├── supabase/         Supabase project: config.toml, migrations, seed, Edge Functions
 ├── packages/
 │   └── shared/       Shared services + utils used by both apps
 ├── docs/             Project docs (status, user manual, chatbot, testing)
-├── scripts/          One-off scripts (wireframe capture, etc.)
 └── package.json      npm workspaces root
 ```
 
@@ -62,15 +60,15 @@ VITE_WEATHER_LON=85.3240
 
 ### 3. Set up the database
 
-See [`backend/README.md`](backend/README.md) for the full migration order. Quick version:
+See [`supabase/README.md`](supabase/README.md) for the full migration order. Quick version:
 
-1. In your Supabase dashboard → **SQL Editor**, run each file in `backend/migrations/` in numeric order (001 → 013).
-2. Run each seed file in `backend/seed/` in numeric order to populate vehicles, an admin user, and UI assets.
+1. In your Supabase dashboard → **SQL Editor**, run each file in `supabase/migrations/` in numeric order (001 → 013).
+2. Run each seed file in `supabase/seed/` in numeric order to populate vehicles, an admin user, and UI assets.
 3. (Optional) Toggle **Confirm Email OFF** in Authentication → Providers → Email for local dev.
 
 ## Running the project
 
-> **All `npm` commands below are run from the repo root** (`VRS/`), **not** from inside `user/`, `admin/`, `backend/`, or `packages/`. The npm workspace setup expects this.
+> **All `npm` commands below are run from the repo root** (`VRS/`), **not** from inside `user/`, `admin/`, `supabase/`, or `packages/`. The npm workspace setup expects this.
 
 ### First-time setup walkthrough
 
@@ -130,34 +128,27 @@ Run all of these from the repo root (`VRS/`):
 | `npm run dev:admin` | Start only the admin app on :5174 |
 | `npm run build:user` | Production build of the user app → `user/dist/` |
 | `npm run build:admin` | Production build of the admin app → `admin/dist/` |
-| `npm run capture:wireframes` | Playwright script that captures page screenshots |
 
 ### Working on the backend (database)
 
-The backend lives in `backend/` (Supabase). You don't run a server locally — your code talks to the hosted Supabase project directly.
+The backend lives in `supabase/` (migrations, seed, Edge Functions, and `config.toml`). You don't run a server locally — your code talks to the hosted Supabase project directly.
 
-To apply schema changes:
+To apply schema changes, follow [`supabase/README.md`](supabase/README.md) to run the migrations in the Supabase dashboard.
 
-```bash
-cd backend
-# then follow backend/README.md to run migrations in the Supabase dashboard
-```
-
-Or with the Supabase CLI (if installed):
+Or with the Supabase CLI (if installed), from the repo root:
 
 ```bash
-cd backend
 supabase db push
 ```
 
 ## Default admin login (development only)
 
-After running the seed files in `backend/seed/`:
+After running the seed files in `supabase/seed/`:
 
 - Email: `admin@gmail.com`
 - Password: `admin123`
 
-Log in at <http://localhost:5174> using these. To promote any other user to admin, run the SQL snippet in [`backend/README.md`](backend/README.md#make-a-user-admin).
+Log in at <http://localhost:5174> using these. To promote any other user to admin, run the SQL snippet in [`supabase/README.md`](supabase/README.md#make-a-user-admin).
 
 ## Migrating to a new machine
 
@@ -179,7 +170,7 @@ Someone ran `npm install` inside `user/` or `admin/` instead of at the root. Fix
 ```bash
 # from the repo root
 rm -rf user/node_modules admin/node_modules user/package-lock.json admin/package-lock.json
-rm -rf node_modules apps/user/node_modules/.vite apps/admin/node_modules/.vite
+rm -rf node_modules user/node_modules/.vite admin/node_modules/.vite
 npm install
 ```
 
@@ -205,4 +196,4 @@ You're hitting the eSewa sandbox. Use the sandbox test login: ID `9806800001`, p
 
 ## Project status
 
-See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) for implemented features, current architecture, and the production-readiness checklist. Other docs live in [`docs/`](docs/) — the [user manual](docs/USER_MANUAL.md), [chatbot setup](docs/chatbot/SETUP.md), and [testing notes](docs/TESTING_ISSUES.md).
+See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) for implemented features, current architecture, and the production-readiness checklist. Other docs live in [`docs/`](docs/) — the [deployment guide](docs/DEPLOYMENT.md) (shipping user + admin to separate domains), [user manual](docs/USER_MANUAL.md), [chatbot setup](docs/chatbot/SETUP.md), and [testing notes](docs/TESTING_ISSUES.md).

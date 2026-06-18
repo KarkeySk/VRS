@@ -5863,3 +5863,37 @@ textarea:focus-visible,
   white-space: nowrap;
   border-width: 0;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE OVERRIDES  —  authoritative, appended last so it
+   wins the cascade over the duplicated rules earlier in this file.
+   Class-based layouts only; inline-styled pages branch via the
+   useViewport hook (inline styles can't be overridden by CSS).
+   ═══════════════════════════════════════════════════════════ */
+
+/* Global safety net */
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: hidden; }
+img, video, svg, canvas { max-width: 100%; }
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+  .features-strip { grid-template-columns: repeat(2, 1fr) !important; }
+  .fleet-header,
+  .routes-header { grid-template-columns: 1fr !important; gap: 16px; }
+}
+
+/* Phones */
+@media (max-width: 768px) {
+  .container { padding-left: 16px; padding-right: 16px; }
+
+  .fleet-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important; gap: 16px; }
+  .routes-grid { grid-template-columns: 1fr !important; }
+  .features-strip { grid-template-columns: 1fr !important; }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .container { padding-left: 14px; padding-right: 14px; }
+  .fleet-grid { grid-template-columns: 1fr !important; }
+}
