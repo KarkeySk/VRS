@@ -29,13 +29,13 @@ const getVehicleHint = (district) => {
 
 // Per-province zoom: center point + scale factor
 const PROVINCE_ZOOM = {
-    koshi:          { cx: 710, cy: 298, scale: 1.8 },
-    madhesh:        { cx: 579, cy: 311, scale: 2.6 },
-    bagmati:        { cx: 556, cy: 255, scale: 1.9 },
-    gandaki:        { cx: 439, cy: 201, scale: 1.8 },
-    lumbini:        { cx: 328, cy: 222, scale: 1.8 },
-    karnali:        { cx: 285, cy: 154, scale: 1.8 },
-    sudurpashchim:  { cx: 176, cy: 81, scale: 1.8 },
+    koshi:          { cx: 704, cy: 288, scale: 2.2 },
+    madhesh:        { cx: 585, cy: 312, scale: 3.63 },
+    bagmati:        { cx: 543, cy: 253, scale: 2.64 },
+    gandaki:        { cx: 442, cy: 192, scale: 2.05 },
+    lumbini:        { cx: 318, cy: 216, scale: 2.53 },
+    karnali:        { cx: 300, cy: 116, scale: 1.69 },
+    sudurpashchim:  { cx: 185, cy: 105, scale: 1.86 },
 };
 
 // Approximate bounding boxes for each province in SVG coordinates [x, y, w, h]
@@ -414,19 +414,27 @@ export default function TerrainSelect() {
     const townPositions = selectedDistrictPos ? getTownPositions(selectedDistrictPos, placeList) : [];
     const selectedTownPos = townPositions.find((t) => t.town === selectedTown);
 
-    // Compute SVG zoom transform based on current selection depth
+    // Compute SVG zoom transform based on current selection depth.
+    // The map centre (450,190) is the viewBox centre; we translate the focus point there
+    // and scale up. Units must be `px` for the CSS `transform` property to be valid in SVG
+    // user space (unitless translate is invalid CSS and would be silently dropped → no zoom).
+    const zoomTo = (cx, cy, scale) =>
+        `translate(${450 - cx * scale}px, ${190 - cy * scale}px) scale(${scale})`;
     const computeMapTransform = () => {
-        if (!selected) return 'translate(0,0) scale(1)';
+        if (!selected) return 'translate(0px, 0px) scale(1)';
         const pz = PROVINCE_ZOOM[selected];
+        // Level 1 — province selected: zoom to the whole province
         if (!selectedDistrict || !selectedDistrictPos) {
-            return `translate(${450 - pz.cx * pz.scale}, ${190 - pz.cy * pz.scale}) scale(${pz.scale})`;
+            return zoomTo(pz.cx, pz.cy, pz.scale);
         }
+        // Level 2 — district selected: zoom further into the district
         const ds = pz.scale * 2.1;
         if (!selectedTown || !selectedTownPos) {
-            return `translate(${450 - selectedDistrictPos.x * ds}, ${190 - selectedDistrictPos.y * ds}) scale(${ds})`;
+            return zoomTo(selectedDistrictPos.x, selectedDistrictPos.y, ds);
         }
+        // Level 3 — town selected: zoom in on the town
         const ts = ds * 1.6;
-        return `translate(${450 - selectedTownPos.x * ts}, ${190 - selectedTownPos.y * ts}) scale(${ts})`;
+        return zoomTo(selectedTownPos.x, selectedTownPos.y, ts);
     };
     const mapTransform = computeMapTransform();
 
