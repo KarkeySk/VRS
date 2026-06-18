@@ -9,6 +9,7 @@ import FleetPage from './pages/FleetPage'
 import BookingsPage from './pages/BookingsPage'
 import CompliancePage from './pages/CompliancePage'
 import OperationsPage from './pages/OperationsPage'
+import MessagesPage from './pages/MessagesPage'
 import SettingsPage from './pages/SettingsPage'
 import AddVehiclePage from './pages/AddVehiclePage'
 import NewBookingPage from './pages/NewBookingPage'
@@ -53,6 +54,7 @@ function App() {
             <Route path="bookings" element={<AdminPage component={BookingsPage} />} />
             <Route path="compliance" element={<CompliancePage />} />
             <Route path="operations" element={<OperationsPage />} />
+            <Route path="messages" element={<MessagesPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="add-vehicle" element={<AdminPage component={AddVehiclePage} />} />
             <Route path="new-booking" element={<AdminPage component={NewBookingPage} />} />

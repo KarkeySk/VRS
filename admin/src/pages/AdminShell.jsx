@@ -9,6 +9,7 @@ const PAGE_META = {
   bookings:      { title: 'Bookings', showNewBtn: true },
   compliance:    { title: 'Checks & Logs', showNewBtn: false },
   operations:    { title: 'Operations & Logs', subtitle: 'Admin', showNewBtn: false },
+  messages:      { title: 'Messages', subtitle: 'Live support', showNewBtn: false },
   settings:      { title: 'Settings', showNewBtn: false },
   'add-vehicle': { title: 'Add Vehicle', subtitle: 'Form', showNewBtn: false },
   'new-booking': { title: 'New Booking', subtitle: 'Booking Form', showNewBtn: false },
