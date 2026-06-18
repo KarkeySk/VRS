@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapPin, Mountain, ArrowRight, ArrowLeft, Navigation, Thermometer, Wind } from 'lucide-react';
 import nepalProvincePaths from '../../data/nepalProvincePaths.json';
 import { useTheme } from '../../context/ThemeContext';
+import { useViewport } from '../../hooks/useViewport';
 import { NEPAL_LOCATIONS } from '../../features/chatbot/nepalLocations';
 
 // District → terrain class (1=urban, 2=mid-hill, 3=high-hill, 4=mountain/extreme)
@@ -395,6 +396,9 @@ const getTownPositions = (districtPos, towns, scale = 1) => {
 export default function TerrainSelect() {
     const navigate = useNavigate();
     const { isDark } = useTheme();
+    // Below this width the 52/48 map+panel split is too cramped, so we stack vertically.
+    const isStacked = useViewport('(max-width: 960px)');
+    const isMobile = useViewport('(max-width: 560px)');
     const [hovered, setHovered] = useState(null);
     const [selected, setSelected] = useState(null);       // province id
     const [selectedDistrict, setSelectedDistrict] = useState(null);
@@ -516,11 +520,11 @@ export default function TerrainSelect() {
     };
 
     return (
-        <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '40px' }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+        <div style={{ paddingTop: isMobile ? '84px' : '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '40px' }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '0 14px' : '0 24px' }}>
 
                 {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <div style={{ textAlign: 'center', marginBottom: isStacked ? '18px' : '24px' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--accent-subtle)', padding: '6px 16px', borderRadius: '30px', fontSize: '0.65rem', fontWeight: '700', letterSpacing: '2px', color: 'var(--accent)', marginBottom: '16px', border: '1px solid var(--accent-subtle)' }}>
                         <MapPin size={12} /> PICK YOUR AREA
                     </div>
@@ -532,12 +536,27 @@ export default function TerrainSelect() {
                     </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+                {/* On the desktop overview the content is short; centre the whole block vertically to
+                    avoid a big empty void, while keeping the two cards top-aligned to each other.
+                    Once a province is picked the panel grows, so we let it flow from the top. */}
+                <div style={{
+                    minHeight: (!isStacked && !selected) ? 'calc(100vh - 300px)' : 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: (!isStacked && !selected) ? 'center' : 'flex-start',
+                }}>
+                <div style={{ display: 'flex', flexDirection: isStacked ? 'column' : 'row', gap: isStacked ? '16px' : '24px', alignItems: 'flex-start' }}>
 
-                    {/* Map — sticky so it stays visible while the panel scrolls */}
-                    <div style={{ flex: '0 0 52%', position: 'sticky', top: '88px' }}>
+                    {/* Map — sticky on desktop so it stays visible while the panel scrolls; static when stacked */}
+                    <div style={{
+                        flex: isStacked ? '1 1 auto' : '0 0 52%',
+                        width: isStacked ? '100%' : 'auto',
+                        position: isStacked ? 'static' : 'sticky',
+                        top: isStacked ? 'auto' : '92px',
+                        alignSelf: isStacked ? 'stretch' : 'flex-start',
+                    }}>
                         <div style={{
-                            background: 'var(--bg-card)', borderRadius: '24px', padding: '24px',
+                            background: 'var(--bg-card)', borderRadius: isMobile ? '16px' : '24px', padding: isMobile ? '12px' : '24px',
                             border: '1px solid var(--border)', position: 'relative',
                         }}>
                             {/* Wrapper clips labels that overflow the card; SVG itself is visible */}
@@ -771,7 +790,11 @@ export default function TerrainSelect() {
                     </div>
 
                     {/* Info Panel — 3-step drill-down */}
-                    <div style={{ flex: '1 1 0', minWidth: '280px' }}>
+                    <div style={{
+                        flex: isStacked ? '1 1 auto' : '1 1 0',
+                        width: isStacked ? '100%' : 'auto',
+                        minWidth: 0,
+                    }}>
 
                         {/* STEP 0 — no province selected */}
                         {!selected && (
@@ -857,7 +880,7 @@ export default function TerrainSelect() {
                                 </div>
 
                                 {/* District grid */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '260px', overflowY: 'auto', paddingRight: '2px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: isStacked ? '48vh' : 'none', overflowY: isStacked ? 'auto' : 'visible', paddingRight: '2px' }}>
                                     {districtList.map((dist) => {
                                         const hint = getVehicleHint(dist);
                                         return (
@@ -984,7 +1007,7 @@ export default function TerrainSelect() {
                                 <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>
                                     Towns & Villages
                                 </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px', maxHeight: '140px', overflowY: 'auto' }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px', maxHeight: isStacked ? '32vh' : '320px', overflowY: 'auto' }}>
                                     {placeList.map((place) => (
                                         <button
                                             key={place}
@@ -1066,6 +1089,7 @@ export default function TerrainSelect() {
                             </button>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
