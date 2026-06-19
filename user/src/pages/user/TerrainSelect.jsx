@@ -400,6 +400,7 @@ export default function TerrainSelect() {
     const isStacked = useViewport('(max-width: 960px)');
     const isMobile = useViewport('(max-width: 560px)');
     const [hovered, setHovered] = useState(null);
+    const [hoveredMarker, setHoveredMarker] = useState(null); // 'd:<district>' | 't:<town>' on the map
     const [selected, setSelected] = useState(null);       // province id
     const [selectedDistrict, setSelectedDistrict] = useState(null);
     const [selectedTown, setSelectedTown] = useState(null);
@@ -479,10 +480,11 @@ export default function TerrainSelect() {
         setSelectedDistrict(null);
         setSelectedTown(null);
         setHovered(null);
+        setHoveredMarker(null);
     };
 
-    const handleBackToProvinces = () => { setSelected(null); setSelectedDistrict(null); setSelectedTown(null); };
-    const handleBackToDistricts = () => { setSelectedDistrict(null); setSelectedTown(null); };
+    const handleBackToProvinces = () => { setSelected(null); setSelectedDistrict(null); setSelectedTown(null); setHoveredMarker(null); };
+    const handleBackToDistricts = () => { setSelectedDistrict(null); setSelectedTown(null); setHoveredMarker(null); };
     const handleBackToTowns    = () => { setSelectedTown(null); };
 
     const handleAIRecommend = () => {
@@ -640,20 +642,25 @@ export default function TerrainSelect() {
                                         full district name stay a constant, fully-legible size at any zoom. */}
                                     {selected && !selectedDistrict && districtPositions.map(({ district, x, y }) => {
                                         const hint = getVehicleHint(district);
+                                        const isHover = hoveredMarker === 'd:' + district;
                                         const pillW = labelWidth(district, DISTRICT_FS);
                                         const pillH = DISTRICT_FS + 7;
                                         return (
                                             <g key={district} style={{ cursor: 'pointer' }}
-                                                onClick={(e) => { e.stopPropagation(); setSelectedDistrict(district); setSelectedTown(null); }}>
-                                                <g transform={`translate(${x} ${y}) scale(${invScale})`}>
-                                                    <circle r={5} fill={hint.color + '33'} stroke={hint.color} strokeWidth={1} />
+                                                onClick={(e) => { e.stopPropagation(); setSelectedDistrict(district); setSelectedTown(null); setHoveredMarker(null); }}
+                                                onMouseEnter={() => setHoveredMarker('d:' + district)}
+                                                onMouseLeave={() => setHoveredMarker((h) => (h === 'd:' + district ? null : h))}>
+                                                {/* The marker pops slightly and the pill fills with its colour on hover. */}
+                                                <g transform={`translate(${x} ${y}) scale(${invScale * (isHover ? 1.12 : 1)})`} style={{ transition: 'transform 0.15s ease' }}>
+                                                    <circle r={isHover ? 6.5 : 5} fill={hint.color + (isHover ? '55' : '33')} stroke={hint.color} strokeWidth={isHover ? 1.6 : 1} style={{ transition: 'r 0.15s, fill 0.15s' }} />
                                                     <circle r={2.4} fill={hint.color} />
                                                     <rect x={-pillW / 2} y={8} width={pillW} height={pillH} rx={pillH / 2}
-                                                        fill={isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)'}
-                                                        stroke={hint.color + 'cc'} strokeWidth={1} />
+                                                        fill={isHover ? hint.color : (isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)')}
+                                                        stroke={hint.color + 'cc'} strokeWidth={isHover ? 1.4 : 1}
+                                                        style={{ transition: 'fill 0.15s' }} />
                                                     <text x={0} y={8 + pillH / 2} textAnchor="middle" dominantBaseline="central"
-                                                        fill={hint.color} fontSize={DISTRICT_FS} fontWeight="700" fontFamily="Inter, sans-serif"
-                                                        style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                                                        fill={isHover ? '#fff' : hint.color} fontSize={DISTRICT_FS} fontWeight="700" fontFamily="Inter, sans-serif"
+                                                        style={{ pointerEvents: 'none', userSelect: 'none', transition: 'fill 0.15s' }}>
                                                         {district}
                                                     </text>
                                                 </g>
@@ -665,21 +672,26 @@ export default function TerrainSelect() {
                                         every village name renders fully and crisply. */}
                                     {selected && selectedDistrict && townPositions.map(({ town, x, y }) => {
                                         const isSelTown = selectedTown === town;
+                                        const isHover = hoveredMarker === 't:' + town;
+                                        const active = isSelTown || isHover;
                                         const color = lockedRegion?.color ?? '#e8732a';
                                         const pillW = labelWidth(town, TOWN_FS);
                                         const pillH = TOWN_FS + 6;
                                         return (
                                             <g key={town} style={{ cursor: 'pointer' }}
-                                                onClick={(e) => { e.stopPropagation(); setSelectedTown(town); }}>
-                                                <g transform={`translate(${x} ${y}) scale(${invScale})`}>
-                                                    {isSelTown && <circle r={7} fill={color + '25'} stroke={color} strokeWidth={1.4} />}
-                                                    <circle r={isSelTown ? 3.2 : 2.2} fill={isSelTown ? color : color + 'cc'} />
+                                                onClick={(e) => { e.stopPropagation(); setSelectedTown(town); }}
+                                                onMouseEnter={() => setHoveredMarker('t:' + town)}
+                                                onMouseLeave={() => setHoveredMarker((h) => (h === 't:' + town ? null : h))}>
+                                                <g transform={`translate(${x} ${y}) scale(${invScale * (isHover && !isSelTown ? 1.12 : 1)})`} style={{ transition: 'transform 0.15s ease' }}>
+                                                    {active && <circle r={7} fill={color + '25'} stroke={color} strokeWidth={1.4} style={{ transition: 'r 0.15s' }} />}
+                                                    <circle r={active ? 3.2 : 2.2} fill={active ? color : color + 'cc'} style={{ transition: 'r 0.15s, fill 0.15s' }} />
                                                     <rect x={-pillW / 2} y={7} width={pillW} height={pillH} rx={pillH / 2}
-                                                        fill={isSelTown ? color : isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)'}
-                                                        stroke={color + (isSelTown ? 'ff' : 'aa')} strokeWidth={isSelTown ? 1.4 : 1} />
+                                                        fill={isSelTown ? color : isHover ? color + 'dd' : (isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)')}
+                                                        stroke={color + (active ? 'ff' : 'aa')} strokeWidth={active ? 1.4 : 1}
+                                                        style={{ transition: 'fill 0.15s' }} />
                                                     <text x={0} y={7 + pillH / 2} textAnchor="middle" dominantBaseline="central"
-                                                        fill={isSelTown ? '#fff' : color} fontSize={TOWN_FS} fontWeight="700" fontFamily="Inter, sans-serif"
-                                                        style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                                                        fill={active ? '#fff' : color} fontSize={TOWN_FS} fontWeight="700" fontFamily="Inter, sans-serif"
+                                                        style={{ pointerEvents: 'none', userSelect: 'none', transition: 'fill 0.15s' }}>
                                                         {town}
                                                     </text>
                                                 </g>
@@ -864,44 +876,67 @@ export default function TerrainSelect() {
                                     </div>
                                 </div>
 
-                                {/* Images */}
-                                {activeImages.length > 0 && (
-                                    <div style={{ marginBottom: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', marginTop: '10px' }}>
-                                        <img src={activeImages[0]} alt="" loading="lazy" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border)', gridColumn: '1 / -1' }} />
-                                        {activeImages.slice(1, 3).map((url, i) => (
-                                            <img key={i} src={url} alt="" loading="lazy" style={{ width: '100%', height: '52px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)' }} />
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Step 2 instruction */}
-                                <div style={{ padding: '10px 12px', borderRadius: '10px', background: lockedRegion.color + '10', border: `1px dashed ${lockedRegion.color}50`, marginBottom: '10px', marginTop: '8px', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                                    <span style={{ color: lockedRegion.color, fontWeight: '700' }}>Step 2 —</span> Click a district label on the map, or pick from the list below.
+                                {/* Images — hero + two thumbs. A province-colour gradient sits behind each
+                                    image so the area always looks intentional even if a photo fails to load. */}
+                                <div style={{ marginTop: '10px', marginBottom: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                                    {[0, 1, 2].map((i) => (
+                                        <div key={i} style={{
+                                            position: 'relative',
+                                            height: i === 0 ? '92px' : '58px',
+                                            gridColumn: i === 0 ? '1 / -1' : 'auto',
+                                            borderRadius: '10px', overflow: 'hidden',
+                                            border: '1px solid var(--border)',
+                                            background: `linear-gradient(135deg, ${lockedRegion.color}cc, ${lockedRegion.color}44)`,
+                                        }}>
+                                            {activeImages[i] && (
+                                                <img
+                                                    src={activeImages[i]} alt="" loading="lazy"
+                                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                                />
+                                            )}
+                                            {i === 0 && (
+                                                <span style={{
+                                                    position: 'absolute', left: '10px', bottom: '8px',
+                                                    color: '#fff', fontSize: '0.72rem', fontWeight: '800',
+                                                    textShadow: '0 1px 4px rgba(0,0,0,0.6)', letterSpacing: '0.3px',
+                                                }}>{lockedRegion.terrain}</span>
+                                            )}
+                                        </div>
+                                    ))}
                                 </div>
 
-                                {/* District grid */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: isStacked ? '48vh' : 'none', overflowY: isStacked ? 'auto' : 'visible', paddingRight: '2px' }}>
+                                {/* Step 2 instruction */}
+                                <div style={{ padding: '8px 12px', borderRadius: '10px', background: lockedRegion.color + '10', border: `1px dashed ${lockedRegion.color}50`, marginBottom: '10px', fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                                    <span style={{ color: lockedRegion.color, fontWeight: '700' }}>Step 2 —</span> Tap a district on the map or pick one below.
+                                </div>
+
+                                {/* District grid — two columns to stay compact */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', maxHeight: isStacked ? '46vh' : 'none', overflowY: isStacked ? 'auto' : 'visible', paddingRight: isStacked ? '2px' : '0' }}>
                                     {districtList.map((dist) => {
                                         const hint = getVehicleHint(dist);
+                                        const isHover = hoveredMarker === 'd:' + dist;
                                         return (
                                             <button
                                                 key={dist}
-                                                onClick={() => setSelectedDistrict(dist)}
+                                                onClick={() => { setSelectedDistrict(dist); setHoveredMarker(null); }}
+                                                title={dist}
+                                                onMouseEnter={() => setHoveredMarker('d:' + dist)}
+                                                onMouseLeave={() => setHoveredMarker((h) => (h === 'd:' + dist ? null : h))}
                                                 style={{
-                                                    display: 'flex', alignItems: 'center', gap: '8px',
-                                                    padding: '8px 12px', borderRadius: '10px',
-                                                    background: 'var(--bg-glass)', border: '1px solid var(--border)',
-                                                    cursor: 'pointer', width: '100%', textAlign: 'left',
-                                                    transition: 'background 0.15s, border-color 0.15s',
+                                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                                    padding: '7px 9px', borderRadius: '9px',
+                                                    background: isHover ? lockedRegion.color + '18' : 'var(--bg-glass)',
+                                                    border: `1px solid ${isHover ? lockedRegion.color + '70' : 'var(--border)'}`,
+                                                    cursor: 'pointer', width: '100%', textAlign: 'left', minWidth: 0,
+                                                    transform: isHover ? 'translateY(-1px)' : 'none',
+                                                    transition: 'background 0.15s, border-color 0.15s, transform 0.15s',
                                                     fontFamily: "'Inter', sans-serif",
                                                 }}
-                                                onMouseOver={(e) => { e.currentTarget.style.background = lockedRegion.color + '12'; e.currentTarget.style.borderColor = lockedRegion.color + '50'; }}
-                                                onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-glass)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
                                             >
-                                                <MapPin size={12} color={lockedRegion.color} style={{ flexShrink: 0 }} />
-                                                <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: '500' }}>{dist}</span>
-                                                <span style={{ fontSize: '0.6rem', fontWeight: '700', color: hint.color, background: hint.color + '15', padding: '2px 6px', borderRadius: '6px', whiteSpace: 'nowrap' }}>{hint.icon}</span>
-                                                <ArrowRight size={11} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                                                <MapPin size={11} color={lockedRegion.color} style={{ flexShrink: 0 }} />
+                                                <span style={{ flex: 1, minWidth: 0, color: 'var(--text-primary)', fontSize: '0.75rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dist}</span>
+                                                <span style={{ fontSize: '0.62rem', flexShrink: 0 }}>{hint.icon}</span>
                                             </button>
                                         );
                                     })}
@@ -1008,22 +1043,30 @@ export default function TerrainSelect() {
                                     Towns & Villages
                                 </div>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px', maxHeight: isStacked ? '32vh' : '320px', overflowY: 'auto' }}>
-                                    {placeList.map((place) => (
-                                        <button
-                                            key={place}
-                                            onClick={() => setSelectedTown(place)}
-                                            style={{
-                                                padding: '4px 10px', borderRadius: '20px', cursor: 'pointer',
-                                                background: 'var(--bg-glass)', border: `1px solid ${lockedRegion.color}40`,
-                                                fontSize: '0.72rem', color: lockedRegion.color, fontWeight: '600',
-                                                fontFamily: "'Inter', sans-serif", transition: 'background 0.15s',
-                                            }}
-                                            onMouseOver={(e) => e.currentTarget.style.background = lockedRegion.color + '15'}
-                                            onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-glass)'}
-                                        >
-                                            {place}
-                                        </button>
-                                    ))}
+                                    {placeList.map((place) => {
+                                        const isSel = selectedTown === place;
+                                        const isHover = hoveredMarker === 't:' + place;
+                                        const active = isSel || isHover;
+                                        return (
+                                            <button
+                                                key={place}
+                                                onClick={() => setSelectedTown(place)}
+                                                onMouseEnter={() => setHoveredMarker('t:' + place)}
+                                                onMouseLeave={() => setHoveredMarker((h) => (h === 't:' + place ? null : h))}
+                                                style={{
+                                                    padding: '5px 11px', borderRadius: '20px', cursor: 'pointer',
+                                                    background: isSel ? lockedRegion.color : active ? lockedRegion.color + '22' : 'var(--bg-glass)',
+                                                    border: `1px solid ${isSel ? lockedRegion.color : lockedRegion.color + (active ? '80' : '40')}`,
+                                                    fontSize: '0.72rem', color: isSel ? '#fff' : lockedRegion.color, fontWeight: isSel ? '700' : '600',
+                                                    fontFamily: "'Inter', sans-serif",
+                                                    transform: active ? 'translateY(-1px)' : 'none',
+                                                    transition: 'background 0.15s, border-color 0.15s, transform 0.15s, color 0.15s',
+                                                }}
+                                            >
+                                                {place}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
 
                                 {/* Vehicle Kind */}

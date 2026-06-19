@@ -122,6 +122,7 @@ function AnimatedRoutes() {
                     <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
                     <Route path="/auth/callback" element={<OAuthCallbackPage />} />
 
+                    <Route path="/__terrain_preview" element={<TerrainSelect />} />
                     {/* Protected routes */}
                     <Route element={<ProtectedRoute />}>
                         <Route path="/dashboard" element={<Dashboard />} />
