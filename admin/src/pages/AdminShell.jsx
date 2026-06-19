@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import Sidebar from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 const PAGE_META = {
   dashboard:     { title: 'Fleet Command', subtitle: 'Bikes • Cars • Jeeps', showNewBtn: true },
@@ -50,7 +51,9 @@ export default function AdminShell() {
               </button>
             </div>
           )}
-          <Outlet />
+          <ErrorBoundary key={location.pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

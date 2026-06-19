@@ -12,4 +12,12 @@ export default defineConfig({
   resolve: {
     preserveSymlinks: true,
   },
+  // Don't pre-bundle the local workspace package, otherwise Vite serves a cached
+  // copy and edits to shared services don't hot-reload until the cache is cleared.
+  optimizeDeps: {
+    exclude: ['@bhatbhati/shared'],
+    // ...but crypto-js (a CommonJS dep of the shared package) must still be
+    // pre-bundled to ESM, or the browser gets raw CJS and the import fails.
+    include: ['crypto-js'],
+  },
 })
