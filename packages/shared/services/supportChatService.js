@@ -1,5 +1,13 @@
 import { supabase } from '../lib/supabase'
 
+// Supabase caches Realtime channels by name, so two components subscribing with
+// the same name (e.g. the Sidebar badge and the Messages page both watching the
+// inbox) receive the *same* already-subscribed channel — and calling `.on()` on it
+// throws "cannot add postgres_changes callbacks ... after subscribe()". A unique
+// suffix per subscription guarantees each caller gets its own channel instance.
+let channelSeq = 0
+const uniqueChannelName = (base) => `${base}:${Date.now()}:${channelSeq++}`
+
 /**
  * Live support chat between users and admins.
  * Each user has exactly one conversation; admins reply from the dashboard.
@@ -128,7 +136,7 @@ export const supportChatService = {
     subscribeMessages: (conversationId, onNew) => {
         if (!supabase) return () => {}
         const channel = supabase
-            .channel(`support_messages:${conversationId}`)
+            .channel(uniqueChannelName(`support_messages:${conversationId}`))
             .on(
                 'postgres_changes',
                 {
@@ -151,7 +159,7 @@ export const supportChatService = {
     subscribeConversations: (onChange) => {
         if (!supabase) return () => {}
         const channel = supabase
-            .channel('conversations:inbox')
+            .channel(uniqueChannelName('conversations:inbox'))
             .on(
                 'postgres_changes',
                 { event: '*', schema: 'public', table: 'conversations' },

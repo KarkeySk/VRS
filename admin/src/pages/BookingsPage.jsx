@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Search, Trash2, CheckCircle2, XCircle } from 'lucide-react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
+import {
+  CalendarDays, Search, Trash2, CheckCircle2, XCircle,
+  ChevronDown, ChevronRight, Car, Mail, Phone, Gauge, Users, Cog, Star,
+} from 'lucide-react'
 import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 import { applicationService } from '@bhatbhati/shared/services/applicationService.js'
 import { vehicleService } from '@bhatbhati/shared/services/vehicleService.js'
@@ -65,6 +68,8 @@ export default function BookingsPage({ onNavigate }) {
   const [showQuickForm, setShowQuickForm] = useState(false)
   const [error, setError] = useState('')
   const [busyKey, setBusyKey] = useState('')
+  // Which row's detail panel (vehicle description + actions) is expanded.
+  const [expandedKey, setExpandedKey] = useState('')
   const [quickForm, setQuickForm] = useState({
     customerName: '',
     customerPhone: '',
@@ -418,6 +423,139 @@ export default function BookingsPage({ onNavigate }) {
     }
   }
 
+  // Action buttons for a row — shown inside the expanded detail panel so the
+  // main table stays compact and scannable.
+  const renderActions = (row) => {
+    if (row.kind === 'booking') {
+      return (
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            disabled={busyKey === row.key}
+            onClick={() => setBookingStatus(row.id, row.status === 'confirmed' ? 'active' : 'confirmed')}
+            className="px-3 py-1.5 text-xs rounded-md border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            {row.status === 'confirmed' ? 'Activate' : 'Confirm'}
+          </button>
+          {row.status === 'confirmed' && (
+            <button
+              type="button"
+              disabled={busyKey === `${row.key}:resend` || !row.customerEmail}
+              onClick={() => resendBookingConfirmation(row)}
+              className="px-3 py-1.5 text-xs rounded-md border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1.5"
+            >
+              <Mail className="w-3.5 h-3.5" /> Resend Email
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={busyKey === row.key}
+            onClick={() => setBookingStatus(row.id, 'cancelled')}
+            className="px-3 py-1.5 text-xs rounded-md border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <XCircle className="w-3.5 h-3.5" /> Cancel
+          </button>
+          <button
+            type="button"
+            disabled={busyKey === row.key}
+            onClick={() => handleDelete(row.id)}
+            className="px-3 py-1.5 text-xs rounded-md border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1.5"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Delete
+          </button>
+        </div>
+      )
+    }
+    return (
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          disabled={busyKey === row.key}
+          onClick={() => approveApplication(row.raw)}
+          className="px-3 py-1.5 text-xs rounded-md border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1.5"
+        >
+          <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+        </button>
+        <button
+          type="button"
+          disabled={busyKey === row.key}
+          onClick={() => setApplicationStatus(row.id, 'rejected')}
+          className="px-3 py-1.5 text-xs rounded-md border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1.5"
+        >
+          <XCircle className="w-3.5 h-3.5" /> Reject
+        </button>
+      </div>
+    )
+  }
+
+  // Expanded detail panel: vehicle description/specs + full customer info + actions.
+  const renderDetail = (row) => {
+    const v = row.raw?.vehicles || {}
+    const spec = (Icon, label, value) =>
+      value ? (
+        <div className="flex items-center gap-1.5 text-xs text-txt-secondary">
+          <Icon className="w-3.5 h-3.5 text-brand-orange" />
+          <span className="text-txt-secondary/70">{label}:</span>
+          <span className="text-txt-primary">{value}</span>
+        </div>
+      ) : null
+    const caps = Array.isArray(v.capabilities) ? v.capabilities : []
+    return (
+      <div className="grid md:grid-cols-[1.4fr_1fr] gap-5 px-4 py-4 bg-dark-deeper/40 rounded-lg">
+        {/* Vehicle */}
+        <div className="flex gap-4">
+          {v.image ? (
+            <img src={v.image} alt="" className="w-28 h-20 rounded-lg object-cover shrink-0" />
+          ) : (
+            <div className="w-28 h-20 rounded-lg bg-dark-border flex items-center justify-center shrink-0">
+              <Car className="w-6 h-6 text-txt-secondary" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="text-sm font-bold m-0">{v.name || row.vehicleName}</p>
+            {v.subtitle && <p className="text-xs text-txt-secondary mt-0.5 mb-2">{v.subtitle}</p>}
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              {spec(Car, 'Type', [v.type, v.category].filter(Boolean).join(' • '))}
+              {spec(Gauge, 'Engine', v.engine)}
+              {spec(Cog, 'Drive', v.drive)}
+              {spec(Users, 'Seats', v.capacity)}
+              {spec(Star, 'Rating', v.rating ? `${v.rating}/5` : null)}
+              {v.price_per_day != null && spec(CalendarDays, 'Per day', `NPR ${Number(v.price_per_day).toLocaleString()}`)}
+            </div>
+            {caps.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {caps.slice(0, 6).map((c, i) => (
+                  <span key={i} className="px-2 py-0.5 rounded-full text-[10px] bg-brand-orange/10 text-brand-orange">
+                    {typeof c === 'string' ? c : c?.label || c?.name}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Customer + actions */}
+        <div className="flex flex-col gap-2 md:border-l md:border-dark-border md:pl-5">
+          <p className="text-[10px] uppercase tracking-wider text-txt-secondary m-0">Customer</p>
+          <p className="text-sm font-semibold m-0">{row.customerName || 'Unknown User'}</p>
+          {row.customerPhone && (
+            <p className="text-xs text-txt-secondary m-0 flex items-center gap-1.5"><Phone className="w-3 h-3" />{row.customerPhone}</p>
+          )}
+          {row.customerEmail && (
+            <p className="text-xs text-txt-secondary m-0 flex items-center gap-1.5 break-all"><Mail className="w-3 h-3 shrink-0" />{row.customerEmail}</p>
+          )}
+          {row.kind === 'booking' && row.emailSent && (
+            <p className="text-[11px] text-status-green m-0 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3" /> Confirmation email sent
+            </p>
+          )}
+          <div className="mt-2">{renderActions(row)}</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
@@ -548,115 +686,65 @@ export default function BookingsPage({ onNavigate }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-txt-secondary uppercase tracking-wider border-b border-dark-border">
-                <th className="pb-3">Booking</th>
-                <th className="pb-3">Customer</th>
-                <th className="pb-3">Vehicle</th>
-                <th className="pb-3">Dates</th>
-                <th className="pb-3">Price</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3">Actions</th>
+                <th className="pb-3 font-medium">Customer</th>
+                <th className="pb-3 font-medium">Vehicle</th>
+                <th className="pb-3 font-medium">Dates</th>
+                <th className="pb-3 font-medium text-right">Price</th>
+                <th className="pb-3 font-medium">Status</th>
+                <th className="pb-3 w-8" aria-label="Expand" />
               </tr>
             </thead>
             <tbody>
-              {filtered.map((row, idx) => (
-                <tr key={row.key} className={idx < filtered.length - 1 ? 'border-b border-dark-border/50' : ''}>
-                  <td className="py-3 text-xs text-txt-secondary">
-                    #{shortId(row.id)}
-                    <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold ${row.kind === 'application' ? 'bg-status-yellow/20 text-status-yellow' : 'bg-brand-orange/20 text-brand-orange'}`}>
-                      {row.kind === 'application' ? 'REQUEST' : 'BOOKING'}
-                    </span>
-                  </td>
-                  <td>
-                    <p className="text-sm font-semibold">{row.customerName || 'Unknown User'}</p>
-                    <p className="text-xs text-txt-secondary">
-                      {[row.customerPhone, row.customerEmail].filter(Boolean).join(' • ') || 'No contact info'}
-                    </p>
-                  </td>
-                  <td className="text-sm">{row.vehicleName}</td>
-                  <td className="text-xs text-txt-secondary">
-                    <div className="flex items-center gap-1">
-                      <CalendarDays className="w-3.5 h-3.5" />
-                      {row.startDate} to {row.endDate}
-                    </div>
-                  </td>
-                  <td>NPR {Number(row.totalPrice || 0).toLocaleString()}</td>
-                  <td>
-                    <span className="px-2 py-1 text-xs rounded bg-brand-orange/20 text-brand-orange uppercase">
-                      {row.status}
-                    </span>
-                    {row.kind === 'booking' && row.emailSent && (
-                      <p className="mt-1 text-[11px] text-status-green">Confirmation email sent</p>
+              {filtered.map((row) => {
+                const isOpen = expandedKey === row.key
+                return (
+                  <Fragment key={row.key}>
+                    <tr
+                      onClick={() => setExpandedKey(isOpen ? '' : row.key)}
+                      className={`cursor-pointer transition-colors ${isOpen ? 'bg-brand-orange/[0.06]' : 'hover:bg-dark-border/30'} border-b border-dark-border/50`}
+                    >
+                      <td className="py-3 pr-3">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${row.kind === 'application' ? 'bg-status-yellow' : 'bg-brand-orange'}`} />
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold m-0 truncate">{row.customerName || 'Unknown User'}</p>
+                            <p className="text-[11px] text-txt-secondary m-0">
+                              #{shortId(row.id)} · {row.kind === 'application' ? 'Request' : 'Booking'}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="text-sm pr-3 truncate max-w-[140px]">{row.vehicleName}</td>
+                      <td className="text-xs text-txt-secondary pr-3 whitespace-nowrap">
+                        {row.startDate} → {row.endDate}
+                      </td>
+                      <td className="text-sm font-medium text-right pr-3 whitespace-nowrap">
+                        NPR {Number(row.totalPrice || 0).toLocaleString()}
+                      </td>
+                      <td>
+                        <span className={`px-2 py-0.5 text-[11px] rounded-full uppercase font-semibold ${
+                          ['rejected', 'cancelled'].includes(row.status) ? 'bg-status-red/15 text-status-red'
+                          : ['confirmed', 'active', 'approved', 'completed'].includes(row.status) ? 'bg-status-green/15 text-status-green'
+                          : 'bg-status-yellow/15 text-status-yellow'
+                        }`}>
+                          {row.status}
+                        </span>
+                      </td>
+                      <td className="text-txt-secondary">
+                        {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr className="border-b border-dark-border/50">
+                        <td colSpan={6} className="p-2">{renderDetail(row)}</td>
+                      </tr>
                     )}
-                  </td>
-                  <td>
-                    {row.kind === 'booking' ? (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={busyKey === row.key}
-                          onClick={() => setBookingStatus(row.id, row.status === 'confirmed' ? 'active' : 'confirmed')}
-                          className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          {row.status === 'confirmed' ? 'Activate' : 'Confirm'}
-                        </button>
-                        {row.status === 'confirmed' && (
-                          <button
-                            type="button"
-                            disabled={busyKey === `${row.key}:resend` || !row.customerEmail}
-                            onClick={() => resendBookingConfirmation(row)}
-                            className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
-                          >
-                            Resend Email
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          disabled={busyKey === row.key}
-                          onClick={() => setBookingStatus(row.id, 'cancelled')}
-                          className="px-2 py-1 text-xs rounded border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1"
-                        >
-                          <XCircle className="w-3.5 h-3.5" />
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          disabled={busyKey === row.key}
-                          onClick={() => handleDelete(row.id)}
-                          className="px-2 py-1 text-xs rounded border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          Delete
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={busyKey === row.key}
-                          onClick={() => approveApplication(row.raw)}
-                          className="px-2 py-1 text-xs rounded border border-dark-border text-txt-secondary hover:text-brand-orange hover:border-brand-orange disabled:opacity-50 flex items-center gap-1"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          disabled={busyKey === row.key}
-                          onClick={() => setApplicationStatus(row.id, 'rejected')}
-                          className="px-2 py-1 text-xs rounded border border-status-red/30 text-status-red hover:bg-status-red/10 disabled:opacity-50 flex items-center gap-1"
-                        >
-                          <XCircle className="w-3.5 h-3.5" />
-                          Reject
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                  </Fragment>
+                )
+              })}
               {!filtered.length && (
                 <tr>
-                  <td className="pt-4 text-sm text-txt-secondary" colSpan={7}>No bookings found.</td>
+                  <td className="pt-4 text-sm text-txt-secondary" colSpan={6}>No bookings found.</td>
                 </tr>
               )}
             </tbody>
