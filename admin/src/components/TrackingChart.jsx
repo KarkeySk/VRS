@@ -40,7 +40,7 @@ export default function TrackingChart({ activeUnits = 0 }) {
           <line x1="0" y1="150" x2="700" y2="150" stroke="#2a2a2a" strokeWidth="0.5" strokeDasharray="4" />
 
           {/* Area fill */}
-          <path d="M0 180 Q50 160 100 140 T200 100 T300 80 T400 60 T500 70 T600 50 T700 40 L700 200 L0 200 Z" fill="rgba(255,143,63,0.08)" />
+          <path d="M0 180 Q50 160 100 140 T200 100 T300 80 T400 60 T500 70 T600 50 T700 40 L700 200 L0 200 Z" fill="rgba(255,87,35,0.08)" />
           <path d="M0 190 Q50 175 100 165 T200 150 T300 140 T400 130 T500 135 T600 120 T700 110 L700 200 L0 200 Z" fill="rgba(160,160,160,0.05)" />
 
           {/* Main line */}

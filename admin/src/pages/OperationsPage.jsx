@@ -8,7 +8,7 @@ import { uiAssetService } from "@bhatbhati/shared/services/uiAssetService.js";
 const severityStyles = {
   "URGENT": "bg-status-red/20 text-status-red",
   "2 DAYS": "bg-status-yellow/20 text-status-yellow",
-  "INFO": "bg-[rgba(100,150,200,0.2)] text-[#64d4ff]",
+  "INFO": "bg-brand-city/20 text-brand-city",
 };
 
 export default function OperationsPage() {

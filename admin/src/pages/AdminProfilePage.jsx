@@ -265,7 +265,7 @@ export default function AdminProfilePage({ onNavigate }) {
                 <div className="flex items-center gap-3">
                   <span className="px-2.5 py-1 bg-status-green/20 text-status-green text-[10px] font-bold rounded-full uppercase">Active</span>
                   <span className="px-2.5 py-1 bg-brand-orange/20 text-brand-orange text-[10px] font-bold rounded-full uppercase">{profile.role}</span>
-                  <span className="px-2.5 py-1 bg-[rgba(100,150,200,0.2)] text-[#64d4ff] text-[10px] font-bold rounded-full uppercase">Verified</span>
+                  <span className="px-2.5 py-1 bg-brand-city/20 text-brand-city text-[10px] font-bold rounded-full uppercase">Verified</span>
                 </div>
               </div>
 
@@ -476,7 +476,7 @@ export default function AdminProfilePage({ onNavigate }) {
               {[
                 { action: 'Password changed', time: '3 days ago', color: 'text-brand-orange' },
                 { action: 'New vehicle added', time: '5 days ago', color: 'text-status-green' },
-                { action: 'Booking updated', time: '1 week ago', color: 'text-[#64d4ff]' },
+                { action: 'Booking updated', time: '1 week ago', color: 'text-brand-city' },
                 { action: 'Login from new device', time: '2 weeks ago', color: 'text-status-yellow' },
               ].map((item) => (
                 <div key={item.action} className="flex items-start gap-2">

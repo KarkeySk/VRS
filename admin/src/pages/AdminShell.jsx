@@ -32,7 +32,6 @@ export default function AdminShell() {
         <TopBar
           title={meta.title}
           subtitle={meta.subtitle}
-          onShowNotifications={() => setTopBarMessage('Notifications will be added soon.')}
           onShowHelp={() => setTopBarMessage('Need help? Open Add Vehicle, New Booking, or Profile.')}
         />
         <main className="flex-1 overflow-y-auto p-6">

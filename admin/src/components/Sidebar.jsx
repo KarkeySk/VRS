@@ -96,7 +96,7 @@ export default function Sidebar() {
         </button>
         <div
           onClick={() => navigate('/dashboard/admin-profile')}
-          className="flex items-center gap-3 px-2 cursor-pointer rounded-lg py-2 hover:bg-[rgba(255,143,63,0.1)] transition-all duration-200"
+          className="flex items-center gap-3 px-2 cursor-pointer rounded-lg py-2 hover:bg-brand-orange/10 transition-all duration-200"
         >
           <div className="w-8 h-8 rounded-md bg-brand-orange flex items-center justify-center font-bold text-xs text-dark">
             <User className="w-5 h-5" />

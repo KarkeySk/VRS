@@ -399,7 +399,7 @@ export default function DashboardPage({ onNavigate = () => {} }) {
               <button type="button" disabled={isSaving} onClick={() => handleStatusChange("ACTIVE")} className="px-3 py-2 rounded-md bg-status-green/20 text-status-green border border-status-green/30 disabled:opacity-50">
                 Set Active
               </button>
-              <button type="button" disabled={isSaving} onClick={() => handleStatusChange("COMPLETED")} className="px-3 py-2 rounded-md bg-[rgba(100,150,200,0.2)] text-[#64d4ff] border border-[#64d4ff]/40 disabled:opacity-50">
+              <button type="button" disabled={isSaving} onClick={() => handleStatusChange("COMPLETED")} className="px-3 py-2 rounded-md bg-brand-city/20 text-brand-city border border-brand-city/40 disabled:opacity-50">
                 Set Completed
               </button>
               <button type="button" disabled={isSaving} onClick={() => handleStatusChange("CANCELLED")} className="px-3 py-2 rounded-md bg-status-red/20 text-status-red border border-status-red/30 disabled:opacity-50">

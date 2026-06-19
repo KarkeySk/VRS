@@ -10,8 +10,8 @@ const STATUS_STYLES = {
 
 // Type label styling for the booking tag.
 const TYPE_STYLES = {
-  "SELF-DRIVE":  { bg: "bg-[rgba(100,150,200,0.2)]", text: "text-[#64d4ff]" },
-  "WITH DRIVER": { bg: "bg-[rgba(139,92,246,0.2)]",  text: "text-[#a78bfa]" },
+  "SELF-DRIVE":  { bg: "bg-brand-city/20", text: "text-brand-city" },
+  "WITH DRIVER": { bg: "bg-brand-nature/20",  text: "text-brand-nature" },
 };
 
 /*
