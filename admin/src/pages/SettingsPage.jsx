@@ -27,7 +27,7 @@ const defaultRoles = [
 ]
 
 function readSavedSettings() {
-  // Persist settings locally for demo purposes.
+  // Settings persist in localStorage on this device.
   const raw = localStorage.getItem(SETTINGS_KEY)
   if (!raw) return defaultSettings
   try {

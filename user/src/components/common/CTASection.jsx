@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import CountUp from './CountUp'
 
 const STATS = [
   { value: '200+', label: 'Vehicles' },
@@ -50,9 +51,9 @@ export default function CTASection() {
           </Link>
         </div>
         <div className="cta-stats reveal">
-          {STATS.map((s) => (
+          {STATS.map((s, i) => (
             <div key={s.label} className="cta-stat">
-              <span className="cta-stat-value">{s.value}</span>
+              <CountUp className="cta-stat-value" value={s.value} delay={i * 150} />
               <span className="cta-stat-label">{s.label}</span>
             </div>
           ))}

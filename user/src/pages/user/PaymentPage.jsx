@@ -116,7 +116,11 @@ export default function PaymentPage() {
         );
     }
 
-    const canPay = app?.status === 'approved' && app?.payment_status !== 'completed';
+    const amountValue = Number(app?.total_price);
+    const hasValidAmount = Number.isFinite(amountValue) && amountValue > 0;
+    const canPay = app?.status === 'approved' && app?.payment_status !== 'completed' && hasValidAmount;
+    // Approved & unpaid but the stored amount is missing/zero — block payment with a clear reason.
+    const invalidAmount = app?.status === 'approved' && app?.payment_status !== 'completed' && !hasValidAmount;
 
     return (
         <div style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--bg-primary)', fontFamily: "'Inter', sans-serif", paddingBottom: '40px' }}>
@@ -195,9 +199,21 @@ export default function PaymentPage() {
                         }}>
                             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600' }}>Total Amount</span>
                             <span style={{ color: 'var(--accent)', fontSize: '1.6rem', fontWeight: '800' }}>
-                                NPR {Number(app.total_price).toLocaleString()}
+                                NPR {hasValidAmount ? amountValue.toLocaleString() : '0'}
                             </span>
                         </div>
+                    </div>
+                )}
+
+                {/* Invalid / missing amount — cannot proceed to eSewa */}
+                {invalidAmount && (
+                    <div style={{
+                        background: 'var(--status-error-soft)', border: '1px solid var(--status-error-border)',
+                        borderRadius: '12px', padding: '16px', marginBottom: '24px',
+                        color: 'var(--status-error)', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '10px',
+                    }}>
+                        <AlertCircle size={18} />
+                        <span>This booking has no valid amount to pay (NPR 0). Please contact support to have the price corrected before paying.</span>
                     </div>
                 )}
 

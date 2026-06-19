@@ -26,6 +26,13 @@ function getSpecValue(specs, label) {
   return specs.find((s) => String(s?.label || '').toLowerCase() === String(label).toLowerCase())?.value || ''
 }
 
+// A native <input type="date"> only accepts an empty string or a yyyy-MM-dd
+// value — anything else (e.g. the '-' sentinel stored for "no date") triggers a
+// console warning and renders blank, so normalize it before binding.
+function toDateInputValue(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value || '')) ? value : ''
+}
+
 function splitName(name) {
   const raw = String(name || '').trim()
   if (!raw) return { make: '', model: '' }
@@ -141,8 +148,8 @@ export default function FleetPage() {
       engine: vehicle.engine || '',
       pricePerDay: String(vehicle.price_per_day ?? ''),
       notes: vehicle.notes || '',
-      bluebookExpiry: getSpecValue(vehicle.technical_specs, 'Bluebook Expiry'),
-      insuranceExpiry: getSpecValue(vehicle.technical_specs, 'Insurance Expiry'),
+      bluebookExpiry: toDateInputValue(getSpecValue(vehicle.technical_specs, 'Bluebook Expiry')),
+      insuranceExpiry: toDateInputValue(getSpecValue(vehicle.technical_specs, 'Insurance Expiry')),
       imageUrl: vehicle.image || '',
       isAvailable: Boolean(vehicle.is_available),
     })

@@ -7,6 +7,7 @@ import { ToastProvider } from './components/common/Toast'
 import ScrollToTop from './components/common/ScrollToTop'
 import Navbar from './components/layout/Navbar'
 import ChatBot from './features/chatbot/ChatBot.jsx'
+import CookiesConsent from './components/common/CookiesConsent'
 
 // Pages
 import HomePage from './pages/HomePage'
@@ -41,6 +42,7 @@ function App() {
                         <Navbar />
                         <AnimatedRoutes />
                         <ChatBotGate />
+                        <CookiesConsent />
                     </ToastProvider>
                 </ThemeProvider>
             </AuthProvider>

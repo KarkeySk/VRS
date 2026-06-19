@@ -8,17 +8,11 @@ import {
   Lock,
   Mail,
   Phone,
-  Shield,
-  Bell,
   Globe,
   Camera,
   Eye,
   EyeOff,
   LogOut,
-  Key,
-  Clock,
-  Monitor,
-  Smartphone,
   CheckCircle,
 } from 'lucide-react'
 
@@ -32,12 +26,6 @@ export default function AdminProfilePage({ onNavigate }) {
   const [showCurrentPw, setShowCurrentPw] = useState(false)
   const [showNewPw, setShowNewPw] = useState(false)
   const [showConfirmPw, setShowConfirmPw] = useState(false)
-
-  // Notification preference toggles.
-  const [notifEmail, setNotifEmail] = useState(true)
-  const [notifSms, setNotifSms] = useState(false)
-  const [notifPush, setNotifPush] = useState(true)
-  const [twoFactor, setTwoFactor] = useState(true)
 
   // Profile fields shown in the form.
   const [profile, setProfile] = useState({
@@ -56,12 +44,6 @@ export default function AdminProfilePage({ onNavigate }) {
     next: '',
     confirm: '',
   })
-
-  // Simulated session list for UI.
-  const [sessions, setSessions] = useState([
-    { id: 'current', device: 'Windows PC — Chrome', location: 'Kathmandu, Nepal', time: 'Current session', icon: Monitor, current: true },
-    { id: 'mobile', device: 'iPhone 15 Pro — Safari', location: 'Pokhara, Nepal', time: '2 hours ago', icon: Smartphone, current: false },
-  ])
 
   // UI state for messages and loading.
   const [message, setMessage] = useState('')
@@ -209,12 +191,6 @@ export default function AdminProfilePage({ onNavigate }) {
     }
   }
 
-  // Remove a session from the local list.
-  const revokeSession = (sessionId) => {
-    setSessions((prev) => prev.filter((s) => s.id !== sessionId))
-    setMessage('Session revoked from this device list.')
-  }
-
   if (loading) {
     return <p className="text-sm text-txt-secondary">Loading profile...</p>
   }
@@ -260,18 +236,11 @@ export default function AdminProfilePage({ onNavigate }) {
 
               <div className="flex-1">
                 <h3 className="text-xl font-bold mb-1">{profile.displayName || 'Admin'}</h3>
-                <p className="text-sm text-brand-orange font-semibold mb-1">Fleet Director</p>
-                <p className="text-xs text-txt-secondary mb-3">Member since January 2024 · Kathmandu, Nepal</p>
+                <p className="text-sm text-brand-orange font-semibold mb-3">Fleet Director</p>
                 <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 bg-status-green/20 text-status-green text-[10px] font-bold rounded-full uppercase">Active</span>
                   <span className="px-2.5 py-1 bg-brand-orange/20 text-brand-orange text-[10px] font-bold rounded-full uppercase">{profile.role}</span>
-                  <span className="px-2.5 py-1 bg-brand-city/20 text-brand-city text-[10px] font-bold rounded-full uppercase">Verified</span>
                 </div>
               </div>
-
-              <button type="button" onClick={() => setMessage('Edit profile mode is active below.')} className="text-xs text-brand-orange border border-brand-orange px-4 py-2 rounded-lg hover:bg-brand-orange/10 transition-colors cursor-pointer bg-transparent font-semibold">
-                Edit Profile
-              </button>
             </div>
           </div>
 
@@ -363,77 +332,6 @@ export default function AdminProfilePage({ onNavigate }) {
             </div>
           </div>
 
-          <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
-            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-brand-orange" /> Security Settings
-            </h3>
-            <div className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-brand-orange/20 flex items-center justify-center">
-                  <Key className="w-4 h-4 text-brand-orange" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Two-Factor Authentication</p>
-                  <p className="text-xs text-txt-secondary">Extra security for your account</p>
-                </div>
-              </div>
-              <button type="button" onClick={() => setTwoFactor(!twoFactor)} className={`w-11 h-6 rounded-full relative border-none ${twoFactor ? 'bg-brand-orange' : 'bg-dark-border'}`}>
-                <div className={`absolute top-0.5 w-5 h-5 rounded-full ${twoFactor ? 'right-0.5 bg-white' : 'left-0.5 bg-txt-secondary'}`} />
-              </button>
-            </div>
-
-            <p className="text-xs text-txt-secondary uppercase tracking-wider font-semibold mb-3">Active Sessions</p>
-            <div className="space-y-2">
-              {sessions.map((session) => {
-                const Icon = session.icon
-                return (
-                  <div key={session.id} className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-dark-border flex items-center justify-center">
-                        <Icon className="w-4 h-4 text-txt-secondary" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold flex items-center gap-2">
-                          {session.device}
-                          {session.current && <span className="px-1.5 py-0.5 bg-status-green/20 text-status-green text-[9px] font-bold rounded uppercase">Current</span>}
-                        </p>
-                        <p className="text-xs text-txt-secondary">{session.location} · {session.time}</p>
-                      </div>
-                    </div>
-                    {!session.current && (
-                      <button type="button" onClick={() => revokeSession(session.id)} className="text-xs text-status-red hover:text-status-red/80 bg-transparent border-none cursor-pointer font-semibold">
-                        Revoke
-                      </button>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
-            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-              <Bell className="w-4 h-4 text-brand-orange" /> Notification Preferences
-            </h3>
-            <div className="space-y-3">
-              {[
-                { id: 'email', label: 'Email Notifications', desc: 'Booking alerts, compliance updates', value: notifEmail, toggle: setNotifEmail },
-                { id: 'sms', label: 'SMS Alerts', desc: 'Critical fleet warnings only', value: notifSms, toggle: setNotifSms },
-                { id: 'push', label: 'Push Notifications', desc: 'Real-time updates in browser', value: notifPush, toggle: setNotifPush },
-              ].map((pref) => (
-                <div key={pref.id} className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3">
-                  <div>
-                    <p className="text-sm font-semibold">{pref.label}</p>
-                    <p className="text-xs text-txt-secondary">{pref.desc}</p>
-                  </div>
-                  <button type="button" onClick={() => pref.toggle(!pref.value)} className={`w-11 h-6 rounded-full relative border-none ${pref.value ? 'bg-brand-orange' : 'bg-dark-border'}`}>
-                    <div className={`absolute top-0.5 w-5 h-5 rounded-full ${pref.value ? 'right-0.5 bg-white' : 'left-0.5 bg-txt-secondary'}`} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="flex items-center justify-between">
             <button onClick={handleSignOut} disabled={signingOut} className="flex items-center gap-2 text-sm text-status-red hover:text-status-red/80 bg-transparent border-none cursor-pointer font-semibold disabled:opacity-60">
               <LogOut className="w-4 h-4" /> {signingOut ? 'Signing Out...' : 'Sign Out'}
@@ -463,46 +361,12 @@ export default function AdminProfilePage({ onNavigate }) {
                 </div>
               </div>
               <div className="border-t border-dark-border pt-3 space-y-2">
-                <div className="flex justify-between text-xs"><span className="text-txt-secondary">Account Status</span><span className="text-status-green font-semibold">Active</span></div>
                 <div className="flex justify-between text-xs"><span className="text-txt-secondary">Role</span><span className="text-brand-orange font-semibold">{profile.role}</span></div>
-                <div className="flex justify-between text-xs"><span className="text-txt-secondary">2FA</span><span className={`font-semibold ${twoFactor ? 'text-status-green' : 'text-status-red'}`}>{twoFactor ? 'Enabled' : 'Disabled'}</span></div>
+                <div className="flex justify-between text-xs"><span className="text-txt-secondary">Email</span><span className="text-txt-primary font-semibold truncate max-w-[150px]">{profile.email || '—'}</span></div>
               </div>
             </div>
           </div>
 
-          <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
-            <h4 className="text-sm font-semibold mb-3">Recent Activity</h4>
-            <div className="space-y-3">
-              {[
-                { action: 'Password changed', time: '3 days ago', color: 'text-brand-orange' },
-                { action: 'New vehicle added', time: '5 days ago', color: 'text-status-green' },
-                { action: 'Booking updated', time: '1 week ago', color: 'text-brand-city' },
-                { action: 'Login from new device', time: '2 weeks ago', color: 'text-status-yellow' },
-              ].map((item) => (
-                <div key={item.action} className="flex items-start gap-2">
-                  <Clock className="w-3 h-3 text-txt-muted mt-0.5 shrink-0" />
-                  <div>
-                    <p className={`text-xs font-semibold ${item.color}`}>{item.action}</p>
-                    <p className="text-[10px] text-txt-muted">{item.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-[rgba(255,255,255,0.02)] border border-status-red/30 rounded-xl p-6">
-            <h4 className="text-sm font-semibold mb-2 text-status-red">Danger Zone</h4>
-            <p className="text-xs text-txt-secondary mb-4 leading-relaxed">
-              Permanently delete your account and all associated data. This action cannot be undone.
-            </p>
-            <button
-              type="button"
-              onClick={() => setError('Account deletion requires service-role backend endpoint. Action blocked in client app.')}
-              className="w-full py-2.5 bg-status-red/20 border border-status-red/30 text-status-red rounded-md text-xs font-semibold hover:bg-status-red/30 transition-colors cursor-pointer"
-            >
-              Delete Account
-            </button>
-          </div>
         </div>
       </div>
     </div>

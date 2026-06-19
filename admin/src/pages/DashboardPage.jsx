@@ -15,7 +15,6 @@ import { uiAssetService } from "@bhatbhati/shared/services/uiAssetService.js";
 import BookingsList from "@/components/BookingsList";
 import CalendarPanel from "@/components/CalendarPanel";
 import StatsCard from "@/components/StatsCard";
-import TrackingChart from "@/components/TrackingChart";
 import WeatherPanel from "@/components/WeatherPanel";
 
 // Visual themes for fleet categories.
@@ -361,12 +360,9 @@ export default function DashboardPage({ onNavigate = () => {} }) {
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[300px_1fr]">
-        <div className="space-y-6">
-          <CalendarPanel />
-          <WeatherPanel />
-        </div>
-        <TrackingChart activeUnits={activeCount} />
+      <section className="grid gap-6 md:grid-cols-2">
+        <CalendarPanel />
+        <WeatherPanel />
       </section>
 
       {isLoading && (
