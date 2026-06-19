@@ -1,24 +1,23 @@
 import { useState } from 'react'
-import { useNavigate, useLocation, Outlet } from 'react-router-dom'
+import { useLocation, Outlet } from 'react-router-dom'
 import Sidebar from '@/components/Sidebar'
 import TopBar from '@/components/TopBar'
 import ErrorBoundary from '@/components/ErrorBoundary'
 
 const PAGE_META = {
-  dashboard:     { title: 'Fleet Command', subtitle: 'Bikes • Cars • Jeeps', showNewBtn: true },
-  fleet:         { title: 'Fleet', showNewBtn: false },
-  bookings:      { title: 'Bookings', showNewBtn: true },
-  compliance:    { title: 'Checks & Logs', showNewBtn: false },
-  operations:    { title: 'Operations & Logs', subtitle: 'Admin', showNewBtn: false },
-  messages:      { title: 'Messages', subtitle: 'Live support', showNewBtn: false },
-  settings:      { title: 'Settings', showNewBtn: false },
-  'add-vehicle': { title: 'Add Vehicle', subtitle: 'Form', showNewBtn: false },
-  'new-booking': { title: 'New Booking', subtitle: 'Booking Form', showNewBtn: false },
-  'admin-profile': { title: 'Profile', subtitle: 'Account', showNewBtn: false },
+  dashboard:     { title: 'Fleet Command', subtitle: 'Bikes • Cars • Jeeps' },
+  fleet:         { title: 'Fleet' },
+  bookings:      { title: 'Bookings' },
+  compliance:    { title: 'Checks & Logs' },
+  operations:    { title: 'Operations & Logs', subtitle: 'Admin' },
+  messages:      { title: 'Messages', subtitle: 'Live support' },
+  settings:      { title: 'Settings' },
+  'add-vehicle': { title: 'Add Vehicle', subtitle: 'Form' },
+  'new-booking': { title: 'New Booking', subtitle: 'Booking Form' },
+  'admin-profile': { title: 'Profile', subtitle: 'Account' },
 }
 
 export default function AdminShell() {
-  const navigate = useNavigate()
   const location = useLocation()
   const [topBarMessage, setTopBarMessage] = useState('')
 
@@ -33,8 +32,6 @@ export default function AdminShell() {
         <TopBar
           title={meta.title}
           subtitle={meta.subtitle}
-          showNewBooking={meta.showNewBtn}
-          onNewBooking={() => navigate('/dashboard/new-booking')}
           onShowNotifications={() => setTopBarMessage('Notifications will be added soon.')}
           onShowHelp={() => setTopBarMessage('Need help? Open Add Vehicle, New Booking, or Profile.')}
         />
