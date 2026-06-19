@@ -57,8 +57,8 @@ export default function Footer() {
           <div className="footer-links">
             <Link to="/auth/login">Login</Link>
             <Link to="/auth/register">Register</Link>
-            <a href="#cta">Help Center</a>
-            <a href="#cta">Terms & Privacy</a>
+            <Link to="/help">Help Center</Link>
+            <Link to="/privacy-policy">Terms & Privacy</Link>
           </div>
         </div>
 
