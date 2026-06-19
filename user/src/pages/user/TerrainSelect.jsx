@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Mountain, ArrowRight, ArrowLeft, Navigation, Thermometer, Wind } from 'lucide-react';
+import { MapPin, Mountain, ArrowRight, ArrowLeft, Navigation, Thermometer, Wind, Search, X } from 'lucide-react';
 import nepalProvincePaths from '../../data/nepalProvincePaths.json';
 import { useTheme } from '../../context/ThemeContext';
 import { useViewport } from '../../hooks/useViewport';
@@ -54,180 +54,180 @@ const PROVINCE_BBOX = {
 // Derived from actual lat/lon mapped to the hand-drawn SVG province paths
 const DISTRICT_CENTERS = {
     // Koshi Province
-    'Taplejung':        { x: 758, y: 259 },
-    'Panchthar':        { x: 754, y: 298 },
-    'Ilam':             { x: 765, y: 317 },
-    'Jhapa':            { x: 766, y: 342 },
-    'Morang':           { x: 728, y: 340 },
-    'Sunsari':          { x: 703, y: 337 },
-    'Dhankuta':         { x: 717, y: 308 },
-    'Terhathum':        { x: 735, y: 295 },
-    'Sankhuwasabha':    { x: 712, y: 259 },
-    'Bhojpur':          { x: 672, y: 294 },
-    'Solukhumbu':       { x: 666, y: 248 },
-    'Okhaldhunga':      { x: 641, y: 280 },
-    'Khotang':          { x: 695, y: 293 },
-    'Udayapur':         { x: 663, y: 316 },
+    'Taplejung':          { x: 756.3, y: 264.2 },
+    'Panchthar':          { x: 760.0, y: 292.9 },
+    'Ilam':               { x: 759.8, y: 317.7 },
+    'Jhapa':              { x: 770.6, y: 343.3 },
+    'Morang':             { x: 728.6, y: 338.4 },
+    'Sunsari':            { x: 703.3, y: 336.2 },
+    'Dhankuta':           { x: 715.6, y: 308.3 },
+    'Terhathum':          { x: 736.3, y: 291.8 },
+    'Sankhuwasabha':      { x: 712.4, y: 256.8 },
+    'Bhojpur':            { x: 695.5, y: 293.2 },
+    'Solukhumbu':         { x: 668.2, y: 254.9 },
+    'Okhaldhunga':        { x: 635.8, y: 278.0 },
+    'Khotang':            { x: 670.6, y: 291.0 },
+    'Udayapur':           { x: 655.0, y: 308.7 },
     // Madhesh Province
-    'Saptari':          { x: 634, y: 329 },
-    'Siraha':           { x: 570, y: 309 },
-    'Dhanusha':         { x: 504, y: 288 },
-    'Mahottari':        { x: 528, y: 299 },
-    'Sarlahi':          { x: 609, y: 322 },
-    'Rautahat':         { x: 591, y: 318 },
-    'Bara':             { x: 668, y: 341 },
-    'Parsa':            { x: 548, y: 307 },
+    'Saptari':            { x: 665.6, y: 342.9 },
+    'Siraha':             { x: 637.2, y: 328.7 },
+    'Dhanusha':           { x: 608.2, y: 324.7 },
+    'Mahottari':          { x: 589.4, y: 316.2 },
+    'Sarlahi':            { x: 569.3, y: 307.5 },
+    'Rautahat':           { x: 546.2, y: 310.7 },
+    'Bara':               { x: 528.8, y: 298.1 },
+    'Parsa':              { x: 507.9, y: 286.3 },
     // Bagmati Province
-    'Sindhuli':         { x: 601, y: 291 },
-    'Ramechhap':        { x: 621, y: 265 },
-    'Dolakha':          { x: 622, y: 242 },
-    'Sindhupalchok':    { x: 584, y: 231 },
-    'Kavrepalanchok':   { x: 574, y: 263 },
-    'Lalitpur':         { x: 552, y: 247 },
-    'Bhaktapur':        { x: 559, y: 251 },
-    'Kathmandu':        { x: 542, y: 231 },
-    'Nuwakot':          { x: 519, y: 228 },
-    'Rasuwa':           { x: 557, y: 209 },
-    'Dhading':          { x: 475, y: 259 },
-    'Makwanpur':        { x: 551, y: 263 },
-    'Chitwan':          { x: 529, y: 268 },
+    'Sindhuli':           { x: 593.3, y: 283.2 },
+    'Ramechhap':          { x: 615.7, y: 276.3 },
+    'Dolakha':            { x: 622.5, y: 243.0 },
+    'Sindhupalchok':      { x: 582.8, y: 230.1 },
+    'Kavrepalanchok':     { x: 572.7, y: 264.3 },
+    'Lalitpur':           { x: 549.6, y: 264.3 },
+    'Bhaktapur':          { x: 559.3, y: 251.2 },
+    'Kathmandu':          { x: 551.0, y: 245.5 },
+    'Nuwakot':            { x: 532.5, y: 233.6 },
+    'Rasuwa':             { x: 549.9, y: 211.2 },
+    'Dhading':            { x: 512.1, y: 232.4 },
+    'Makwanpur':          { x: 524.3, y: 263.6 },
+    'Chitwan':            { x: 473.9, y: 263.5 },
     // Gandaki Province
-    'Gorkha':           { x: 475, y: 200 },
-    'Manang':           { x: 458, y: 168 },
-    'Mustang':          { x: 427, y: 142 },
-    'Myagdi':           { x: 394, y: 178 },
-    'Kaski':            { x: 439, y: 195 },
-    'Lamjung':          { x: 505, y: 198 },
-    'Tanahu':           { x: 460, y: 228 },
-    'Nawalpur':         { x: 444, y: 250 },
-    'Syangja':          { x: 423, y: 222 },
-    'Parbat':           { x: 412, y: 207 },
-    'Baglung':          { x: 377, y: 195 },
+    'Gorkha':             { x: 512.1, y: 191.9 },
+    'Manang':             { x: 461.4, y: 167.5 },
+    'Mustang':            { x: 434.5, y: 134.9 },
+    'Myagdi':             { x: 389.5, y: 175.5 },
+    'Kaski':              { x: 439.1, y: 194.2 },
+    'Lamjung':            { x: 478.0, y: 200.2 },
+    'Tanahu':             { x: 463.5, y: 227.2 },
+    'Nawalpur':           { x: 448.6, y: 247.2 },
+    'Syangja':            { x: 424.6, y: 222.9 },
+    'Parbat':             { x: 413.5, y: 199.9 },
+    'Baglung':            { x: 369.8, y: 192.3 },
     // Lumbini Province
-    'Rukum East':       { x: 354, y: 148 },
-    'Rolpa':            { x: 340, y: 168 },
-    'Pyuthan':          { x: 325, y: 196 },
-    'Gulmi':            { x: 344, y: 215 },
-    'Arghakhanchi':     { x: 381, y: 216 },
-    'Palpa':            { x: 362, y: 232 },
-    'Nawalparasi East': { x: 408, y: 239 },
-    'Nawalparasi West': { x: 417, y: 264 },
-    'Rupandehi':        { x: 388, y: 260 },
-    'Kapilvastu':       { x: 354, y: 255 },
-    'Dang':             { x: 222, y: 192 },
-    'Banke':            { x: 307, y: 227 },
-    'Bardiya':          { x: 258, y: 217 },
+    'Rukum East':         { x: 339.3, y: 168.7 },
+    'Rolpa':              { x: 320.5, y: 195.7 },
+    'Pyuthan':            { x: 342.5, y: 218.3 },
+    'Gulmi':              { x: 383.6, y: 218.6 },
+    'Arghakhanchi':       { x: 367.7, y: 231.0 },
+    'Palpa':              { x: 413.9, y: 239.5 },
+    'Nawalparasi East':   { x: 448.6, y: 247.2 },
+    'Nawalparasi West':   { x: 414.2, y: 261.9 },
+    'Rupandehi':          { x: 386.0, y: 257.0 },
+    'Kapilvastu':         { x: 359.9, y: 257.0 },
+    'Dang':               { x: 312.1, y: 230.6 },
+    'Banke':              { x: 261.0, y: 219.0 },
+    'Bardiya':            { x: 223.5, y: 193.9 },
     // Karnali Province
-    'Dolpa':            { x: 360, y: 127 },
-    'Mugu':             { x: 303, y: 89 },
-    'Humla':            { x: 262, y: 55 },
-    'Jumla':            { x: 290, y: 118 },
-    'Kalikot':          { x: 252, y: 125 },
-    'Rukum West':       { x: 311, y: 163 },
-    'Salyan':           { x: 284, y: 191 },
-    'Jajarkot':         { x: 286, y: 152 },
-    'Dailekh':          { x: 246, y: 151 },
-    'Surkhet':          { x: 238, y: 171 },
+    'Dolpa':              { x: 358.2, y: 123.2 },
+    'Mugu':               { x: 319.8, y: 85.9 },
+    'Humla':              { x: 261.3, y: 45.2 },
+    'Jumla':              { x: 281.9, y: 119.8 },
+    'Kalikot':            { x: 249.3, y: 124.7 },
+    'Rukum West':         { x: 304.6, y: 166.7 },
+    'Salyan':             { x: 287.2, y: 188.6 },
+    'Jajarkot':           { x: 279.6, y: 156.6 },
+    'Dailekh':            { x: 248.9, y: 152.3 },
+    'Surkhet':            { x: 220.8, y: 159.6 },
     // Sudurpashchim Province
-    'Bajura':           { x: 236, y: 94 },
-    'Bajhang':          { x: 204, y: 82 },
-    'Achham':           { x: 214, y: 131 },
-    'Doti':             { x: 180, y: 127 },
-    'Kailali':          { x: 179, y: 162 },
-    'Kanchanpur':       { x: 133, y: 152 },
-    'Dadeldhura':       { x: 146, y: 122 },
-    'Baitadi':          { x: 153, y: 98 },
-    'Darchula':         { x: 172, y: 62 },
+    'Bajura':             { x: 237.3, y: 95.7 },
+    'Bajhang':            { x: 212.4, y: 73.6 },
+    'Achham':             { x: 213.1, y: 129.3 },
+    'Doti':               { x: 178.0, y: 128.2 },
+    'Kailali':            { x: 181.4, y: 163.7 },
+    'Kanchanpur':         { x: 132.2, y: 148.8 },
+    'Dadeldhura':         { x: 143.1, y: 121.4 },
+    'Baitadi':            { x: 156.4, y: 94.2 },
+    'Darchula':           { x: 176.1, y: 66.2 },
 };
 
 // Bounding box of each district polygon (viewBox coords) — bounds the town grid so
 // village markers stay inside the district shape.
 const DISTRICT_BBOX = {
     // Koshi Province
-    'Taplejung':        { x0: 727, y0: 229, x1: 790, y1: 285 },
-    'Panchthar':        { x0: 731, y0: 272, x1: 779, y1: 319 },
-    'Ilam':             { x0: 740, y0: 299, x1: 788, y1: 335 },
-    'Jhapa':            { x0: 743, y0: 324, x1: 788, y1: 360 },
-    'Morang':           { x0: 710, y0: 318, x1: 747, y1: 362 },
-    'Sunsari':          { x0: 681, y0: 318, x1: 719, y1: 357 },
-    'Dhankuta':         { x0: 703, y0: 292, x1: 737, y1: 320 },
-    'Terhathum':        { x0: 722, y0: 283, x1: 752, y1: 310 },
-    'Sankhuwasabha':    { x0: 685, y0: 228, x1: 745, y1: 296 },
-    'Bhojpur':          { x0: 642, y0: 271, x1: 687, y1: 318 },
-    'Solukhumbu':       { x0: 636, y0: 215, x1: 690, y1: 279 },
-    'Okhaldhunga':      { x0: 624, y0: 264, x1: 663, y1: 295 },
-    'Khotang':          { x0: 682, y0: 269, x1: 712, y1: 317 },
-    'Udayapur':         { x0: 619, y0: 293, x1: 703, y1: 334 },
+    'Taplejung':          { x0: 726.7, y0: 228.9, x1: 789.7, y1: 285.4 },
+    'Panchthar':          { x0: 730.4, y0: 271.5, x1: 779.5, y1: 319.2 },
+    'Ilam':               { x0: 739.6, y0: 299.1, x1: 788.1, y1: 335.4 },
+    'Jhapa':              { x0: 742.3, y0: 323.8, x1: 788.4, y1: 360.3 },
+    'Morang':             { x0: 709.3, y0: 318.3, x1: 746.9, y1: 360.7 },
+    'Sunsari':            { x0: 681.3, y0: 317.7, x1: 718.8, y1: 356.8 },
+    'Dhankuta':           { x0: 701.7, y0: 292.0, x1: 737.7, y1: 320.4 },
+    'Terhathum':          { x0: 722.0, y0: 283.3, x1: 752.1, y1: 310.3 },
+    'Sankhuwasabha':      { x0: 684.6, y0: 228.5, x1: 745.9, y1: 296.4 },
+    'Bhojpur':            { x0: 680.6, y0: 269.4, x1: 712.3, y1: 316.9 },
+    'Solukhumbu':         { x0: 635.6, y0: 215.4, x1: 690.2, y1: 279.6 },
+    'Okhaldhunga':        { x0: 622.9, y0: 264.1, x1: 663.2, y1: 295.4 },
+    'Khotang':            { x0: 641.5, y0: 271.2, x1: 688.0, y1: 318.1 },
+    'Udayapur':           { x0: 618.9, y0: 292.7, x1: 703.4, y1: 333.4 },
     // Madhesh Province
-    'Saptari':          { x0: 617, y0: 313, x1: 652, y1: 344 },
-    'Siraha':           { x0: 550, y0: 291, x1: 591, y1: 328 },
-    'Dhanusha':         { x0: 480, y0: 269, x1: 520, y1: 309 },
-    'Mahottari':        { x0: 512, y0: 277, x1: 544, y1: 320 },
-    'Sarlahi':          { x0: 594, y0: 297, x1: 627, y1: 344 },
-    'Rautahat':         { x0: 579, y0: 294, x1: 601, y1: 341 },
-    'Bara':             { x0: 646, y0: 325, x1: 691, y1: 356 },
-    'Parsa':            { x0: 536, y0: 288, x1: 564, y1: 329 },
+    'Saptari':            { x0: 646.5, y0: 324.9, x1: 690.5, y1: 355.1 },
+    'Siraha':             { x0: 616.8, y0: 312.9, x1: 652.1, y1: 344.3 },
+    'Dhanusha':           { x0: 593.2, y0: 296.5, x1: 627.5, y1: 343.0 },
+    'Mahottari':          { x0: 578.9, y0: 293.6, x1: 601.3, y1: 340.3 },
+    'Sarlahi':            { x0: 549.4, y0: 291.3, x1: 590.5, y1: 328.7 },
+    'Rautahat':           { x0: 536.1, y0: 288.2, x1: 564.5, y1: 328.4 },
+    'Bara':               { x0: 511.3, y0: 277.1, x1: 545.1, y1: 319.7 },
+    'Parsa':              { x0: 479.4, y0: 269.0, x1: 520.2, y1: 308.6 },
     // Bagmati Province
-    'Sindhuli':         { x0: 557, y0: 270, x1: 638, y1: 314 },
-    'Ramechhap':        { x0: 589, y0: 238, x1: 654, y1: 287 },
-    'Dolakha':          { x0: 596, y0: 210, x1: 652, y1: 268 },
-    'Sindhupalchok':    { x0: 559, y0: 207, x1: 611, y1: 257 },
-    'Kavrepalanchok':   { x0: 555, y0: 245, x1: 596, y1: 280 },
-    'Lalitpur':         { x0: 538, y0: 239, x1: 570, y1: 260 },
-    'Bhaktapur':        { x0: 552, y0: 247, x1: 566, y1: 256 },
-    'Kathmandu':        { x0: 522, y0: 217, x1: 564, y1: 244 },
-    'Nuwakot':          { x0: 491, y0: 195, x1: 545, y1: 252 },
-    'Rasuwa':           { x0: 533, y0: 192, x1: 589, y1: 227 },
-    'Dhading':          { x0: 432, y0: 234, x1: 506, y1: 278 },
-    'Makwanpur':        { x0: 542, y0: 250, x1: 560, y1: 274 },
-    'Chitwan':          { x0: 495, y0: 248, x1: 565, y1: 294 },
+    'Sindhuli':           { x0: 557.5, y0: 270.3, x1: 638.2, y1: 314.1 },
+    'Ramechhap':          { x0: 589.2, y0: 238.6, x1: 653.6, y1: 287.5 },
+    'Dolakha':            { x0: 596.3, y0: 210.2, x1: 652.2, y1: 268.3 },
+    'Sindhupalchok':      { x0: 559.5, y0: 207.7, x1: 611.4, y1: 256.9 },
+    'Kavrepalanchok':     { x0: 554.8, y0: 244.8, x1: 596.0, y1: 279.9 },
+    'Lalitpur':           { x0: 541.8, y0: 250.0, x1: 559.5, y1: 274.0 },
+    'Bhaktapur':          { x0: 551.9, y0: 247.1, x1: 566.3, y1: 256.1 },
+    'Kathmandu':          { x0: 538.3, y0: 239.7, x1: 569.7, y1: 260.1 },
+    'Nuwakot':            { x0: 521.6, y0: 217.0, x1: 564.0, y1: 244.3 },
+    'Rasuwa':             { x0: 532.8, y0: 192.3, x1: 589.3, y1: 227.4 },
+    'Dhading':            { x0: 490.9, y0: 195.6, x1: 545.1, y1: 251.9 },
+    'Makwanpur':          { x0: 494.6, y0: 248.4, x1: 564.8, y1: 294.0 },
+    'Chitwan':            { x0: 432.4, y0: 234.3, x1: 505.5, y1: 277.9 },
     // Gandaki Province
-    'Gorkha':           { x0: 455, y0: 182, x1: 496, y1: 219 },
-    'Manang':           { x0: 423, y0: 149, x1: 486, y1: 187 },
-    'Mustang':          { x0: 396, y0: 114, x1: 460, y1: 177 },
-    'Myagdi':           { x0: 364, y0: 158, x1: 428, y1: 199 },
-    'Kaski':            { x0: 415, y0: 173, x1: 462, y1: 217 },
-    'Lamjung':          { x0: 474, y0: 162, x1: 539, y1: 241 },
-    'Tanahu':           { x0: 434, y0: 213, x1: 485, y1: 245 },
-    'Nawalpur':         { x0: 413, y0: 235, x1: 475, y1: 271 },
-    'Syangja':          { x0: 393, y0: 206, x1: 442, y1: 235 },
-    'Parbat':           { x0: 402, y0: 191, x1: 424, y1: 224 },
-    'Baglung':          { x0: 346, y0: 172, x1: 412, y1: 218 },
+    'Gorkha':             { x0: 474.2, y0: 161.6, x1: 539.1, y1: 241.4 },
+    'Manang':             { x0: 421.7, y0: 149.0, x1: 486.6, y1: 187.1 },
+    'Mustang':            { x0: 395.8, y0: 112.7, x1: 459.8, y1: 177.0 },
+    'Myagdi':             { x0: 364.1, y0: 157.9, x1: 428.5, y1: 199.3 },
+    'Kaski':              { x0: 414.2, y0: 173.0, x1: 462.2, y1: 217.8 },
+    'Lamjung':            { x0: 454.7, y0: 181.7, x1: 497.0, y1: 219.6 },
+    'Tanahu':             { x0: 433.9, y0: 213.5, x1: 485.7, y1: 245.8 },
+    'Nawalpur':           { x0: 412.2, y0: 235.1, x1: 475.1, y1: 270.9 },
+    'Syangja':            { x0: 392.4, y0: 205.9, x1: 441.6, y1: 235.2 },
+    'Parbat':             { x0: 402.4, y0: 190.9, x1: 424.4, y1: 223.7 },
+    'Baglung':            { x0: 345.5, y0: 171.1, x1: 412.0, y1: 217.6 },
     // Lumbini Province
-    'Rukum East':       { x0: 338, y0: 137, x1: 370, y1: 159 },
-    'Rolpa':            { x0: 313, y0: 152, x1: 368, y1: 184 },
-    'Pyuthan':          { x0: 302, y0: 178, x1: 352, y1: 216 },
-    'Gulmi':            { x0: 322, y0: 194, x1: 364, y1: 234 },
-    'Arghakhanchi':     { x0: 358, y0: 202, x1: 406, y1: 230 },
-    'Palpa':            { x0: 335, y0: 215, x1: 383, y1: 244 },
-    'Nawalparasi East': { x0: 376, y0: 228, x1: 441, y1: 252 },
-    'Nawalparasi West': { x0: 403, y0: 250, x1: 430, y1: 279 },
-    'Rupandehi':        { x0: 373, y0: 244, x1: 408, y1: 280 },
-    'Kapilvastu':       { x0: 330, y0: 239, x1: 375, y1: 272 },
-    'Dang':             { x0: 194, y0: 168, x1: 253, y1: 218 },
-    'Banke':            { x0: 273, y0: 203, x1: 340, y1: 251 },
-    'Bardiya':          { x0: 231, y0: 196, x1: 288, y1: 236 },
+    'Rukum East':         { x0: 313.0, y0: 151.4, x1: 368.5, y1: 184.4 },
+    'Rolpa':              { x0: 301.5, y0: 177.4, x1: 352.1, y1: 216.3 },
+    'Pyuthan':            { x0: 321.4, y0: 193.9, x1: 363.8, y1: 234.2 },
+    'Gulmi':              { x0: 357.6, y0: 201.6, x1: 406.2, y1: 230.7 },
+    'Arghakhanchi':       { x0: 334.7, y0: 214.7, x1: 383.2, y1: 244.9 },
+    'Palpa':              { x0: 375.0, y0: 227.7, x1: 441.4, y1: 252.2 },
+    'Nawalparasi East':   { x0: 412.2, y0: 235.1, x1: 475.1, y1: 270.9 },
+    'Nawalparasi West':   { x0: 403.4, y0: 249.7, x1: 431.2, y1: 278.5 },
+    'Rupandehi':          { x0: 372.7, y0: 243.5, x1: 408.5, y1: 279.7 },
+    'Kapilvastu':         { x0: 330.5, y0: 239.2, x1: 375.1, y1: 272.5 },
+    'Dang':               { x0: 273.2, y0: 202.4, x1: 339.8, y1: 250.8 },
+    'Banke':              { x0: 230.5, y0: 195.7, x1: 288.4, y1: 236.1 },
+    'Bardiya':            { x0: 193.8, y0: 167.5, x1: 252.8, y1: 218.0 },
     // Karnali Province
-    'Dolpa':            { x0: 305, y0: 82, x1: 412, y1: 164 },
-    'Mugu':             { x0: 253, y0: 60, x1: 341, y1: 108 },
-    'Humla':            { x0: 211, y0: 20, x1: 314, y1: 90 },
-    'Jumla':            { x0: 260, y0: 98, x1: 322, y1: 143 },
-    'Kalikot':          { x0: 229, y0: 102, x1: 274, y1: 143 },
-    'Rukum West':       { x0: 288, y0: 142, x1: 331, y1: 180 },
-    'Salyan':           { x0: 251, y0: 171, x1: 309, y1: 211 },
-    'Jajarkot':         { x0: 259, y0: 130, x1: 321, y1: 173 },
-    'Dailekh':          { x0: 224, y0: 130, x1: 266, y1: 171 },
-    'Surkhet':          { x0: 187, y0: 143, x1: 275, y1: 196 },
+    'Dolpa':              { x0: 305.2, y0: 80.9, x1: 412.4, y1: 163.6 },
+    'Mugu':               { x0: 252.8, y0: 58.5, x1: 341.6, y1: 107.7 },
+    'Humla':              { x0: 210.5, y0: 17.8, x1: 313.9, y1: 89.2 },
+    'Jumla':              { x0: 259.6, y0: 97.5, x1: 321.7, y1: 142.6 },
+    'Kalikot':            { x0: 228.0, y0: 101.4, x1: 274.0, y1: 142.7 },
+    'Rukum West':         { x0: 287.9, y0: 141.1, x1: 330.7, y1: 180.5 },
+    'Salyan':             { x0: 251.0, y0: 170.1, x1: 308.6, y1: 211.2 },
+    'Jajarkot':           { x0: 257.3, y0: 129.7, x1: 320.7, y1: 172.9 },
+    'Dailekh':            { x0: 223.1, y0: 128.8, x1: 266.2, y1: 171.0 },
+    'Surkhet':            { x0: 187.5, y0: 142.1, x1: 275.4, y1: 195.8 },
     // Sudurpashchim Province
-    'Bajura':           { x0: 203, y0: 62, x1: 256, y1: 118 },
-    'Bajhang':          { x0: 168, y0: 53, x1: 236, y1: 108 },
-    'Achham':           { x0: 191, y0: 109, x1: 237, y1: 162 },
-    'Doti':             { x0: 150, y0: 104, x1: 205, y1: 147 },
-    'Kailali':          { x0: 145, y0: 136, x1: 213, y1: 191 },
-    'Kanchanpur':       { x0: 114, y0: 130, x1: 152, y1: 177 },
-    'Dadeldhura':       { x0: 121, y0: 106, x1: 171, y1: 141 },
-    'Baitadi':          { x0: 126, y0: 82, x1: 181, y1: 114 },
-    'Darchula':         { x0: 136, y0: 18, x1: 198, y1: 90 },
+    'Bajura':             { x0: 203.2, y0: 60.1, x1: 256.4, y1: 117.0 },
+    'Bajhang':            { x0: 167.9, y0: 51.1, x1: 236.2, y1: 107.2 },
+    'Achham':             { x0: 191.2, y0: 107.6, x1: 237.4, y1: 161.4 },
+    'Doti':               { x0: 149.4, y0: 102.7, x1: 204.6, y1: 145.9 },
+    'Kailali':            { x0: 144.6, y0: 134.5, x1: 212.9, y1: 190.5 },
+    'Kanchanpur':         { x0: 110.6, y0: 128.5, x1: 152.1, y1: 177.7 },
+    'Dadeldhura':         { x0: 120.9, y0: 104.3, x1: 171.1, y1: 140.6 },
+    'Baitadi':            { x0: 125.8, y0: 80.4, x1: 181.3, y1: 114.1 },
+    'Darchula':           { x0: 136.0, y0: 34.7, x1: 198.1, y1: 88.9 },
 };
 
 // Return district positions using real geographic centers (falls back to bbox center)
@@ -367,6 +367,48 @@ const regions = [
     },
 ];
 
+// Province display-name → region id, for resolving search hits back to map state.
+const PROVINCE_ID_BY_NAME = regions.reduce((m, r) => { m[r.name] = r.id; return m; }, {});
+
+// Flat, searchable index of every province / district / town in Nepal so a user can
+// jump straight to a location instead of drilling down through the map by hand.
+const SEARCH_INDEX = (() => {
+    const items = [];
+    Object.entries(NEPAL_LOCATIONS).forEach(([provinceName, districts]) => {
+        const provinceId = PROVINCE_ID_BY_NAME[provinceName];
+        if (!provinceId) return;
+        const shortProvince = provinceName.replace(' Province', '');
+        items.push({ type: 'Province', provinceId, provinceName, label: shortProvince, sub: 'Province', key: 'p:' + provinceId });
+        Object.entries(districts).forEach(([district, towns]) => {
+            items.push({ type: 'District', provinceId, provinceName, district, label: district, sub: shortProvince, key: 'd:' + district });
+            towns.forEach((town) => {
+                items.push({ type: 'Place', provinceId, provinceName, district, town, label: town, sub: `${district}, ${shortProvince}`, key: `t:${district}:${town}` });
+            });
+        });
+    });
+    return items;
+})();
+
+// Rank matches: exact label > label prefix > label substring > context (sub) substring.
+const searchLocations = (query) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return SEARCH_INDEX
+        .map((it) => {
+            const label = it.label.toLowerCase();
+            let score = -1;
+            if (label === q) score = 0;
+            else if (label.startsWith(q)) score = 1;
+            else if (label.includes(q)) score = 2;
+            else if (it.sub.toLowerCase().includes(q)) score = 3;
+            return { it, score };
+        })
+        .filter((r) => r.score >= 0)
+        .sort((a, b) => a.score - b.score)
+        .slice(0, 8)
+        .map((r) => r.it);
+};
+
 // Spread town labels in a tight grid around the district's geographic center
 // Label sizing (in on-screen SVG units). Markers are counter-scaled by 1/zoom so a
 // place name renders at this constant size at every zoom level — never clipped, never huge.
@@ -375,22 +417,47 @@ const DISTRICT_FS = 11;
 // Estimated pill width for a name at a given font size (Inter, bold ~0.6em advance) + padding.
 const labelWidth = (name, fs) => name.length * fs * 0.6 + 16;
 
-// Town positions: a grid centred on the district, spaced so the constant-size name pills
-// never overlap. Because the markers stay a fixed screen size while the map is zoomed by
-// `scale`, the required spacing in map units is the on-screen footprint divided by `scale`.
-const getTownPositions = (districtPos, towns, scale = 1) => {
+// Town positions: a compact grid centred on the district point (which is also the zoom
+// focus, so the block sits centred in view). There is no per-town geographic data and no
+// district polygon — only the province outline — so we keep the cluster tight around the
+// district's centre rather than spreading it across the bounding box, otherwise corner
+// markers land in neighbouring (grey) areas outside the irregular province shape.
+//
+// Markers keep a constant on-screen size while the map is zoomed by `scale`, so the
+// overlap-free spacing in map units is the on-screen footprint divided by `scale`.
+const getTownPositions = (districtPos, towns, scale = 1, bbox = null) => {
     if (!districtPos || !towns.length) return [];
-    const { x, y } = districtPos;
-    const cols = Math.ceil(Math.sqrt(towns.length * 1.2));
-    const rows = Math.ceil(towns.length / cols);
+    const { x: cx, y: cy } = districtPos;
+    const n = towns.length;
     const maxLen = towns.reduce((m, t) => Math.max(m, t.length), 0);
-    const sx = (labelWidth('x'.repeat(maxLen), TOWN_FS) + 10) / scale; // column pitch
-    const sy = (TOWN_FS + 16) / scale;                                 // row pitch
-    return towns.map((town, i) => ({
-        town,
-        x: x - ((cols - 1) * sx) / 2 + (i % cols) * sx,
-        y: y - ((rows - 1) * sy) / 2 + Math.floor(i / cols) * sy,
-    }));
+
+    const sx = (labelWidth('x'.repeat(maxLen), TOWN_FS) + 12) / scale; // column pitch
+    const sy = (TOWN_FS + 18) / scale;                                 // row pitch
+
+    // Cap the column count to what the district's width can hold so the cluster never
+    // spills sideways past the district body; otherwise aim for a balanced block.
+    const pad = 8 / scale;
+    const usableW = bbox ? Math.max(sx, bbox.x1 - bbox.x0 - 2 * pad) : Infinity;
+    const colsFit = Math.max(1, Math.floor(usableW / sx) + 1);
+    const balancedCols = Math.max(1, Math.round(Math.sqrt(n * 1.4)));
+    const cols = Math.max(1, Math.min(n, colsFit, balancedCols));
+    const rows = Math.ceil(n / cols);
+
+    const usedW = (cols - 1) * sx;
+    const usedH = (rows - 1) * sy;
+
+    return towns.map((town, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        // Centre the final (possibly partial) row so it isn't left-justified under the rest.
+        const itemsInRow = row === rows - 1 ? n - row * cols : cols;
+        const rowOffset = ((cols - itemsInRow) * sx) / 2;
+        return {
+            town,
+            x: cx - usedW / 2 + rowOffset + col * sx,
+            y: cy - usedH / 2 + row * sy,
+        };
+    });
 };
 
 export default function TerrainSelect() {
@@ -400,10 +467,15 @@ export default function TerrainSelect() {
     const isStacked = useViewport('(max-width: 960px)');
     const isMobile = useViewport('(max-width: 560px)');
     const [hovered, setHovered] = useState(null);
+    const [hoveredMarker, setHoveredMarker] = useState(null); // 'd:<district>' | 't:<town>' on the map
     const [selected, setSelected] = useState(null);       // province id
     const [selectedDistrict, setSelectedDistrict] = useState(null);
     const [selectedTown, setSelectedTown] = useState(null);
     const [wheelType, setWheelType] = useState('all');
+    const [search, setSearch] = useState('');
+    const [searchFocused, setSearchFocused] = useState(false);
+
+    const searchResults = searchLocations(search);
 
     const lockedRegion = regions.find((r) => r.id === selected);
     const activeImages = lockedRegion ? (provinceImages[lockedRegion.id] || []) : [];
@@ -423,7 +495,7 @@ export default function TerrainSelect() {
     const districtPositions = selected ? getDistrictPositions(selected, districtList) : [];
     const selectedDistrictPos = districtPositions.find((d) => d.district === selectedDistrict);
     const townPositions = selectedDistrictPos
-        ? getTownPositions(selectedDistrictPos, placeList, districtZoomScale)
+        ? getTownPositions(selectedDistrictPos, placeList, districtZoomScale, selectedDistrictPos.box)
         : [];
     const selectedTownPos = townPositions.find((t) => t.town === selectedTown);
 
@@ -479,10 +551,21 @@ export default function TerrainSelect() {
         setSelectedDistrict(null);
         setSelectedTown(null);
         setHovered(null);
+        setHoveredMarker(null);
     };
 
-    const handleBackToProvinces = () => { setSelected(null); setSelectedDistrict(null); setSelectedTown(null); };
-    const handleBackToDistricts = () => { setSelectedDistrict(null); setSelectedTown(null); };
+    const handleSearchSelect = (it) => {
+        setSelected(it.provinceId);
+        setSelectedDistrict(it.district ?? null);
+        setSelectedTown(it.town ?? null);
+        setHovered(null);
+        setHoveredMarker(null);
+        setSearch('');
+        setSearchFocused(false);
+    };
+
+    const handleBackToProvinces = () => { setSelected(null); setSelectedDistrict(null); setSelectedTown(null); setHoveredMarker(null); };
+    const handleBackToDistricts = () => { setSelectedDistrict(null); setSelectedTown(null); setHoveredMarker(null); };
     const handleBackToTowns    = () => { setSelectedTown(null); };
 
     const handleAIRecommend = () => {
@@ -534,6 +617,88 @@ export default function TerrainSelect() {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '500px', margin: '0 auto' }}>
                         Click a province to see routes and find the best vehicle for your road type.
                     </p>
+
+                    {/* Location search — jump straight to any province, district or town */}
+                    <div style={{ maxWidth: '440px', margin: '18px auto 0', position: 'relative', textAlign: 'left', zIndex: 30 }}>
+                        <div style={{ position: 'relative' }}>
+                            <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                onFocus={() => setSearchFocused(true)}
+                                onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+                                placeholder="Search a province, district or town"
+                                aria-label="Search locations"
+                                style={{
+                                    width: '100%', padding: '11px 38px 11px 40px', borderRadius: '999px',
+                                    border: '1px solid var(--border)', background: 'var(--bg-card)',
+                                    color: 'var(--text-primary)', fontSize: '0.85rem', fontFamily: "'Inter', sans-serif",
+                                    outline: 'none', boxSizing: 'border-box',
+                                }}
+                            />
+                            {search && (
+                                <button
+                                    onClick={() => setSearch('')}
+                                    aria-label="Clear search"
+                                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 0 }}
+                                >
+                                    <X size={15} />
+                                </button>
+                            )}
+                        </div>
+
+                        {searchFocused && searchResults.length > 0 && (
+                            <div style={{
+                                position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+                                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                                borderRadius: '14px', boxShadow: '0 12px 32px rgba(0,0,0,0.22)',
+                                overflow: 'hidden', zIndex: 40,
+                            }}>
+                                {searchResults.map((it, i) => {
+                                    const region = regions.find((r) => r.id === it.provinceId);
+                                    const color = region?.color ?? 'var(--accent)';
+                                    return (
+                                        <button
+                                            key={it.key}
+                                            onMouseDown={() => handleSearchSelect(it)}
+                                            style={{
+                                                display: 'flex', alignItems: 'center', gap: '10px', width: '100%',
+                                                padding: '10px 14px', background: 'transparent', border: 'none',
+                                                borderBottom: i < searchResults.length - 1 ? '1px solid var(--border)' : 'none',
+                                                cursor: 'pointer', textAlign: 'left', fontFamily: "'Inter', sans-serif",
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-glass)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            <MapPin size={14} color={color} style={{ flexShrink: 0 }} />
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.label}</div>
+                                                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{it.sub}</div>
+                                            </div>
+                                            <span style={{
+                                                flexShrink: 0, fontSize: '0.58rem', fontWeight: '700', letterSpacing: '0.5px',
+                                                textTransform: 'uppercase', color, background: color + '18',
+                                                padding: '3px 8px', borderRadius: '999px',
+                                            }}>{it.type}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {searchFocused && search.trim() && searchResults.length === 0 && (
+                            <div style={{
+                                position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+                                background: 'var(--bg-card)', border: '1px solid var(--border)',
+                                borderRadius: '14px', boxShadow: '0 12px 32px rgba(0,0,0,0.22)',
+                                padding: '14px', fontSize: '0.8rem', color: 'var(--text-muted)',
+                                textAlign: 'center', zIndex: 40,
+                            }}>
+                                No locations found for "{search.trim()}"
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* On the desktop overview the content is short; centre the whole block vertically to
@@ -640,20 +805,25 @@ export default function TerrainSelect() {
                                         full district name stay a constant, fully-legible size at any zoom. */}
                                     {selected && !selectedDistrict && districtPositions.map(({ district, x, y }) => {
                                         const hint = getVehicleHint(district);
+                                        const isHover = hoveredMarker === 'd:' + district;
                                         const pillW = labelWidth(district, DISTRICT_FS);
                                         const pillH = DISTRICT_FS + 7;
                                         return (
                                             <g key={district} style={{ cursor: 'pointer' }}
-                                                onClick={(e) => { e.stopPropagation(); setSelectedDistrict(district); setSelectedTown(null); }}>
-                                                <g transform={`translate(${x} ${y}) scale(${invScale})`}>
-                                                    <circle r={5} fill={hint.color + '33'} stroke={hint.color} strokeWidth={1} />
+                                                onClick={(e) => { e.stopPropagation(); setSelectedDistrict(district); setSelectedTown(null); setHoveredMarker(null); }}
+                                                onMouseEnter={() => setHoveredMarker('d:' + district)}
+                                                onMouseLeave={() => setHoveredMarker((h) => (h === 'd:' + district ? null : h))}>
+                                                {/* The marker pops slightly and the pill fills with its colour on hover. */}
+                                                <g transform={`translate(${x} ${y}) scale(${invScale * (isHover ? 1.12 : 1)})`} style={{ transition: 'transform 0.15s ease' }}>
+                                                    <circle r={isHover ? 6.5 : 5} fill={hint.color + (isHover ? '55' : '33')} stroke={hint.color} strokeWidth={isHover ? 1.6 : 1} style={{ transition: 'r 0.15s, fill 0.15s' }} />
                                                     <circle r={2.4} fill={hint.color} />
                                                     <rect x={-pillW / 2} y={8} width={pillW} height={pillH} rx={pillH / 2}
-                                                        fill={isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)'}
-                                                        stroke={hint.color + 'cc'} strokeWidth={1} />
+                                                        fill={isHover ? hint.color : (isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)')}
+                                                        stroke={hint.color + 'cc'} strokeWidth={isHover ? 1.4 : 1}
+                                                        style={{ transition: 'fill 0.15s' }} />
                                                     <text x={0} y={8 + pillH / 2} textAnchor="middle" dominantBaseline="central"
-                                                        fill={hint.color} fontSize={DISTRICT_FS} fontWeight="700" fontFamily="Inter, sans-serif"
-                                                        style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                                                        fill={isHover ? '#fff' : hint.color} fontSize={DISTRICT_FS} fontWeight="700" fontFamily="Inter, sans-serif"
+                                                        style={{ pointerEvents: 'none', userSelect: 'none', transition: 'fill 0.15s' }}>
                                                         {district}
                                                     </text>
                                                 </g>
@@ -665,21 +835,26 @@ export default function TerrainSelect() {
                                         every village name renders fully and crisply. */}
                                     {selected && selectedDistrict && townPositions.map(({ town, x, y }) => {
                                         const isSelTown = selectedTown === town;
+                                        const isHover = hoveredMarker === 't:' + town;
+                                        const active = isSelTown || isHover;
                                         const color = lockedRegion?.color ?? '#e8732a';
                                         const pillW = labelWidth(town, TOWN_FS);
                                         const pillH = TOWN_FS + 6;
                                         return (
                                             <g key={town} style={{ cursor: 'pointer' }}
-                                                onClick={(e) => { e.stopPropagation(); setSelectedTown(town); }}>
-                                                <g transform={`translate(${x} ${y}) scale(${invScale})`}>
-                                                    {isSelTown && <circle r={7} fill={color + '25'} stroke={color} strokeWidth={1.4} />}
-                                                    <circle r={isSelTown ? 3.2 : 2.2} fill={isSelTown ? color : color + 'cc'} />
+                                                onClick={(e) => { e.stopPropagation(); setSelectedTown(town); }}
+                                                onMouseEnter={() => setHoveredMarker('t:' + town)}
+                                                onMouseLeave={() => setHoveredMarker((h) => (h === 't:' + town ? null : h))}>
+                                                <g transform={`translate(${x} ${y}) scale(${invScale * (isHover && !isSelTown ? 1.12 : 1)})`} style={{ transition: 'transform 0.15s ease' }}>
+                                                    {active && <circle r={7} fill={color + '25'} stroke={color} strokeWidth={1.4} style={{ transition: 'r 0.15s' }} />}
+                                                    <circle r={active ? 3.2 : 2.2} fill={active ? color : color + 'cc'} style={{ transition: 'r 0.15s, fill 0.15s' }} />
                                                     <rect x={-pillW / 2} y={7} width={pillW} height={pillH} rx={pillH / 2}
-                                                        fill={isSelTown ? color : isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)'}
-                                                        stroke={color + (isSelTown ? 'ff' : 'aa')} strokeWidth={isSelTown ? 1.4 : 1} />
+                                                        fill={isSelTown ? color : isHover ? color + 'dd' : (isDark ? 'rgba(15,15,15,0.92)' : 'rgba(255,255,255,0.96)')}
+                                                        stroke={color + (active ? 'ff' : 'aa')} strokeWidth={active ? 1.4 : 1}
+                                                        style={{ transition: 'fill 0.15s' }} />
                                                     <text x={0} y={7 + pillH / 2} textAnchor="middle" dominantBaseline="central"
-                                                        fill={isSelTown ? '#fff' : color} fontSize={TOWN_FS} fontWeight="700" fontFamily="Inter, sans-serif"
-                                                        style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                                                        fill={active ? '#fff' : color} fontSize={TOWN_FS} fontWeight="700" fontFamily="Inter, sans-serif"
+                                                        style={{ pointerEvents: 'none', userSelect: 'none', transition: 'fill 0.15s' }}>
                                                         {town}
                                                     </text>
                                                 </g>
@@ -864,44 +1039,67 @@ export default function TerrainSelect() {
                                     </div>
                                 </div>
 
-                                {/* Images */}
-                                {activeImages.length > 0 && (
-                                    <div style={{ marginBottom: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', marginTop: '10px' }}>
-                                        <img src={activeImages[0]} alt="" loading="lazy" style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border)', gridColumn: '1 / -1' }} />
-                                        {activeImages.slice(1, 3).map((url, i) => (
-                                            <img key={i} src={url} alt="" loading="lazy" style={{ width: '100%', height: '52px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)' }} />
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Step 2 instruction */}
-                                <div style={{ padding: '10px 12px', borderRadius: '10px', background: lockedRegion.color + '10', border: `1px dashed ${lockedRegion.color}50`, marginBottom: '10px', marginTop: '8px', fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                                    <span style={{ color: lockedRegion.color, fontWeight: '700' }}>Step 2 —</span> Click a district label on the map, or pick from the list below.
+                                {/* Images — hero + two thumbs. A province-colour gradient sits behind each
+                                    image so the area always looks intentional even if a photo fails to load. */}
+                                <div style={{ marginTop: '10px', marginBottom: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                                    {[0, 1, 2].map((i) => (
+                                        <div key={i} style={{
+                                            position: 'relative',
+                                            height: i === 0 ? '92px' : '58px',
+                                            gridColumn: i === 0 ? '1 / -1' : 'auto',
+                                            borderRadius: '10px', overflow: 'hidden',
+                                            border: '1px solid var(--border)',
+                                            background: `linear-gradient(135deg, ${lockedRegion.color}cc, ${lockedRegion.color}44)`,
+                                        }}>
+                                            {activeImages[i] && (
+                                                <img
+                                                    src={activeImages[i]} alt="" loading="lazy"
+                                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                                />
+                                            )}
+                                            {i === 0 && (
+                                                <span style={{
+                                                    position: 'absolute', left: '10px', bottom: '8px',
+                                                    color: '#fff', fontSize: '0.72rem', fontWeight: '800',
+                                                    textShadow: '0 1px 4px rgba(0,0,0,0.6)', letterSpacing: '0.3px',
+                                                }}>{lockedRegion.terrain}</span>
+                                            )}
+                                        </div>
+                                    ))}
                                 </div>
 
-                                {/* District grid */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: isStacked ? '48vh' : 'none', overflowY: isStacked ? 'auto' : 'visible', paddingRight: '2px' }}>
+                                {/* Step 2 instruction */}
+                                <div style={{ padding: '8px 12px', borderRadius: '10px', background: lockedRegion.color + '10', border: `1px dashed ${lockedRegion.color}50`, marginBottom: '10px', fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                                    <span style={{ color: lockedRegion.color, fontWeight: '700' }}>Step 2 —</span> Tap a district on the map or pick one below.
+                                </div>
+
+                                {/* District grid — two columns to stay compact */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', maxHeight: isStacked ? '46vh' : 'none', overflowY: isStacked ? 'auto' : 'visible', paddingRight: isStacked ? '2px' : '0' }}>
                                     {districtList.map((dist) => {
                                         const hint = getVehicleHint(dist);
+                                        const isHover = hoveredMarker === 'd:' + dist;
                                         return (
                                             <button
                                                 key={dist}
-                                                onClick={() => setSelectedDistrict(dist)}
+                                                onClick={() => { setSelectedDistrict(dist); setHoveredMarker(null); }}
+                                                title={dist}
+                                                onMouseEnter={() => setHoveredMarker('d:' + dist)}
+                                                onMouseLeave={() => setHoveredMarker((h) => (h === 'd:' + dist ? null : h))}
                                                 style={{
-                                                    display: 'flex', alignItems: 'center', gap: '8px',
-                                                    padding: '8px 12px', borderRadius: '10px',
-                                                    background: 'var(--bg-glass)', border: '1px solid var(--border)',
-                                                    cursor: 'pointer', width: '100%', textAlign: 'left',
-                                                    transition: 'background 0.15s, border-color 0.15s',
+                                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                                    padding: '7px 9px', borderRadius: '9px',
+                                                    background: isHover ? lockedRegion.color + '18' : 'var(--bg-glass)',
+                                                    border: `1px solid ${isHover ? lockedRegion.color + '70' : 'var(--border)'}`,
+                                                    cursor: 'pointer', width: '100%', textAlign: 'left', minWidth: 0,
+                                                    transform: isHover ? 'translateY(-1px)' : 'none',
+                                                    transition: 'background 0.15s, border-color 0.15s, transform 0.15s',
                                                     fontFamily: "'Inter', sans-serif",
                                                 }}
-                                                onMouseOver={(e) => { e.currentTarget.style.background = lockedRegion.color + '12'; e.currentTarget.style.borderColor = lockedRegion.color + '50'; }}
-                                                onMouseOut={(e) => { e.currentTarget.style.background = 'var(--bg-glass)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
                                             >
-                                                <MapPin size={12} color={lockedRegion.color} style={{ flexShrink: 0 }} />
-                                                <span style={{ flex: 1, color: 'var(--text-primary)', fontSize: '0.78rem', fontWeight: '500' }}>{dist}</span>
-                                                <span style={{ fontSize: '0.6rem', fontWeight: '700', color: hint.color, background: hint.color + '15', padding: '2px 6px', borderRadius: '6px', whiteSpace: 'nowrap' }}>{hint.icon}</span>
-                                                <ArrowRight size={11} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                                                <MapPin size={11} color={lockedRegion.color} style={{ flexShrink: 0 }} />
+                                                <span style={{ flex: 1, minWidth: 0, color: 'var(--text-primary)', fontSize: '0.75rem', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dist}</span>
+                                                <span style={{ fontSize: '0.62rem', flexShrink: 0 }}>{hint.icon}</span>
                                             </button>
                                         );
                                     })}
@@ -1008,22 +1206,30 @@ export default function TerrainSelect() {
                                     Towns & Villages
                                 </div>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px', maxHeight: isStacked ? '32vh' : '320px', overflowY: 'auto' }}>
-                                    {placeList.map((place) => (
-                                        <button
-                                            key={place}
-                                            onClick={() => setSelectedTown(place)}
-                                            style={{
-                                                padding: '4px 10px', borderRadius: '20px', cursor: 'pointer',
-                                                background: 'var(--bg-glass)', border: `1px solid ${lockedRegion.color}40`,
-                                                fontSize: '0.72rem', color: lockedRegion.color, fontWeight: '600',
-                                                fontFamily: "'Inter', sans-serif", transition: 'background 0.15s',
-                                            }}
-                                            onMouseOver={(e) => e.currentTarget.style.background = lockedRegion.color + '15'}
-                                            onMouseOut={(e) => e.currentTarget.style.background = 'var(--bg-glass)'}
-                                        >
-                                            {place}
-                                        </button>
-                                    ))}
+                                    {placeList.map((place) => {
+                                        const isSel = selectedTown === place;
+                                        const isHover = hoveredMarker === 't:' + place;
+                                        const active = isSel || isHover;
+                                        return (
+                                            <button
+                                                key={place}
+                                                onClick={() => setSelectedTown(place)}
+                                                onMouseEnter={() => setHoveredMarker('t:' + place)}
+                                                onMouseLeave={() => setHoveredMarker((h) => (h === 't:' + place ? null : h))}
+                                                style={{
+                                                    padding: '5px 11px', borderRadius: '20px', cursor: 'pointer',
+                                                    background: isSel ? lockedRegion.color : active ? lockedRegion.color + '22' : 'var(--bg-glass)',
+                                                    border: `1px solid ${isSel ? lockedRegion.color : lockedRegion.color + (active ? '80' : '40')}`,
+                                                    fontSize: '0.72rem', color: isSel ? '#fff' : lockedRegion.color, fontWeight: isSel ? '700' : '600',
+                                                    fontFamily: "'Inter', sans-serif",
+                                                    transform: active ? 'translateY(-1px)' : 'none',
+                                                    transition: 'background 0.15s, border-color 0.15s, transform 0.15s, color 0.15s',
+                                                }}
+                                            >
+                                                {place}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
 
                                 {/* Vehicle Kind */}

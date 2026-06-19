@@ -56,6 +56,28 @@ export const applicationService = {
         return data
     },
 
+    /**
+     * Edit a booking application's details. Only permitted while the booking is
+     * still 'submitted' or 'under-review' and has not been paid — the status/
+     * payment filters are applied in the query so the DB rejects edits on
+     * approved, confirmed, cancelled, or paid bookings even if the UI is bypassed.
+     */
+    update: async (id, fields) => {
+        if (!supabase) throw new Error('Supabase is not configured')
+        const { data, error } = await supabase
+            .from('booking_applications')
+            .update(fields)
+            .eq('id', id)
+            .in('status', ['submitted', 'under-review'])
+            .neq('payment_status', 'completed')
+            .select('*, vehicles(*), inquiries(*)')
+        if (error) throw error
+        if (!data || data.length === 0) {
+            throw new Error('This booking can no longer be edited.')
+        }
+        return data[0]
+    },
+
     cancel: async (id) => {
         if (!supabase) throw new Error('Supabase is not configured')
         const { data, error } = await supabase
