@@ -14,7 +14,7 @@ const statusStyles = {
   'under-review': 'bg-brand-orange/20 text-brand-orange',
   approved: 'bg-status-green/20 text-status-green',
   rejected: 'bg-status-red/20 text-status-red',
-  confirmed: 'bg-[rgba(100,150,200,0.2)] text-[#64d4ff]',
+  confirmed: 'bg-brand-city/20 text-brand-city',
   cancelled: 'bg-dark-border text-txt-secondary',
 }
 
@@ -643,16 +643,16 @@ export default function CompliancePage() {
                     </div>
                   )}
                   {/* Scrollable chart container */}
-                  <div className="overflow-x-auto" style={{ height: '260px', scrollbarWidth: 'thin', scrollbarColor: 'rgba(211,116,47,0.3) transparent' }}>
+                  <div className="overflow-x-auto" style={{ height: '260px', scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,87,35,0.3) transparent' }}>
                     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ minWidth: `${W}px` }}>
                       <defs>
                         <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#d3742f" stopOpacity="0.35" />
-                          <stop offset="100%" stopColor="#d3742f" stopOpacity="0.02" />
+                          <stop offset="0%" stopColor="#FF5723" stopOpacity="0.35" />
+                          <stop offset="100%" stopColor="#FF5723" stopOpacity="0.02" />
                         </linearGradient>
                         <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#d3742f" stopOpacity="0.6" />
-                          <stop offset="50%" stopColor="#d3742f" stopOpacity="1" />
+                          <stop offset="0%" stopColor="#FF5723" stopOpacity="0.6" />
+                          <stop offset="50%" stopColor="#FF5723" stopOpacity="1" />
                           <stop offset="100%" stopColor="#e8a060" stopOpacity="0.8" />
                         </linearGradient>
                       </defs>
@@ -674,7 +674,7 @@ export default function CompliancePage() {
                       {/* Data points & labels */}
                       {points.map((p, i) => (
                         <g key={`pt-${i}`}>
-                          <circle cx={p.x} cy={p.y} r={p.revenue > 0 ? 4 : 2} fill={p.revenue > 0 ? '#d3742f' : 'rgba(211,116,47,0.3)'} stroke="#0c1317" strokeWidth="2" />
+                          <circle cx={p.x} cy={p.y} r={p.revenue > 0 ? 4 : 2} fill={p.revenue > 0 ? '#FF5723' : 'rgba(255,87,35,0.3)'} stroke="#1a1b1a" strokeWidth="2" />
                           {p.revenue > 0 && (
                             <text x={p.x} y={p.y - 12} textAnchor="middle" fill="#eff5f9" fontSize="9" fontWeight="600" fontFamily="Inter, sans-serif">
                               {p.revenue >= 1000 ? `${(p.revenue / 1000).toFixed(1)}k` : p.revenue}

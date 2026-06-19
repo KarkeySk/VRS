@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Map, User, Cog, Edit, AlertTriangle } from 'lucide-react'
+import { Map, User, Edit, AlertTriangle, Trash2, X } from 'lucide-react'
+import { bookingService } from '@bhatbhati/shared/services/bookingService.js'
 
 // localStorage key for admin settings.
 const SETTINGS_KEY = 'bhatbhati_admin_settings_v1'
+// localStorage key for custom user roles.
+const ROLES_KEY = 'bhatbhati_admin_roles_v1'
+
+// Months after which finished bookings are eligible for cleanup.
+const PURGE_AFTER_MONTHS = 6
 
 // Defaults used for first load and reset.
 const defaultSettings = {
@@ -13,8 +19,15 @@ const defaultSettings = {
   autoPurge: true,
 }
 
+// Seed roles shown until the admin customizes them.
+const defaultRoles = [
+  { id: 'fleet-manager', title: 'Fleet Manager', desc: 'Can manage vehicles and routes' },
+  { id: 'booking-agent', title: 'Booking Agent', desc: 'Can manage bookings' },
+  { id: 'tech-admin', title: 'Tech Admin', desc: 'Can manage system settings' },
+]
+
 function readSavedSettings() {
-  // Persist settings locally for demo purposes.
+  // Settings persist in localStorage on this device.
   const raw = localStorage.getItem(SETTINGS_KEY)
   if (!raw) return defaultSettings
   try {
@@ -25,17 +38,64 @@ function readSavedSettings() {
   }
 }
 
+function readSavedRoles() {
+  const raw = localStorage.getItem(ROLES_KEY)
+  if (!raw) return defaultRoles
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) && parsed.length ? parsed : defaultRoles
+  } catch {
+    localStorage.removeItem(ROLES_KEY)
+    return defaultRoles
+  }
+}
+
 export default function SettingsPage() {
   // Settings form state.
   const [settings, setSettings] = useState(defaultSettings)
+  // Persistent custom roles.
+  const [roles, setRoles] = useState(defaultRoles)
+  // Role currently being edited/created in the modal (null = closed).
+  const [editingRole, setEditingRole] = useState(null)
+  // Cleanup in-progress flag.
+  const [purging, setPurging] = useState(false)
   // Inline feedback states.
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    // Load saved settings on mount.
+    // Load saved settings and roles on mount.
     setSettings(readSavedSettings())
+    setRoles(readSavedRoles())
   }, [])
+
+  // Persist roles and update state together.
+  const persistRoles = (next) => {
+    setRoles(next)
+    localStorage.setItem(ROLES_KEY, JSON.stringify(next))
+  }
+
+  const saveRole = (role) => {
+    const title = role.title.trim()
+    if (!title) {
+      setError('Role name is required.')
+      return
+    }
+    const exists = roles.some((r) => r.id === role.id)
+    const next = exists
+      ? roles.map((r) => (r.id === role.id ? { ...role, title } : r))
+      : [...roles, { ...role, title, id: role.id || `role-${Date.now()}` }]
+    persistRoles(next)
+    setEditingRole(null)
+    setError('')
+    setMessage(exists ? 'Role updated.' : 'Role created.')
+  }
+
+  const deleteRole = (id) => {
+    if (!window.confirm('Delete this role?')) return
+    persistRoles(roles.filter((r) => r.id !== id))
+    setMessage('Role deleted.')
+  }
 
   // Update a single setting key.
   const update = (key, value) => {
@@ -71,12 +131,29 @@ export default function SettingsPage() {
     setMessage('Changes reverted.')
   }
 
-  const manualPurge = () => {
+  const manualPurge = async () => {
     // Confirm destructive action with the user.
-    const ok = window.confirm('Run manual cleanup now? This cannot be undone.')
+    const ok = window.confirm(
+      `Permanently delete completed and cancelled bookings older than ${PURGE_AFTER_MONTHS} months? This cannot be undone.`,
+    )
     if (!ok) return
     setError('')
-    setMessage('Manual cleanup queued. (Demo mode)')
+    setMessage('')
+    setPurging(true)
+    try {
+      const cutoff = new Date()
+      cutoff.setMonth(cutoff.getMonth() - PURGE_AFTER_MONTHS)
+      const removed = await bookingService.purgeFinishedBefore(cutoff)
+      setMessage(
+        removed > 0
+          ? `Cleanup complete. Removed ${removed} old ${removed === 1 ? 'booking' : 'bookings'}.`
+          : 'Cleanup complete. No old bookings to remove.',
+      )
+    } catch (err) {
+      setError(err.message || 'Cleanup failed.')
+    } finally {
+      setPurging(false)
+    }
   }
 
   return (
@@ -168,34 +245,41 @@ export default function SettingsPage() {
         <div className="bg-[rgba(255,255,255,0.02)] border border-dark-border rounded-xl p-6">
           <h3 className="text-lg font-semibold mb-4">User Roles</h3>
           <div className="space-y-3">
-            {[
-              { title: 'Fleet Manager', desc: 'Can manage vehicles and routes', icon: User },
-              { title: 'Booking Agent', desc: 'Can manage bookings', icon: User },
-              { title: 'Tech Admin', desc: 'Can manage system settings', icon: Cog },
-            ].map((role) => (
-              <div key={role.title} className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3">
+            {roles.map((role) => (
+              <div key={role.id} className="flex items-center justify-between bg-dark-deeper rounded-lg px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-brand-orange/20 flex items-center justify-center">
-                    <role.icon className="w-4 h-4 text-brand-orange" />
+                    <User className="w-4 h-4 text-brand-orange" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold">{role.title}</p>
                     <p className="text-xs text-txt-secondary">{role.desc}</p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setMessage(`Edit role: ${role.title} (coming soon).`)}
-                  className="text-txt-secondary cursor-pointer hover:text-brand-orange transition-colors bg-transparent border-none"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingRole({ ...role })}
+                    className="text-txt-secondary cursor-pointer hover:text-brand-orange transition-colors bg-transparent border-none"
+                    title="Edit role"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteRole(role.id)}
+                    className="text-txt-secondary cursor-pointer hover:text-status-red transition-colors bg-transparent border-none"
+                    title="Delete role"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
           <button
             type="button"
-            onClick={() => setMessage('Create Role clicked.')}
+            onClick={() => setEditingRole({ id: '', title: '', desc: '' })}
             className="w-full mt-4 py-2 text-brand-orange text-sm font-semibold hover:text-brand-orange-dark transition-colors bg-transparent border-none cursor-pointer"
           >
             + Create Custom Role
@@ -228,10 +312,11 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={manualPurge}
-            className="w-full py-2.5 bg-status-red/20 border border-status-red/30 text-status-red rounded-md text-sm font-semibold hover:bg-status-red/30 transition-colors flex items-center justify-center gap-1.5"
+            disabled={purging}
+            className="w-full py-2.5 bg-status-red/20 border border-status-red/30 text-status-red rounded-md text-sm font-semibold hover:bg-status-red/30 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
           >
             <AlertTriangle className="w-4 h-4" />
-            Run Manual Cleanup
+            {purging ? 'Cleaning up…' : 'Run Manual Cleanup'}
           </button>
         </div>
       </div>
@@ -242,6 +327,47 @@ export default function SettingsPage() {
         </button>
         <button type="button" onClick={save} className="btn-action px-8 py-2.5 text-sm">Save Changes</button>
       </div>
+
+      {editingRole && (
+        <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-dark border border-dark-border rounded-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold">{roles.some((r) => r.id === editingRole.id) ? 'Edit Role' : 'Create Role'}</h3>
+              <button type="button" onClick={() => setEditingRole(null)} className="bg-transparent border-none text-txt-secondary cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-txt-secondary mb-1.5">Role Name</label>
+                <input
+                  type="text"
+                  value={editingRole.title}
+                  onChange={(e) => setEditingRole((r) => ({ ...r, title: e.target.value }))}
+                  placeholder="e.g. Dispatch Lead"
+                  className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2 text-sm text-txt-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-txt-secondary mb-1.5">Description</label>
+                <input
+                  type="text"
+                  value={editingRole.desc}
+                  onChange={(e) => setEditingRole((r) => ({ ...r, desc: e.target.value }))}
+                  placeholder="What can this role do?"
+                  className="w-full bg-dark-deeper border border-dark-border rounded-lg px-3 py-2 text-sm text-txt-primary"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 mt-5">
+              <button type="button" onClick={() => setEditingRole(null)} className="text-sm text-txt-secondary hover:text-txt-primary transition-colors bg-transparent border-none cursor-pointer">
+                Cancel
+              </button>
+              <button type="button" onClick={() => saveRole(editingRole)} className="btn-action px-6 py-2 text-sm">Save Role</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

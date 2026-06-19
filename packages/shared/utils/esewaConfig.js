@@ -43,10 +43,20 @@ export function generateEsewaSignature(secretKey, message) {
 export function buildEsewaPayload({ amount, transactionUuid, successUrl, failureUrl }) {
     const config = getEsewaConfig()
 
+    // eSewa rejects amounts that aren't a clean number (float artifacts like
+    // 1500.30000000002, NaN, 0, or comma-formatted values cause a 400 /
+    // "Invalid transaction amount"). Coerce to a finite, positive value rounded
+    // to at most 2 decimals so the posted and signed amounts are always valid.
+    const numericAmount = Number(amount)
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+        throw new Error('Invalid payment amount.')
+    }
+    const cleanAmount = String(Math.round(numericAmount * 100) / 100)
+
     const payload = {
-        amount: String(amount),
+        amount: cleanAmount,
         tax_amount: '0',
-        total_amount: String(amount),
+        total_amount: cleanAmount,
         transaction_uuid: transactionUuid,
         product_code: config.merchantCode,
         product_service_charge: '0',

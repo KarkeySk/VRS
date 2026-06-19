@@ -76,6 +76,23 @@ export const bookingService = {
         if (error) throw error
     },
 
+    /**
+     * Purge finished bookings older than the cutoff (admin cleanup).
+     * Only removes completed/cancelled trips whose end_date is past the cutoff,
+     * so active or upcoming bookings are never touched. Returns the deleted count.
+     */
+    purgeFinishedBefore: async (cutoffDate) => {
+        const cutoff = cutoffDate instanceof Date ? cutoffDate.toISOString().slice(0, 10) : cutoffDate
+        const { data, error } = await supabase
+            .from('bookings')
+            .delete()
+            .in('status', ['completed', 'cancelled'])
+            .lt('end_date', cutoff)
+            .select('id')
+        if (error) throw error
+        return data?.length ?? 0
+    },
+
     /** Get all bookings (admin) */
     getAll: async () => {
         const { data, error } = await supabase

@@ -7,6 +7,7 @@ import { ToastProvider } from './components/common/Toast'
 import ScrollToTop from './components/common/ScrollToTop'
 import Navbar from './components/layout/Navbar'
 import ChatBot from './features/chatbot/ChatBot.jsx'
+import CookiesConsent from './components/common/CookiesConsent'
 
 // Pages
 import HomePage from './pages/HomePage'
@@ -28,6 +29,9 @@ import PaymentPage from './pages/user/PaymentPage'
 import PaymentSuccess from './pages/user/PaymentSuccess'
 import BookingsPage from './pages/user/BookingsPage'
 import ProfilePage from './pages/user/ProfilePage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import CookiePolicyPage from './pages/CookiePolicyPage'
+import HelpCenterPage from './pages/HelpCenterPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
@@ -41,6 +45,7 @@ function App() {
                         <Navbar />
                         <AnimatedRoutes />
                         <ChatBotGate />
+                        <CookiesConsent />
                     </ToastProvider>
                 </ThemeProvider>
             </AuthProvider>
@@ -121,6 +126,10 @@ function AnimatedRoutes() {
                     <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
                     <Route path="/auth/callback" element={<OAuthCallbackPage />} />
+
+                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                    <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+                    <Route path="/help" element={<HelpCenterPage />} />
 
                     <Route path="/__terrain_preview" element={<TerrainSelect />} />
                     {/* Protected routes */}
